@@ -7,9 +7,6 @@ parser:argument("input", {
    args = 2
 })
 
-parser:flag("-q", "--quiet")
-parser:option("-s", "--server")
-
 parser:mutually_exclusive(
    parser:flag("-q", "--quiet"),
    parser:option("-s", "--server")
