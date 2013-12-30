@@ -99,9 +99,6 @@ function Parser:argument(name, ...)
 
    element.mincount, element.maxcount = self:parse_boundaries(element.count)
    element.minargs, element.maxargs = self:parse_boundaries(element.args)
-   if element.minargs == 0 then
-      element.mincount = 0
-   end
 
    table.insert(self.arguments, element)
    table.insert(self.elements, element)

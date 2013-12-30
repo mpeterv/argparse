@@ -56,14 +56,16 @@ function State:get_result()
       invocations = self._result[element.target]
 
       if element.maxcount == 1 then
-         if #invocations > 0 then
-            if element.maxargs == 0 then
+         if element.maxargs == 0 then
+            if #invocations > 0 then
                result[element.target] = true
-            elseif element.maxargs == 1 and element.minargs == 1 then
-               result[element.target] = invocations[1][1]
-            else
-               result[element.target] = invocations[1]
             end
+         elseif element.maxargs == 1 and element.minargs == 1 then
+            if #invocations > 0 then
+               result[element.target] = invocations[1][1]
+            end
+         else
+            result[element.target] = invocations[1] or {}
          end
       else
          if element.maxargs == 0 then
@@ -89,6 +91,11 @@ function State:_check()
    local invocations
    for _, element in ipairs(self._all_elements) do
       invocations = self._result[element.target] or {}
+
+      if element.type == "argument" and #invocations == 0 then
+         invocations[1] = {}
+      end
+
       if #invocations > element.maxcount then
          if element.no_overwrite then
             self:_error("option %s can only be used %d times", element.name, element.maxcount)
@@ -104,8 +111,13 @@ function State:_check()
       self:_assert(#invocations >= element.mincount, "option %s must be used at least %d times", element.name, element.mincount)
 
       for _, passed in ipairs(invocations) do
-         self:_assert(#passed <= element.maxargs, "%s takes at most %d arguments", element.name, element.maxargs)
-         self:_assert(#passed >= element.minargs, "%s takes at least %d arguments", element.name, element.minargs)
+         if element.type == "option" then
+            self:_assert(#passed <= element.maxargs, "%s takes at most %d arguments", element.name, element.maxargs)
+            self:_assert(#passed >= element.minargs, "%s takes at least %d arguments", element.name, element.minargs)
+         else
+            self:_assert(#passed <= element.maxargs, "too many arguments")
+            self:_assert(#passed >= element.minargs, "too few arguments")
+         end
       end
 
       self._result[element.target] = invocations
