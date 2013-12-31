@@ -65,7 +65,7 @@ function State:get_result()
                result[element.target] = invocations[1][1]
             end
          else
-            result[element.target] = invocations[1] or {}
+            result[element.target] = invocations[1]
          end
       else
          if element.maxargs == 0 then

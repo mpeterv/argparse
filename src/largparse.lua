@@ -250,7 +250,7 @@ function Parser:parse(args)
                      element = self:assert(state.context[name], "unknown option " .. name)
                      state:handle_option(name)
 
-                     if i ~= #data and not (element:can_take(0) and data:sub(i+1, i+1):match "[a-zA-Z]") then
+                     if i ~= #data and not (element.minargs == 0 and data:sub(i+1, i+1):match "[a-zA-Z]") then
                         state:handle_argument(data:sub(i+1))
                         break
                      end
