@@ -3,6 +3,7 @@ local largparse = {}
 local class = require "30log"
 
 local State = require "largparse.state"
+local utils = require "largparse.utils"
 
 local Parser = class()
 
@@ -44,34 +45,6 @@ function Parser:make_target(element)
    end
 end
 
-function Parser:parse_boundaries(boundaries)
-   if tonumber(boundaries) then
-      return tonumber(boundaries), tonumber(boundaries)
-   end
-
-   if boundaries == "*" then
-      return 0, math.huge
-   end
-
-   if boundaries == "+" then
-      return 1, math.huge
-   end
-
-   if boundaries == "?" then
-      return 0, 1
-   end
-
-   if boundaries:match "^%d+%-%d+$" then
-      local min, max = boundaries:match "^(%d+)%-(%d+)$"
-      return tonumber(min), tonumber(max)
-   end
-
-   if boundaries:match "^%d+%+$" then
-      local min = boundaries:match "^(%d+)%+$"
-      return tonumber(min), math.huge
-   end
-end
-
 -- TODO: make it declarative as it was
 function Parser:argument(name, ...)
    local element = {
@@ -97,8 +70,8 @@ function Parser:argument(name, ...)
 
    self:make_target(element)
 
-   element.mincount, element.maxcount = self:parse_boundaries(element.count)
-   element.minargs, element.maxargs = self:parse_boundaries(element.args)
+   element.mincount, element.maxcount = utils.parse_boundaries(element.count)
+   element.minargs, element.maxargs = utils.parse_boundaries(element.args)
 
    table.insert(self.arguments, element)
    table.insert(self.elements, element)
@@ -130,8 +103,8 @@ function Parser:option(name, ...)
 
    self:make_target(element)
 
-   element.mincount, element.maxcount = self:parse_boundaries(element.count)
-   element.minargs, element.maxargs = self:parse_boundaries(element.args)
+   element.mincount, element.maxcount = utils.parse_boundaries(element.count)
+   element.minargs, element.maxargs = utils.parse_boundaries(element.args)
 
    table.insert(self.elements, element)
 
@@ -164,8 +137,8 @@ function Parser:flag(name, ...)
 
    self:make_target(element)
 
-   element.mincount, element.maxcount = self:parse_boundaries(element.count)
-   element.minargs, element.maxargs = self:parse_boundaries(element.args)
+   element.mincount, element.maxcount = utils.parse_boundaries(element.count)
+   element.minargs, element.maxargs = utils.parse_boundaries(element.args)
 
    table.insert(self.elements, element)
 
@@ -196,8 +169,8 @@ function Parser:command(name, ...)
 
    self:make_target(command)
 
-   command.mincount, command.maxcount = self:parse_boundaries(command.count)
-   command.minargs, command.maxargs = self:parse_boundaries(command.args)
+   command.mincount, command.maxcount = utils.parse_boundaries(command.count)
+   command.minargs, command.maxargs = utils.parse_boundaries(command.args)
 
    table.insert(self.elements, command)
 

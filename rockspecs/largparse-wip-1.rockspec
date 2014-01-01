@@ -17,6 +17,7 @@ build = {
    type = "builtin",
    modules = {
       largparse = "src/largparse.lua",
-      ["largparse.state"] = "src/state.lua"
+      ["largparse.state"] = "src/state.lua",
+      ["largparse.utils"] = "src/utils.lua"
    }
 }
