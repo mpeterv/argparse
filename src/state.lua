@@ -98,7 +98,7 @@ function State:_check()
 
       if #invocations > element.maxcount then
          if element.no_overwrite then
-            self:_error("option %s can only be used %d times", element.name, element.maxcount)
+            self:_error("option %s must be used at most %d times", element.name, element.maxcount)
          else
             local new_invocations = {}
             for i = 1, element.maxcount do
@@ -111,13 +111,8 @@ function State:_check()
       self:_assert(#invocations >= element.mincount, "option %s must be used at least %d times", element.name, element.mincount)
 
       for _, passed in ipairs(invocations) do
-         if element.type == "option" then
-            self:_assert(#passed <= element.maxargs, "%s takes at most %d arguments", element.name, element.maxargs)
-            self:_assert(#passed >= element.minargs, "%s takes at least %d arguments", element.name, element.minargs)
-         else
-            self:_assert(#passed <= element.maxargs, "too many arguments")
-            self:_assert(#passed >= element.minargs, "too few arguments")
-         end
+         self:_assert(#passed <= element.maxargs, "too many arguments")
+         self:_assert(#passed >= element.minargs, "too few arguments")
       end
 
       self._result[element.target] = invocations

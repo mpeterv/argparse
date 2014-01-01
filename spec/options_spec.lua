@@ -93,6 +93,73 @@ describe("tests related to options", function()
             assert.same(args, {password = {"password"}})
          end)
       end)
+
+      it("handles multi-argument options correctly", function()
+         local parser = largparse.parser()
+         parser:option("--pair", {
+            args = 2
+         })
+         local args = parser:parse({"--pair", "Alice", "Bob"})
+         assert.same(args, {pair = {"Alice", "Bob"}})
+      end)
+
+      describe("Multi-count options", function()
+         it("handles multi-count option correctly", function()
+            local parser = largparse.parser()
+            parser:option("-e", "--exclude", {
+               count = "*"
+            })
+            local args = parser:parse({"-efoo", "--exclude=bar", "-e", "baz"})
+            assert.same(args, {exclude = {"foo", "bar", "baz"}})
+         end)
+
+         it("handles not used multi-count option correctly", function()
+            local parser = largparse.parser()
+            parser:option("-e", "--exclude", {
+               count = "*"
+            })
+            local args = parser:parse({})
+            assert.same(args, {exclude = {}})
+         end)
+
+         it("handles multi-count multi-argument option correctly", function()
+            local parser = largparse.parser()
+            parser:option("-e", "--exclude", {
+               count = "*",
+               args = 2
+            })
+            local args = parser:parse({"-e", "Alice", "Bob", "-e", "Emma", "Jacob"})
+            assert.same(args, {exclude = {{"Alice", "Bob"}, {"Emma", "Jacob"}}})
+         end)
+
+         it("handles multi-count option with optional argument correctly", function()
+            local parser = largparse.parser()
+            parser:option("-w", "--why", "--why-would-someone-use-this", {
+               count = "*",
+               args = "?"
+            })
+            local args = parser:parse({"-w", "-wfoo", "--why=because", "-ww"})
+            assert.same(args, {why = {{}, {"foo"}, {"because"}, {}, {}}})
+         end)
+
+         it("handles multi-count flag correctly", function()
+            local parser = largparse.parser()
+            parser:flag("-q", "--quiet", {
+               count = "*"
+            })
+            local args = parser:parse({"-qq", "--quiet"})
+            assert.same(args, {quiet = 3})
+         end)
+
+         it("handles not used multi-count flag correctly", function()
+            local parser = largparse.parser()
+            parser:flag("-q", "--quiet", {
+               count = "*"
+            })
+            local args = parser:parse({})
+            assert.same(args, {quiet = 0})
+         end)
+      end)
    end)
 
    describe("passing incorrect options", function()
@@ -105,7 +172,18 @@ describe("tests related to options", function()
          end
       end)
 
-      -- TODO
+      it("handles lack of required argument correctly", function()
+         local parser = largparse.parser()
+         parser:option("-s", "--server")
+         assert.has_error(curry(parser.parse, parser, {"--server"}), "too few arguments")
+      end)
+
+      it("handles too many arguments correctly", function()
+         local parser = largparse.parser()
+         parser:option("-s", "--server")
+         assert.has_error(curry(parser.parse, parser, {"-sfoo", "bar"}), "too many arguments")
+      end)
+
 
    end)
 end)
