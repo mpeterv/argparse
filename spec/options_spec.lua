@@ -184,6 +184,7 @@ describe("tests related to options", function()
          assert.has_error(curry(parser.parse, parser, {"-sfoo", "bar"}), "too many arguments")
       end)
 
+      -- TODO: add more
 
    end)
 end)

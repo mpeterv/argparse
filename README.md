@@ -33,15 +33,13 @@ local args = parser:parse()
 TODO L1
 =======
 
-* Fix strange messages for not passed arguments
+* More tests
+* Add defaults
 * Improve error messages: delegate them to parser, have separate methods for each error type
-* Tests
 
 TODO L2
 =======
 
-* More tests
-* Add defaults
 * Add converters
 * Add choices
 * Make interface decalrative
