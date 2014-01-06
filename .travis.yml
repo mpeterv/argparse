@@ -3,6 +3,6 @@ language: c
 install:
   - sudo apt-get install luarocks
   - sudo luarocks install busted
-  - sudo luarocks make rockspecs/largparse-wip-1.rockspec
+  - sudo luarocks make rockspecs/largparse-lrcompat-1.rockspec
 
 script: "busted spec"
