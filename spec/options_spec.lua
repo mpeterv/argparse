@@ -28,6 +28,24 @@ describe("tests related to options", function()
          assert.same(args, {server = "foo"})
       end)
 
+      it("handles GNU-style long options even when it could take more arguments", function()
+         local parser = largparse.parser()
+         parser:option("-s", "--server", {
+            args = "*"
+         })
+         local args = parser:parse({"--server=foo"})
+         assert.same(args, {server = {"foo"}})
+      end)
+
+      it("handles GNU-style long options for multi-argument options", function()
+         local parser = largparse.parser()
+         parser:option("-s", "--server", {
+            args = "1-2"
+         })
+         local args = parser:parse({"--server=foo", "bar"})
+         assert.same(args, {server = {"foo", "bar"}})
+      end)
+
       it("handles short option correclty", function()
          local parser = largparse.parser()
          parser:option("-s", "--server")
@@ -151,6 +169,15 @@ describe("tests related to options", function()
             assert.same(args, {quiet = 3})
          end)
 
+         it("overwrites old invocations", function()
+            local parser = largparse.parser()
+            parser:option("-u", "--user", {
+               count = "0-2"
+            })
+            local args = parser:parse({"-uAlice", "--user=Bob", "--user", "John"})
+            assert.same(args, {user = {"Bob", "John"}})
+         end)
+
          it("handles not used multi-count flag correctly", function()
             local parser = largparse.parser()
             parser:flag("-q", "--quiet", {
@@ -184,7 +211,19 @@ describe("tests related to options", function()
          assert.has_error(curry(parser.parse, parser, {"-sfoo", "bar"}), "too many arguments")
       end)
 
-      -- TODO: add more
+      it("doesn't accept GNU-like long options when it doesn't need arguments", function()
+         local parser = largparse.parser()
+         parser:flag("-q", "--quiet")
+         assert.has_error(curry(parser.parse, parser, {"--quiet=very_quiet"}), "option --quiet doesn't take arguments")
+      end)
 
+      it("handles too many invocations correctly", function()
+         local parser = largparse.parser()
+         parser:flag("-q", "--quiet", {
+            count = 1,
+            no_overwrite = true
+         })
+         assert.has_error(curry(parser.parse, parser, {"-qq"}), "option -q must be used at most 1 times")
+      end)
    end)
 end)

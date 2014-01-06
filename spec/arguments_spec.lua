@@ -59,6 +59,20 @@ describe("tests related to positional arguments", function()
          args = parser:parse({"bar", "baz", "qu"})
          assert.same(args, {foo1 = {"bar", "baz"}, foo2 = {"qu"}})
       end)
+
+      it("handles hyphen correctly", function()
+         local parser = largparse.parser()
+         parser:argument "foo"
+         local args = parser:parse({"-"})
+         assert.same(args, {foo = "-"})
+      end)
+
+      it("handles double hyphen correctly", function()
+         local parser = largparse.parser()
+         parser:argument "foo"
+         local args = parser:parse({"--", "-q"})
+         assert.same(args, {foo = "-q"})
+      end)
    end)
 
    describe("passing incorrect arguments", function()
