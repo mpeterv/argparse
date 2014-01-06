@@ -112,7 +112,15 @@ function State:_check()
 
       for _, passed in ipairs(invocations) do
          self:_assert(#passed <= element.maxargs, "too many arguments")
-         self:_assert(#passed >= element.minargs, "too few arguments")
+         if #passed < element.minargs then
+            if element.default then
+               for i = 1, element.minargs-#passed do
+                  table.insert(passed, element.default)
+               end 
+            else
+               self:_error("too few arguments")
+            end
+         end
       end
 
       self._result[element.target] = invocations

@@ -34,15 +34,14 @@ TODO L1
 =======
 
 * More tests
-* Add defaults
+* Add converters
 * Improve error messages: delegate them to parser, have separate methods for each error type
 
 TODO L2
 =======
 
-* Add converters
 * Add choices
-* Make interface decalrative
+* Make interface declarative
 * Refactor Parser
 * Write primitive ugly usage and help message generation
 
