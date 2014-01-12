@@ -1,4 +1,4 @@
-largparse
+argparse
 =========
 
 Feature-rich command line parser for Lua inspired by argparse for Python. 
@@ -9,9 +9,9 @@ Something already works:
 
 ```lua
 
-local largparse = require "largparse"
+local argparse = require "argparse"
 
-local parser = largparse.parser()
+local parser = argparse.parser()
 
 parser:argument("input", {
    args = 2

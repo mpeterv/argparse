@@ -1,4 +1,4 @@
-local utils = require "largparse.utils"
+local utils = require "argparse.utils"
 
 describe("tests related to utils.parse_boundaries", function()
    it("handles * correctly", function()

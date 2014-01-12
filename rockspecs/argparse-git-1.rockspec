@@ -1,7 +1,7 @@
-package = "largparse"
-version = "lrcompat-1"
+package = "argparse"
+version = "git-1"
 source = {
-   url = "src"
+   url = "git://github.com/mpeterv/literal.git"
 }
 description = {
    summary = "*** please specify description summary ***",
@@ -10,13 +10,14 @@ description = {
    license = "MIT/X11"
 }
 dependencies = {
-   "lua >= 5.1, < 5.3"
+   "lua >= 5.1, < 5.3",
+   "30log >= 0.6"
 }
 build = {
    type = "builtin",
    modules = {
-      largparse = "src/largparse.lua",
-      ["largparse.state"] = "src/state.lua",
-      ["largparse.utils"] = "src/utils.lua"
+      argparse = "src/argparse.lua",
+      ["argparse.state"] = "src/state.lua",
+      ["argparse.utils"] = "src/utils.lua"
    }
 }

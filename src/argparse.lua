@@ -1,9 +1,9 @@
-local largparse = {}
+local argparse = {}
 
 local class = require "30log"
 
-local State = require "largparse.state"
-local utils = require "largparse.utils"
+local State = require "argparse.state"
+local utils = require "argparse.utils"
 
 local Parser = class()
 
@@ -262,6 +262,6 @@ function Parser:parse(args)
    return result
 end
 
-largparse.parser = Parser
+argparse.parser = Parser
 
-return largparse
+return argparse
