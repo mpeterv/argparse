@@ -1,62 +1,25 @@
 argparse
 =========
 
+[![Build Status](https://travis-ci.org/mpeterv/argparse.png?branch=master)](https://travis-ci.org/mpeterv/argparse)
+
 Feature-rich command line parser for Lua inspired by argparse for Python. 
 
 WIP. 
 
-Something already works:
-
-```lua
-
-local argparse = require "argparse"
-
-local parser = argparse.parser()
-
-parser:argument("input", {
-   args = 2
-})
-
-parser:mutually_exclusive(
-   parser:flag("-q", "--quiet"),
-   parser:option("-s", "--server")
-)
-
-local run = parser:command "run"
-
-run:flag("-f", "--fast")
-
-local args = parser:parse()
-
-```
-
 TODO L1
 =======
 
-* More tests
-* Add converters
-* Improve error messages: delegate them to parser, have separate methods for each error type
+* Document NYI declarative interface. Choices, converters. 
+* Write tests related to NYI declarative interface. 
+* Implement NYI declarative interface. 
 
 TODO L2
 =======
 
-* Add choices
-* Make interface declarative
-* Refactor Parser
-* Write primitive ugly usage and help message generation
-
-TODO L3
-=======
-
-* Tests with 100% coverage
-* Document with LuaDoc/LDoc
-* Add examples
-* Add suggestions for command errors(e.g. `$ luarocks isntall` -> `Did you mean 'install'?`)
-* Add pretty formatted usage and help messages
-* Set up travis-ci testing
-
-TODO L4
-=======
-
-* Release
-
+* Document parsing. 
+* Write tests related to parsing. 
+* Refactor/rewrite parsing stuff. 
+* Current Parser class should be just a container for information used in parsingm such as options, commands, etc. The relation between Parser and ParserState should be reversed; ParserState should be the actual parser; it should process args and query Parser when needed. 
+* `-` shouldn't be the only character for options/flags. Infer all of them from first characters of option aliases. 
+* Suggestions for command typos. E.g. `$ luarocks isntall` -> `Did you mean 'install'?`
