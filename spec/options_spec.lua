@@ -3,7 +3,8 @@ local argparse = require "argparse"
 describe("tests related to options", function()
    local function curry(f, ...)
       local args = {...}
-      return function() return f(table.unpack(args)) end
+      local unpack = unpack or table.unpack
+      return function() return f(unpack(args)) end
    end
 
    describe("passing correct options", function()
