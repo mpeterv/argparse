@@ -1,6 +1,8 @@
 local class = require "30log"
 
-local State = class()
+local State = class {
+   context = {}
+}
 
 function State:__init(parser)
    self.context = {}
