@@ -3,8 +3,11 @@ local argparse = {}
 local class = require "30log"
 
 local State = class {
-   context = {}, -- {alias -> element}
-   result = {}
+   opt_context = {},
+   result = {},
+   stack = {},
+   invocations = {},
+   top_is_opt = false
 }
 
 function State:__init(parser)
@@ -12,34 +15,114 @@ function State:__init(parser)
 end
 
 function State:switch(parser)
-   self.parser = parser
-   self.parser:make_targets()
+   self.parser = parser:prepare()
+   self.charset = parser.charset
 
    for _, option in ipairs(parser.options) do
       table.insert(self.options, option)
+
+      for _, alias in ipairs(option.aliases) do
+         self.opt_context[alias] = option
+      end
    end
 
    self.arguments = parser.arguments
    self.commands = parser.commands
-end
+   self.com_context = {}
 
-function Parser:make_target(element)
-   if not element.target then
-      for _, alias in ipairs(element.aliases) do
-         if alias:match "^%-%-" then
-            element.target = alias:sub(3)
-            return
-         end
+   for _, command in ipairs(parser.commands) do
+      for _, alias in ipairs(command.aliases) do
+         self.com_context[][alias] = command
       end
-
-      element.target = element.aliases[1]:match "^%-*(.*)"
    end
 end
 
+function State:invoke(element)
+   if not self.invocatons then
+      
 
+function State:push(option)
+   if self.top_is_opt then
+      self:pop()
+   end
+
+   self:invoke(option)
+
+   if option.maxargs ~= 0 then
+      table.insert(self.stack, option)
+      self.top_is_opt = true
+   end
+end
+
+function State:pop()
+   if self.top_is_opt 
+
+function State:iterargs(args)
+   return coroutine.wrap(function()
+      local handle_options = true
+
+      for _, data in ipairs(args) do
+         local plain = true
+         local first, name, option
+
+         if handle_options then
+            first = data:sub(1, 1)
+            if self.charset[first] then
+               if #data > 1 then
+                  if data:sub(2, 2):match "[a-zA-Z]" then
+                     plain = false
+
+                     for i = 2, #data do
+                        name = first .. data:sub(i, i)
+                        option = self:assert(self.opt_context[name], "unknown option " .. name)
+                        coroutine.yield(nil, name)
+
+                        if i ~= #data and not (options.minargs == 0 and self.opt_context[first .. data:sub(i+1, i+1)]) then
+                           coroutine.yield(data:sub(i+1), nil)
+                           break
+                        end
+                     end
+                  elseif data:sub(2, 2) == first then
+                     if #data == 2 then
+                        plain = false
+                        handle_options = false
+                     elseif data:sub(3, 3):match "[a-zA-Z]" then
+                        plain = false
+
+                        local equal = data:find "="
+                        if equal then
+                           name = data:sub(1, equal-1)
+                           option = self:assert(self.opt_context[name], "unknown option " .. name)
+                           self:assert(option.maxargs > 0, "option " .. name .. " doesn't take arguments")
+
+                           coroutine.yield(nil, data:sub(1, equal-1))
+                           coroutine.yield(data:sub(equal+1), nil)
+                        else
+                           coroutine.yield(nil, data)
+                        end
+                     end
+                  end
+               end
+            end
+         end
+
+         if plain then
+            coroutine.yield(data, nil)
+         end
+      end
+   end)
+end
 
 function State:parse(args)
-   args = args or arg
+   for arg, opt in self:iterargs(args) do
+      if arg then
+
+      elseif opt then
+
+
+      end
+   end
+end
 
 
 
@@ -204,23 +287,6 @@ function State:_pass(element, data)
    table.insert(passed, data)
 end
 
-function State:_switch(command)
-   self._parser = command
-   self._arguments = command.arguments
-   self._commands = command.commands
-
-   for _, element in ipairs(command.elements) do
-      table.insert(self._all_elements, element)
-   end
-
-   for _, group in ipairs(command.groups) do
-      table.insert(self._all_groups, group)
-   end
-
-   self.context = setmetatable(command.context, {__index = self.context})
-   self._next_arg_i = 1
-end
-
 function State:_error(...)
    return self._parser:error(...)
 end
@@ -245,7 +311,13 @@ function Declarative:__call(...)
       name_or_options = select(i, ...)
 
       if type(name_or_options) == "string" then
-         self:set_name(name_or_options)
+         if self.aliases then
+            table.insert(self.aliases, name_or_options)
+         end
+
+         if not self.name then
+            self.name = name_or_options
+         end
       elseif type(name_or_options) == "table" then
          for _, field in ipairs(self.fields) do
             if name_or_options[field] ~= nil then
@@ -258,50 +330,33 @@ function Declarative:__call(...)
    return self
 end
 
-local Aliased = {}
-
-function Aliased:set_name(name)
-   table.insert(self.aliases, name)
-
-   if not self.name then
-      self.name = name
-   end
-end
-
-local Named = {}
-
-function Named:set_name(name)
-   self.name = name
-end
-
 local Parser = class {
    arguments = {},
    options = {},
    commands = {},
-   charset = {"-"},
    fields = {"name", "description", "target"}
-}:include(Declarative):include(Named)
+}:include(Declarative)
 
 local Command = Parser:extends {
    aliases = {}
-}:include(Declarative):include(Aliased)
+}:include(Declarative)
 
 local Argument = class {
    args = 1,
    count = 1,
    fields = {"name", "description", "target", "args", "default", "convert"}
-}:include(Declarative):include(Named)
+}:include(Declarative)
 
 local Option = class {
    aliases = {},
    args = 1,
    count = "?",
    fields = {"name", "aliases", "description", "target", "args", "count", "default", "convert"}
-}:include(Declarative):include(Aliased)
+}:include(Declarative)
 
 local Flag = Option:extends {
    args = 0
-}:include(Declarative):include(Aliased)
+}:include(Declarative)
 
 function Parser:argument(...)
    local argument = Argument(...)
@@ -337,23 +392,26 @@ function Parser:assert(assertion, ...)
    return assertion or self:error(...)
 end
 
-function Parser:get_charset()
-   for _, command in ipairs(self.commands) do
-      for char in command:get_charset() do
-         self.charset[char] = true
+function Parser:make_charset()
+   if not self.charset then
+      self.charset = {}
+
+      for _, command in ipairs(self.commands) do
+         command:make_charset()
+
+         for char in pairs(command.charset) do
+            self.charset[char] = true
+         end
+      end
+
+      for _, option in ipairs(self.options) do
+         for _, alias in ipairs(option.aliases) do
+            self.charset[alias:sub(1, 1)] = true
+         end
       end
    end
-
-   for _, option in ipairs(self.options) do
-      for _, alias in ipairs(option.aliases) do
-         self.charset[alias:sub(1, 1)] = true
-      end
-   end
-
-   return self.charset
 end
 
--- to be called from State
 function Parser:make_targets()
    for _, option in ipairs(self.options) do
       if not option.target then
@@ -377,71 +435,23 @@ function Parser:make_targets()
    end
 end
 
-function Parser:parse(args)
-   self:get_charset()
-   return State(self):parse(args)
+function self:make_command_names()
+   for _, command in ipairs(self.commands) do
+      command.name = self.name .. " " .. command.name
+   end
 end
 
+function Parser:prepare()
+   self:make_charset()
+   self:make_targets()
+   self:make_command_names()
+   return self
+end
 
 function Parser:parse(args)
    args = args or arg
    self.name = self.name or args[0]
-
-   local state = State(self)
-
-   local handle_options = true
-   for _, data in ipairs(args) do
-      local plain = true
-
-      if handle_options then
-         if data:sub(1, 1) == "-" then
-            if #data > 1 then
-               if data:sub(2, 2):match "[a-zA-Z]" then
-                  plain = false
-
-                  local name, element
-                  for i = 2, #data do
-                     name = "-" .. data:sub(i, i)
-                     element = self:assert(state.context[name], "unknown option " .. name)
-                     state:handle_option(name)
-
-                     if i ~= #data and not (element.minargs == 0 and state.context["-" .. data:sub(i+1, i+1)]) then
-                        state:handle_argument(data:sub(i+1))
-                        break
-                     end
-                  end
-               elseif data:sub(2, 2) == "-" then
-                  if #data == 2 then
-                     plain = false
-                     handle_options = false
-                  elseif data:sub(3, 3):match "[a-zA-Z]" then
-                     plain = false
-
-                     local equal = data:find "="
-                     if equal then
-                        local name = data:sub(1, equal-1)
-                        local element = self:assert(state.context[name], "unknown option " .. name)
-                        self:assert(element.maxargs > 0, "option " .. name .. " doesn't take arguments")
-
-                        state:handle_option(data:sub(1, equal-1))
-                        state:handle_argument(data:sub(equal+1))
-                     else
-                        state:handle_option(data)
-                     end
-                  end
-               end
-            end
-         end
-      end
-
-      if plain then
-         state:handle_argument(data)
-      end
-   end
-
-   local result = state:get_result()
-
-   return result
+   return State(self):parse(args)
 end
 
 argparse.parser = Parser
