@@ -77,16 +77,6 @@ describe("tests related to positional arguments", function()
    end)
 
    describe("passing incorrect arguments", function()
-      local old_parser = argparse.parser
-
-      setup(function()
-         argparse.parser = old_parser:extends()
-         function argparse.parser:error(fmt, ...)
-            error(fmt:format(...))
-         end
-      end)
-
-
       it("handles extra arguments with empty parser correctly", function()
          local parser = argparse.parser()
 
@@ -132,17 +122,17 @@ describe("tests related to positional arguments", function()
 
       it("handles too few arguments with multi-argument correctly", function()
          local parser = argparse.parser()
-         parser:argument("foo", {
+         parser:argument "foo" {
             args = "+"
-         })
+         }
          assert.has_error(curry(parser.parse, parser, {}), "too few arguments")
       end)
 
       it("handles too many arguments with multi-argument correctly", function()
          local parser = argparse.parser()
-         parser:argument("foo", {
+         parser:argument "foo" {
             args = "2-4"
-         })
+         }
          assert.has_error(curry(parser.parse, parser, {"foo", "bar", "baz", "qu", "quu"}), "too many arguments")
       end)
 

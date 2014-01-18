@@ -16,8 +16,6 @@ dependencies = {
 build = {
    type = "builtin",
    modules = {
-      argparse = "src/argparse.lua",
-      ["argparse.state"] = "src/state.lua",
-      ["argparse.utils"] = "src/utils.lua"
+      argparse = "src/argparse.lua"
    }
 }

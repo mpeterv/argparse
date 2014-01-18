@@ -151,16 +151,6 @@ describe("tests related to options", function()
             assert.same(args, {exclude = {{"Alice", "Bob"}, {"Emma", "Jacob"}}})
          end)
 
-         it("handles multi-count option with optional argument correctly", function()
-            local parser = argparse.parser()
-            parser:option("-w", "--why", "--why-would-someone-use-this", {
-               count = "*",
-               args = "?"
-            })
-            local args = parser:parse({"-w", "-wfoo", "--why=because", "-ww"})
-            assert.same(args, {why = {{}, {"foo"}, {"because"}, {}, {}}})
-         end)
-
          it("handles multi-count flag correctly", function()
             local parser = argparse.parser()
             parser:flag("-q", "--quiet", {
@@ -191,15 +181,6 @@ describe("tests related to options", function()
    end)
 
    describe("passing incorrect options", function()
-      local old_parser = argparse.parser
-
-      setup(function()
-         argparse.parser = old_parser:extends()
-         function argparse.parser:error(fmt, ...)
-            error(fmt:format(...))
-         end
-      end)
-
       it("handles lack of required argument correctly", function()
          local parser = argparse.parser()
          parser:option("-s", "--server")
@@ -222,9 +203,17 @@ describe("tests related to options", function()
          local parser = argparse.parser()
          parser:flag("-q", "--quiet", {
             count = 1,
-            no_overwrite = true
+            overwrite = false
          })
          assert.has_error(curry(parser.parse, parser, {"-qq"}), "option -q must be used at most 1 times")
+      end)
+
+      it("handles too few invocations correctly", function()
+         local parser = argparse.parser()
+         parser:option("-f", "--foo", {
+            count = "3-4"
+         })
+         assert.has_error(curry(parser.parse, parser, {"-fFOO", "-fBAR"}), "option -f must be used at least 3 times")
       end)
    end)
 end)
