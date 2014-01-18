@@ -2,41 +2,6 @@ local argparse = {}
 
 local class = require "30log"
 
-local State = class {
-   opt_context = {},
-   result = {},
-   stack = {},
-   invocations = {},
-   top_is_opt = false
-}
-
-function State:__init(parser)
-   self:switch(parser)
-end
-
-function State:switch(parser)
-   self.parser = parser:prepare()
-   self.charset = parser.charset
-
-   for _, option in ipairs(parser.options) do
-      table.insert(self.options, option)
-
-      for _, alias in ipairs(option.aliases) do
-         self.opt_context[alias] = option
-      end
-   end
-
-   self.arguments = parser.arguments
-   self.commands = parser.commands
-   self.com_context = {}
-
-   for _, command in ipairs(parser.commands) do
-      for _, alias in ipairs(command.aliases) do
-         self.com_context[][alias] = command
-      end
-   end
-end
-
 function State:invoke(element)
    if not self.invocatons then
       
@@ -55,75 +20,7 @@ function State:push(option)
 end
 
 function State:pop()
-   if self.top_is_opt 
-
-function State:iterargs(args)
-   return coroutine.wrap(function()
-      local handle_options = true
-
-      for _, data in ipairs(args) do
-         local plain = true
-         local first, name, option
-
-         if handle_options then
-            first = data:sub(1, 1)
-            if self.charset[first] then
-               if #data > 1 then
-                  if data:sub(2, 2):match "[a-zA-Z]" then
-                     plain = false
-
-                     for i = 2, #data do
-                        name = first .. data:sub(i, i)
-                        option = self:assert(self.opt_context[name], "unknown option " .. name)
-                        coroutine.yield(nil, name)
-
-                        if i ~= #data and not (options.minargs == 0 and self.opt_context[first .. data:sub(i+1, i+1)]) then
-                           coroutine.yield(data:sub(i+1), nil)
-                           break
-                        end
-                     end
-                  elseif data:sub(2, 2) == first then
-                     if #data == 2 then
-                        plain = false
-                        handle_options = false
-                     elseif data:sub(3, 3):match "[a-zA-Z]" then
-                        plain = false
-
-                        local equal = data:find "="
-                        if equal then
-                           name = data:sub(1, equal-1)
-                           option = self:assert(self.opt_context[name], "unknown option " .. name)
-                           self:assert(option.maxargs > 0, "option " .. name .. " doesn't take arguments")
-
-                           coroutine.yield(nil, data:sub(1, equal-1))
-                           coroutine.yield(data:sub(equal+1), nil)
-                        else
-                           coroutine.yield(nil, data)
-                        end
-                     end
-                  end
-               end
-            end
-         end
-
-         if plain then
-            coroutine.yield(data, nil)
-         end
-      end
-   end)
-end
-
-function State:parse(args)
-   for arg, opt in self:iterargs(args) do
-      if arg then
-
-      elseif opt then
-
-
-      end
-   end
-end
-
+   if self.top_is_opt
 
 
 function State:handle_option(name)
@@ -451,7 +348,99 @@ end
 function Parser:parse(args)
    args = args or arg
    self.name = self.name or args[0]
-   return State(self):parse(args)
+
+   local parser
+   local charset
+   local options = {}
+   local arguments, commands
+   local opt_context= {}
+   local com_context
+   local result = {}
+
+   local function switch(p)
+      parser = p:prepare()
+      charset = p.charset
+
+      for _, option in ipairs(p.options) do
+         table.insert(options, option)
+
+         for _, alias in ipairs(option.aliases) do
+            opt_context[alias] = option
+         end
+      end
+
+      arguments = p.arguments
+      commands = p.commands
+      com_context = {}
+
+      for _, command in ipairs(p.commands) do
+         for _, alias in ipairs(command.aliases) do
+            com_context[alias] = command
+         end
+      end
+   end
+
+   local function handle_argument(data)
+
+   end
+
+   local function handle_option(data)
+
+   end
+
+   local handle_options = true
+
+   for _, data in ipairs(args) do
+      local plain = true
+      local first, name, option
+
+      if handle_options then
+         first = data:sub(1, 1)
+         if self.charset[first] then
+            if #data > 1 then
+               if data:sub(2, 2):match "[a-zA-Z]" then
+                  plain = false
+
+                  for i = 2, #data do
+                     name = first .. data:sub(i, i)
+                     option = self:assert(self.opt_context[name], "unknown option " .. name)
+                     handle_option(name)
+
+                     if i ~= #data and not (options.minargs == 0 and self.opt_context[first .. data:sub(i+1, i+1)]) then
+                        handle_argument(data:sub(i+1))
+                        break
+                     end
+                  end
+               elseif data:sub(2, 2) == first then
+                  if #data == 2 then
+                     plain = false
+                     handle_options = false
+                  elseif data:sub(3, 3):match "[a-zA-Z]" then
+                     plain = false
+
+                     local equal = data:find "="
+                     if equal then
+                        name = data:sub(1, equal-1)
+                        option = self:assert(self.opt_context[name], "unknown option " .. name)
+                        self:assert(option.maxargs > 0, "option " .. name .. " doesn't take arguments")
+
+                        handle_option(data:sub(1, equal-1))
+                        handle_argument(data:sub(equal+1))
+                     else
+                        handle_option(data)
+                     end
+                  end
+               end
+            end
+         end
+      end
+
+      if plain then
+         handle_argument(data)
+      end
+   end
+
+   return result
 end
 
 argparse.parser = Parser
