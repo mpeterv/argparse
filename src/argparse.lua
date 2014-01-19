@@ -39,7 +39,8 @@ local Parser = class {
    arguments = {},
    options = {},
    commands = {},
-   fields = {"name", "description", "target"}
+   require_command = false,
+   fields = {"name", "description", "target", "require_command"}
 }:include(Declarative)
 
 local Command = Parser:extends {
@@ -446,6 +447,10 @@ function Parser:parse(args)
 
    while cur_arg do
       close(cur_arg)
+   end
+
+   if parser.require_command and #commands > 0 then
+      parser:error("command is required")
    end
 
    format()
