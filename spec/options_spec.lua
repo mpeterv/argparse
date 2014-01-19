@@ -1,12 +1,6 @@
 local argparse = require "argparse"
 
 describe("tests related to options", function()
-   local function curry(f, ...)
-      local args = {...}
-      local unpack = unpack or table.unpack
-      return function() return f(unpack(args)) end
-   end
-
    describe("passing correct options", function()
       it("handles no options passed correctly", function()
          local parser = argparse.parser()
@@ -184,19 +178,19 @@ describe("tests related to options", function()
       it("handles lack of required argument correctly", function()
          local parser = argparse.parser()
          parser:option("-s", "--server")
-         assert.has_error(curry(parser.parse, parser, {"--server"}), "too few arguments")
+         assert.has_error(function() parser:parse{"--server"} end, "too few arguments")
       end)
 
       it("handles too many arguments correctly", function()
          local parser = argparse.parser()
          parser:option("-s", "--server")
-         assert.has_error(curry(parser.parse, parser, {"-sfoo", "bar"}), "too many arguments")
+         assert.has_error(function() parser:parse{"-sfoo", "bar"} end, "too many arguments")
       end)
 
       it("doesn't accept GNU-like long options when it doesn't need arguments", function()
          local parser = argparse.parser()
          parser:flag("-q", "--quiet")
-         assert.has_error(curry(parser.parse, parser, {"--quiet=very_quiet"}), "option --quiet doesn't take arguments")
+         assert.has_error(function() parser:parse{"--quiet=very_quiet"} end, "option --quiet doesn't take arguments")
       end)
 
       it("handles too many invocations correctly", function()
@@ -205,7 +199,7 @@ describe("tests related to options", function()
             count = 1,
             overwrite = false
          })
-         assert.has_error(curry(parser.parse, parser, {"-qq"}), "option -q must be used at most 1 times")
+         assert.has_error(function() parser:parse{"-qq"} end, "option -q must be used at most 1 times")
       end)
 
       it("handles too few invocations correctly", function()
@@ -213,7 +207,7 @@ describe("tests related to options", function()
          parser:option("-f", "--foo", {
             count = "3-4"
          })
-         assert.has_error(curry(parser.parse, parser, {"-fFOO", "-fBAR"}), "option -f must be used at least 3 times")
+         assert.has_error(function() parser:parse{"-fFOO", "-fBAR"} end, "option -f must be used at least 3 times")
       end)
    end)
 end)

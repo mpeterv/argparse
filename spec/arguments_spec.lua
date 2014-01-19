@@ -1,12 +1,6 @@
 local argparse = require "argparse"
 
 describe("tests related to positional arguments", function()
-   local function curry(f, ...)
-      local args = {...}
-      local unpack = unpack or table.unpack
-      return function() return f(unpack(args)) end
-   end
-
    describe("passing correct arguments", function()
       it("handles empty parser correctly", function()
          local parser = argparse.parser()
@@ -80,28 +74,28 @@ describe("tests related to positional arguments", function()
       it("handles extra arguments with empty parser correctly", function()
          local parser = argparse.parser()
 
-         assert.has_error(curry(parser.parse, parser, {"foo"}), "too many arguments")
+         assert.has_error(function() parser:parse{"foo"} end, "too many arguments")
       end)
 
       it("handles extra arguments with one argument correctly", function()
          local parser = argparse.parser()
          parser:argument "foo"
 
-         assert.has_error(curry(parser.parse, parser, {"bar", "baz"}), "too many arguments")
+         assert.has_error(function() parser:parse{"bar", "baz"} end, "too many arguments")
       end)
 
       it("handles sudden option correctly", function()
          local parser = argparse.parser()
          parser:argument "foo"
 
-         assert.has_error(curry(parser.parse, parser, {"-q"}), "unknown option -q")
+         assert.has_error(function() parser:parse{"-q"} end, "unknown option -q")
       end)
 
       it("handles too few arguments with one argument correctly", function()
          local parser = argparse.parser()
          parser:argument "foo"
 
-         assert.has_error(curry(parser.parse, parser, {}), "too few arguments")
+         assert.has_error(function() parser:parse{} end, "too few arguments")
       end)
 
       it("handles extra arguments with several arguments correctly", function()
@@ -109,7 +103,7 @@ describe("tests related to positional arguments", function()
          parser:argument "foo1"
          parser:argument "foo2"
 
-         assert.has_error(curry(parser.parse, parser, {"bar", "baz", "qu"}), "too many arguments")
+         assert.has_error(function() parser:parse{"bar", "baz", "qu"} end, "too many arguments")
       end)
 
       it("handles too few arguments with several arguments correctly", function()
@@ -117,7 +111,7 @@ describe("tests related to positional arguments", function()
          parser:argument "foo1"
          parser:argument "foo2"
 
-         assert.has_error(curry(parser.parse, parser, {"bar"}), "too few arguments")
+         assert.has_error(function() parser:parse{"bar"} end, "too few arguments")
       end)
 
       it("handles too few arguments with multi-argument correctly", function()
@@ -125,7 +119,7 @@ describe("tests related to positional arguments", function()
          parser:argument "foo" {
             args = "+"
          }
-         assert.has_error(curry(parser.parse, parser, {}), "too few arguments")
+         assert.has_error(function() parser:parse{} end, "too few arguments")
       end)
 
       it("handles too many arguments with multi-argument correctly", function()
@@ -133,7 +127,7 @@ describe("tests related to positional arguments", function()
          parser:argument "foo" {
             args = "2-4"
          }
-         assert.has_error(curry(parser.parse, parser, {"foo", "bar", "baz", "qu", "quu"}), "too many arguments")
+         assert.has_error(function() parser:parse{"foo", "bar", "baz", "qu", "quu"} end, "too many arguments")
       end)
 
       it("handles too few arguments with multi-argument correctly", function()
@@ -141,7 +135,7 @@ describe("tests related to positional arguments", function()
          parser:argument("foo", {
             args = "2-4"
          })
-         assert.has_error(curry(parser.parse, parser, {"foo"}), "too few arguments")
+         assert.has_error(function() parser:parse{"foo"} end, "too few arguments")
       end)
 
       it("handles too many arguments with several multi-arguments correctly", function()
@@ -152,7 +146,7 @@ describe("tests related to positional arguments", function()
          parser:argument("foo2", {
             args = "0-1"
          })
-         assert.has_error(curry(parser.parse, parser, {"foo", "bar", "baz", "qu"}), "too many arguments")
+         assert.has_error(function() parser:parse{"foo", "bar", "baz", "qu"} end, "too many arguments")
       end)
 
       it("handles too few arguments with several multi-arguments correctly", function()
@@ -163,7 +157,7 @@ describe("tests related to positional arguments", function()
          parser:argument("foo2", {
             args = "*"
          })
-         assert.has_error(curry(parser.parse, parser, {}), "too few arguments")
+         assert.has_error(function() parser:parse{} end, "too few arguments")
       end)
    end)
 end)
