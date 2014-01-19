@@ -221,11 +221,14 @@ function Parser:parse(args)
    local parser
    local charset
    local options = {}
-   local arguments, commands
+   local arguments = {}
+   local commands
    local opt_context = {}
    local com_context
    local result = {}
-   local cur_option, cur_arg_i, cur_arg
+   local cur_option
+   local cur_arg_i = 1
+   local cur_arg
 
    local function close(element)
       local invocations = result[element.target]
@@ -291,15 +294,13 @@ function Parser:parse(args)
          result[option.target] = {}
       end
 
-      arguments = p.arguments
-      cur_arg_i = 1
-      cur_arg = arguments[cur_arg_i]
-
-      for _, argument in ipairs(arguments) do
+      for _, argument in ipairs(p.arguments) do
+         table.insert(arguments, argument)
          result[argument.target] = {}
          invoke(argument)
       end
 
+      cur_arg = arguments[cur_arg_i]
       commands = p.commands
       com_context = {}
 
@@ -396,7 +397,6 @@ function Parser:parse(args)
    end
 
    local function format()
-      local new_result = {}
       local invocations
 
       for _, elements in ipairs{options, arguments} do
@@ -409,32 +409,32 @@ function Parser:parse(args)
             if element.maxcount == 1 then
                if element.maxargs == 0 then
                   if #invocations > 0 then
-                     new_result[element.target] = true
+                     result[element.target] = true
+                  else
+                     result[element.target] = nil
                   end
                elseif element.maxargs == 1 and element.minargs == 1 then
                   if #invocations > 0 then
-                     new_result[element.target] = invocations[1][1]
+                     result[element.target] = invocations[1][1]
+                  else
+                     result[element.target] = nil
                   end
                else
-                  new_result[element.target] = invocations[1]
+                  result[element.target] = invocations[1]
                end
             else
                if element.maxargs == 0 then
-                  new_result[element.target] = #invocations
+                  result[element.target] = #invocations
                elseif element.maxargs == 1 and element.minargs == 1 then
-                  new_result[element.target] = {}
-
-                  for _, passed in ipairs(invocations) do
-                     table.insert(new_result[element.target], passed[1])
+                  for i=1, #invocations do
+                     invocations[i] = invocations[i][1]
                   end
                else
-                  new_result[element.target] = invocations
+                  result[element.target] = invocations
                end
             end
          end
       end
-
-      result = new_result
    end
 
    switch(self)

@@ -5,14 +5,14 @@ describe("tests related to positional arguments", function()
       it("handles empty parser correctly", function()
          local parser = argparse.parser()
          local args = parser:parse({})
-         assert.same(args, {})
+         assert.same({}, args)
       end)
 
       it("handles one argument correctly", function()
          local parser = argparse.parser()
          parser:argument "foo"
          local args = parser:parse({"bar"})
-         assert.same(args, {foo = "bar"})
+         assert.same({foo = "bar"}, args)
       end)
 
       it("handles several arguments correctly", function()
@@ -20,7 +20,7 @@ describe("tests related to positional arguments", function()
          parser:argument "foo1"
          parser:argument "foo2"
          local args = parser:parse({"bar", "baz"})
-         assert.same(args, {foo1 = "bar", foo2 = "baz"})
+         assert.same({foo1 = "bar", foo2 = "baz"}, args)
       end)
 
       it("handles multi-argument correctly", function()
@@ -29,7 +29,7 @@ describe("tests related to positional arguments", function()
             args = "*"
          })
          local args = parser:parse({"bar", "baz", "qu"})
-         assert.same(args, {foo = {"bar", "baz", "qu"}})
+         assert.same({foo = {"bar", "baz", "qu"}}, args)
       end)
 
       it("handles restrained multi-argument correctly", function()
@@ -38,7 +38,7 @@ describe("tests related to positional arguments", function()
             args = "2-4"
          })
          local args = parser:parse({"bar", "baz"})
-         assert.same(args, {foo = {"bar", "baz"}})
+         assert.same({foo = {"bar", "baz"}}, args)
       end)
 
       it("handles several multi-arguments correctly", function()
@@ -50,23 +50,23 @@ describe("tests related to positional arguments", function()
             args = "*"
          })
          local args = parser:parse({"bar"})
-         assert.same(args, {foo1 = {"bar"}, foo2 = {}})
+         assert.same({foo1 = {"bar"}, foo2 = {}}, args)
          args = parser:parse({"bar", "baz", "qu"})
-         assert.same(args, {foo1 = {"bar", "baz"}, foo2 = {"qu"}})
+         assert.same({foo1 = {"bar", "baz"}, foo2 = {"qu"}}, args)
       end)
 
       it("handles hyphen correctly", function()
          local parser = argparse.parser()
          parser:argument "foo"
          local args = parser:parse({"-"})
-         assert.same(args, {foo = "-"})
+         assert.same({foo = "-"}, args)
       end)
 
       it("handles double hyphen correctly", function()
          local parser = argparse.parser()
          parser:argument "foo"
          local args = parser:parse({"--", "-q"})
-         assert.same(args, {foo = "-q"})
+         assert.same({foo = "-q"}, args)
       end)
    end)
 
