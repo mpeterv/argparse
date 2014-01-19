@@ -397,6 +397,16 @@ function Parser:parse(args)
       end
    end
 
+   local function convert(element, data)
+      if element.convert then
+         local ok, err = element.convert(data)
+
+         return parser:assert(ok, "%s", err or "malformed argument " .. data)
+      else
+         return data
+      end
+   end
+
    local function format()
       local invocations
 
@@ -416,22 +426,32 @@ function Parser:parse(args)
                   end
                elseif element.maxargs == 1 and element.minargs == 1 then
                   if #invocations > 0 then
-                     result[element.target] = invocations[1][1]
+                     result[element.target] = convert(element, invocations[1][1])
                   else
                      result[element.target] = nil
                   end
                else
                   result[element.target] = invocations[1]
+
+                  if #invocations > 0 and element.convert then
+                     for i=1, #result[element.target] do
+                        result[element.target][i] = convert(element, result[element.target][i])
+                     end
+                  end
                end
             else
                if element.maxargs == 0 then
                   result[element.target] = #invocations
                elseif element.maxargs == 1 and element.minargs == 1 then
                   for i=1, #invocations do
-                     invocations[i] = invocations[i][1]
+                     invocations[i] = convert(element, invocations[i][1])
                   end
-               else
-                  result[element.target] = invocations
+               elseif element.convert then
+                  for _, invocation in ipairs(invocations) do
+                     for i=1, #invocation do
+                        invocation[i] = convert(element, invocation[i])
+                     end
+                  end
                end
             end
          end
