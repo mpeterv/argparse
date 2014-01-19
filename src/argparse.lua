@@ -320,7 +320,7 @@ function Parser:parse(args)
 
          if not com then
             if #commands > 0 then
-               parser:error("wrong command") -- add lev-based guessing here
+               parser:error("unknown command %s", data) -- add lev-based guessing here
             else
                parser:error("too many arguments")
             end
@@ -356,7 +356,7 @@ function Parser:parse(args)
 
                      for i = 2, #data do
                         name = first .. data:sub(i, i)
-                        option = parser:assert(opt_context[name], "unknown option " .. name)
+                        option = parser:assert(opt_context[name], "unknown option %s", name)
                         handle_option(name)
 
                         if i ~= #data and option.minargs > 0 then
@@ -374,12 +374,13 @@ function Parser:parse(args)
                         local equal = data:find "="
                         if equal then
                            name = data:sub(1, equal-1)
-                           option = parser:assert(opt_context[name], "unknown option " .. name)
-                           parser:assert(option.maxargs > 0, "option " .. name .. " doesn't take arguments")
+                           option = parser:assert(opt_context[name], "unknown option %s", name)
+                           parser:assert(option.maxargs > 0, "option %s doesn't take arguments", name)
 
                            handle_option(data:sub(1, equal-1))
                            handle_argument(data:sub(equal+1))
                         else
+                           parser:assert(opt_context[data], "unknown option %s", data)
                            handle_option(data)
                         end
                      end
