@@ -13,7 +13,7 @@ Features:
     * Combined short options(e.g. `-zx`); 
     * Short options combined with arguments(e.g. `-I/usr/local/include`); 
     * Long options(e.g. `--quiet`); 
-    * Long options with arguments(e.g. `--from there); 
+    * Long options with arguments(e.g. `--from there`); 
     * GNU-style long options with arguments(e.g. `--from=there`). 
 * Supports named arguments consuming several arguments. 
 * Supports options and flags which can be invoked several times, consuming several arguments. 

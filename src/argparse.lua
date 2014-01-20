@@ -40,13 +40,15 @@ local Parser = class {
    options = {},
    commands = {},
    require_command = false,
-   fields = {"name", "description", "target", "require_command"}
+   fields = {
+      "name", "description", "target", "require_command"
+   }
 }:include(Declarative)
 
 local Command = Parser:extends {
    __name = "Command",
    aliases = {}
-}:include(Declarative)
+}
 
 local Argument = class {
    __name = "Argument",
@@ -58,10 +60,9 @@ local Argument = class {
    }
 }:include(Declarative)
 
-local Option = class {
+local Option = Argument:extends {
    __name = "Option",
    aliases = {},
-   args = 1,
    count = "?",
    overwrite = true,
    fields = {
@@ -70,12 +71,12 @@ local Option = class {
       "mincount", "maxcount", "default", "convert",
       "overwrite"
    }
-}:include(Declarative)
+}
 
 local Flag = Option:extends {
    __name = "Flag",
    args = 0
-}:include(Declarative)
+}
 
 function Parser:argument(...)
    local argument = Argument:new(...)
