@@ -41,7 +41,8 @@ local Parser = class {
    commands = {},
    require_command = false,
    fields = {
-      "name", "description", "target", "require_command"
+      "name", "description", "target", "require_command",
+      "action"
    }
 }:include(Declarative)
 
@@ -56,7 +57,8 @@ local Argument = class {
    count = 1,
    fields = {
       "name", "description", "target", "args",
-      "minargs", "maxargs", "default", "convert"
+      "minargs", "maxargs", "default", "convert",
+      "action"
    }
 }:include(Declarative)
 
@@ -69,7 +71,7 @@ local Option = Argument:extends {
       "name", "aliases", "description", "target", 
       "args", "minargs", "maxargs", "count",
       "mincount", "maxcount", "default", "convert",
-      "overwrite"
+      "overwrite", "action"
    }
 }
 
@@ -255,6 +257,7 @@ function Parser:parse(args)
    local result = {}
    local invocations = {}
    local passed = {}
+   local com_callbacks = {}
    local cur_option
    local cur_arg_i = 1
    local cur_arg
@@ -337,19 +340,31 @@ function Parser:parse(args)
          else
             parser:error("too few arguments")
          end
-      end
+      else
+         if element == cur_option then
+            cur_option = nil
+         elseif element == cur_arg then
+            cur_arg_i = cur_arg_i+1
+            cur_arg = arguments[cur_arg_i]
+         end
 
-      if element == cur_option then
-         cur_option = nil
-      elseif element == cur_arg then
-         cur_arg_i = cur_arg_i+1
-         cur_arg = arguments[cur_arg_i]
+         if element.action then
+            if element.type == "multi-count" or element.type == "multi-count multi-arg" then
+               element.action(result[element.target][#result[element.target]])
+            else
+               element.action(result[element.target])
+            end
+         end
       end
    end
 
    local function switch(p)
       parser = p:prepare()
       charset = p.charset
+
+      if p.action then
+         table.insert(com_callbacks, p.action)
+      end
 
       for _, option in ipairs(p.options) do
          table.insert(options, option)
@@ -488,6 +503,10 @@ function Parser:parse(args)
       parser:assert(invocations[option] >= option.mincount,
          "option %s must be used at least %d times", option.name, option.mincount
       )
+   end
+
+   for _, callback in ipairs(com_callbacks) do
+      callback(result)
    end
 
    return result
