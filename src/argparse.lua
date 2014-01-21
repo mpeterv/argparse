@@ -42,7 +42,7 @@ local Parser = class {
    require_command = false,
    fields = {
       "name", "description", "target", "require_command",
-      "action"
+      "action", "usage"
    }
 }:include(Declarative)
 
@@ -58,7 +58,7 @@ local Argument = class {
    fields = {
       "name", "description", "target", "args",
       "minargs", "maxargs", "default", "convert",
-      "action"
+      "action", "usage", "argname"
    }
 }:include(Declarative)
 
@@ -71,7 +71,7 @@ local Option = Argument:extends {
       "name", "aliases", "description", "target", 
       "args", "minargs", "maxargs", "count",
       "mincount", "maxcount", "default", "convert",
-      "overwrite", "action"
+      "overwrite", "action", "usage", "argname"
    }
 }
 
@@ -79,6 +79,50 @@ local Flag = Option:extends {
    __name = "Flag",
    args = 0
 }
+
+function Argument:get_arg_usage(argname)
+   argname = self.argname or argname
+   local buf = {}
+   local i = 1
+
+   while i <= math.min(self.minargs, 3) do
+      table.insert(buf, argname)
+      i = i+1
+   end
+
+   while i <= math.min(self.maxargs, 3) do
+      table.insert(buf, "[" .. argname .. "]")
+      i = i+1
+   end
+
+   if i < self.maxargs then
+      table.insert(buf, "...")
+   end
+
+   return buf
+end
+
+function Argument:get_usage()
+   if not self.usage then
+      self.usage = table.concat(self:get_arg_usage("<" .. self.name .. ">"), " ")
+   end
+
+   return self.usage
+end
+
+function Option:get_usage()
+   if not self.usage then
+      self.usage = self:get_arg_usage("<" .. self.target .. ">")
+      table.insert(self.usage, 1, self.name)
+      self.usage = table.concat(self.usage, " ")
+
+      if self.mincount == 0 then
+         self.usage = "[" .. self.usage .. "]"
+      end
+   end
+
+   return self.usage
+end
 
 function Parser:argument(...)
    local argument = Argument:new(...)
@@ -110,7 +154,7 @@ function Parser:error(fmt, ...)
    if _TEST then
       error(msg)
    else
-      io.stderr:write("Error: " .. msg .. "\r\n")
+      io.stderr:write(("%s\r\nError: %s\r\n"):format(self:get_usage(), msg))
       os.exit(1)
    end
 end
@@ -241,6 +285,33 @@ function Parser:prepare()
    self:make_command_names()
    self:make_types()
    return self
+end
+
+function Parser:get_usage()
+   if not self.usage then
+      local buf = {"Usage:", self.name}
+
+      for _, elements in ipairs{self.options, self.arguments} do
+         for _, element in ipairs(elements) do
+            table.insert(buf, element:get_usage())
+         end
+      end
+
+      if #self.commands > 0 then
+         if self.require_command then
+            table.insert(buf, "<command>")
+         else
+            table.insert(buf, "[<command>]")
+         end
+
+         table.insert(buf, "...")
+      end
+
+      -- TODO: prettify
+      self.usage = table.concat(buf, " ")
+   end
+
+   return self.usage
 end
 
 function Parser:parse(args)
