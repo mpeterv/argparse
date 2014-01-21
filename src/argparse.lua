@@ -93,6 +93,10 @@ function Argument:get_arg_usage(argname)
    while i <= math.min(self.maxargs, 3) do
       table.insert(buf, "[" .. argname .. "]")
       i = i+1
+
+      if self.maxargs == math.huge then
+         break
+      end
    end
 
    if i < self.maxargs then
