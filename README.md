@@ -8,6 +8,31 @@ Not everything stated here is implemented.
 
 Features: 
 
+* Declarative and usual interfaces. 
+
+    Declarative: 
+
+    ```lua
+    parser:argument "input"
+       :description "Path to input file. "
+       :convert(io.open)
+    parser:option "-v" "--verbose"
+       :description "Sets logging level. "
+       :count "*"
+    ```
+
+    Usual: 
+
+    ```lua
+    parser:argument("input", {
+       description = "Path to input file. ",
+       convert = io.open
+    })
+    parser:option("-v", "--verbose", {
+       description  = "Sets logging level. ",
+       count = "*"
+    })
+    ```
 * Parses: 
     * Short options(e.g. `-q`); 
     * Combined short options(e.g. `-zx`); 
@@ -21,14 +46,12 @@ Features:
     Example: 
 
     ```lua
-    parser:option "-p" "--pair" {
-       count = "*",
-       args = 2
-    }
+    parser:option "-p" "--pair"
+       :count "*"
+       :args(2)
 
-    parser:flag "-v" "--verbose" {
-       count = "*"
-    }
+    parser:flag "-v" "--verbose"
+       :count "*"
 
     local args = parser:parse{"--pair", "Alice", "Bob", "-p", "Emma", "John", "-vvv"}
     -- args = {
@@ -41,5 +64,5 @@ Features:
     ```
 
 * Supports default values and automatic conversions for arguments. 
-* [___NYI___] Automatically generates error, help and usage messages. 
+* Automatically generates error, usage  and help(__NYI__) messages. 
 * Supports commands(e.g. in [git](http://git-scm.com/) CLI `add`, `commit`, `push`, etc. are commands). Each command has its own set of options and arguments. 

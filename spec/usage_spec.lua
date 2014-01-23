@@ -9,15 +9,13 @@ describe("tests related to usage message generation", function()
    it("creates correct usage message for arguments", function()
       local parser = argparse.parser "foo"
       parser:argument "first"
-      parser:argument "second-and-third" {
-         args = 2
-      }
-      parser:argument "maybe-fourth" {
-         args = "?"
-      }
-      parser:argument "others" {
-         args = "*"
-      }
+      parser:argument "second-and-third"
+         :args "2"
+      parser:argument "maybe-fourth"
+         :args "?"
+      parser:argument "others"
+         :args "*"
+
       assert.equal(
          [=[Usage: foo <first> <second-and-third> <second-and-third> [<maybe-fourth>] [<others>] ...]=],
          parser:prepare():get_usage()
@@ -27,11 +25,11 @@ describe("tests related to usage message generation", function()
    it("creates correct usage message for options", function()
       local parser = argparse.parser "foo"
       parser:flag "-q" "--quiet"
-      parser:option "--from" {
-         count = 1,
-         target = "server"
-      }
+      parser:option "--from"
+         :count "1"
+         :target "server"
       parser:option "--config"
+
       assert.equal(
          [=[Usage: foo [-q] --from <server> [--config <config>]]=],
          parser:prepare():get_usage()
@@ -43,6 +41,7 @@ describe("tests related to usage message generation", function()
       parser:flag "-q" "--quiet"
       local run = parser:command "run"
       run:option "--where"
+
       assert.equal(
          [=[Usage: foo [-q] [<command>] ...]=],
          parser:prepare():get_usage()
@@ -51,10 +50,10 @@ describe("tests related to usage message generation", function()
 
    describe("usage generation can be customized", function()
       it("uses message provided by user", function()
-         local parser = argparse.parser "foo" {
-            usage = "Usage: obvious"
-         }
+         local parser = argparse.parser "foo"
+            :usage "Usage: obvious"
          parser:flag "-q" "--quiet"
+
          assert.equal(
             [=[Usage: obvious]=],
             parser:prepare():get_usage()
@@ -63,9 +62,9 @@ describe("tests related to usage message generation", function()
 
       it("uses per-option message provided by user", function()
          local parser = argparse.parser "foo"
-         parser:flag "-q" "--quiet" {
-            usage = "[-q | --quiet]"
-         }
+         parser:flag "-q" "--quiet"
+            :usage "[-q | --quiet]"
+
          assert.equal(
             [=[Usage: foo [-q | --quiet]]=],
             parser:prepare():get_usage()
@@ -74,10 +73,10 @@ describe("tests related to usage message generation", function()
 
       it("uses argnames provided by user", function()
          local parser = argparse.parser "foo"
-         parser:argument "inputs" {
-            args = "1-2",
-            argname = "<input>"
-         }
+         parser:argument "inputs"
+            :args "1-2"
+            :argname "<input>"
+
          assert.equal(
             [=[Usage: foo <input> [<input>]]=],
             parser:prepare():get_usage()
