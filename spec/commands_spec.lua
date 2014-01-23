@@ -49,7 +49,7 @@ describe("tests related to commands", function()
       local args = parser:parse{}
       assert.same({}, args)
 
-      parser.require_command = true
+      parser:require_command(true)
       assert.has_error(function() parser:parse{} end, "command is required")
    end)
 
