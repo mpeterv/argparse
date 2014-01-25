@@ -329,6 +329,10 @@ function Parser:get_usage()
    return self._usage
 end
 
+local function quote(s)
+   return "'" .. s .. "'"
+end
+
 function Parser:parse(args)
    args = args or arg
    self._name = self._name or args[0]
@@ -352,7 +356,7 @@ function Parser:parse(args)
       if element._convert then
          local ok, err = element._convert(data)
 
-         return parser:assert(ok, "%s", err or "malformed argument " .. data)
+         return parser:assert(ok, "%s", err or "malformed argument " .. quote(data))
       else
          return data
       end
@@ -367,7 +371,7 @@ function Parser:parse(args)
          if element._overwrite then
             overwrite = true
          else
-            parser:error("option %s must be used at most %d times", element._name, element._maxcount)
+            parser:error("option %s must be used at most %d times", quote(element._name), element._maxcount)
          end
       else
          invocations[element] = invocations[element]+1
@@ -495,7 +499,7 @@ function Parser:parse(args)
 
          if not com then
             if #commands > 0 then
-               parser:error("unknown command %s", data) -- add lev-based guessing here
+               parser:error("unknown command %s", quote(data)) -- add lev-based guessing here
             else
                parser:error("too many arguments")
             end
@@ -531,7 +535,7 @@ function Parser:parse(args)
 
                      for i = 2, #data do
                         name = first .. data:sub(i, i)
-                        option = parser:assert(opt_context[name], "unknown option %s", name)
+                        option = parser:assert(opt_context[name], "unknown option %s", quote(name))
                         handle_option(name)
 
                         if i ~= #data and option._minargs > 0 then
@@ -549,13 +553,13 @@ function Parser:parse(args)
                         local equal = data:find "="
                         if equal then
                            name = data:sub(1, equal-1)
-                           option = parser:assert(opt_context[name], "unknown option %s", name)
-                           parser:assert(option._maxargs > 0, "option %s doesn't take arguments", name)
+                           option = parser:assert(opt_context[name], "unknown option %s", quote(name))
+                           parser:assert(option._maxargs > 0, "option %s doesn't take arguments", quote(name))
 
                            handle_option(data:sub(1, equal-1))
                            handle_argument(data:sub(equal+1))
                         else
-                           parser:assert(opt_context[data], "unknown option %s", data)
+                           parser:assert(opt_context[data], "unknown option %s", quote(data))
                            handle_option(data)
                         end
                      end
@@ -587,7 +591,7 @@ function Parser:parse(args)
 
    for _, option in ipairs(options) do
       parser:assert(invocations[option] >= option._mincount,
-         "option %s must be used at least %d times", option._name, option._mincount
+         "option %s must be used at least %d times", quote(option._name), option._mincount
       )
    end
 
