@@ -48,6 +48,20 @@ describe("tests related to usage message generation", function()
       )
    end)
 
+   it("creates correct usage message for subcommands", function()
+      local parser = argparse.parser "foo"
+      parser:flag "-q" "--quiet"
+      local run = parser:command "run"
+      run:option "--where"
+
+      parser:prepare()
+
+      assert.equal(
+         [=[Usage: foo run [--where <where>]]=],
+         run:prepare():get_usage()
+      )
+   end)
+
    describe("usage generation can be customized", function()
       it("uses message provided by user", function()
          local parser = argparse.parser "foo"

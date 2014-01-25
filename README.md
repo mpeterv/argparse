@@ -8,7 +8,7 @@ Not everything stated here is implemented.
 
 Features: 
 
-* Declarative and usual interfaces. 
+* Declarative and classic interfaces. 
 
     Declarative: 
 
@@ -21,7 +21,7 @@ Features:
        :count "*"
     ```
 
-    Usual: 
+    Classic: 
 
     ```lua
     parser:argument("input", {
@@ -66,3 +66,18 @@ Features:
 * Supports default values and automatic conversions for arguments. 
 * Automatically generates error, usage  and help(__NYI__) messages. 
 * Supports commands(e.g. in [git](http://git-scm.com/) CLI `add`, `commit`, `push`, etc. are commands). Each command has its own set of options and arguments. 
+* Automatically generates tips on typos(__NYI__). 
+
+    Example: 
+
+    ```lua
+    parser:option "-f" "--from"
+    parser:command "install"
+
+    parser:parse{"--form", "there"}
+    -- Error: unknown option --form
+    -- Did you mean --from?
+
+    parser:parse{"isntall"}
+    -- Error: unknown command isntall
+    -- Did you mean install?
