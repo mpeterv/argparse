@@ -66,7 +66,7 @@ Features:
 * Supports default values and automatic conversions for arguments. 
 * Automatically generates error, usage  and help(__NYI__) messages. 
 * Supports commands(e.g. in [git](http://git-scm.com/) CLI `add`, `commit`, `push`, etc. are commands). Each command has its own set of options and arguments. 
-* Automatically generates tips on typos(__NYI__). 
+* Automatically generates tips on typos. 
 
     Example: 
 
