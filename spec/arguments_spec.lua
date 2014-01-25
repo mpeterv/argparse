@@ -88,7 +88,7 @@ describe("tests related to positional arguments", function()
          local parser = argparse.parser()
          parser:argument "foo"
 
-         assert.has_error(function() parser:parse{"-q"} end, "unknown option -q")
+         assert.has_error(function() parser:parse{"-q"} end, "unknown option '-q'")
       end)
 
       it("handles too few arguments with one argument correctly", function()

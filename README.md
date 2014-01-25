@@ -75,9 +75,9 @@ Features:
     parser:command "install"
 
     parser:parse{"--form", "there"}
-    -- Error: unknown option --form
-    -- Did you mean --from?
+    -- Error: unknown option '--form'
+    -- Did you mean '--from'?
 
     parser:parse{"isntall"}
-    -- Error: unknown command isntall
-    -- Did you mean install?
+    -- Error: unknown command 'isntall'
+    -- Did you mean 'install'?

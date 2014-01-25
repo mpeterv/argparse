@@ -18,7 +18,7 @@ describe("tests related to commands", function()
 
       local args = parser:parse{"install", "-q"}
       assert.same({install = true, quiet = true}, args)
-      assert.has_error(function() parser:parse{"-q", "install"} end, "unknown option -q")
+      assert.has_error(function() parser:parse{"-q", "install"} end, "unknown option '-q'")
    end)
 
    it("allows to continue passing old options", function()
@@ -57,6 +57,6 @@ describe("tests related to commands", function()
       local parser = argparse.parser "name"
       local install = parser:command "install"
 
-      assert.has_error(function() parser:parse{"isntall"} end, "unknown command isntall")
+      assert.has_error(function() parser:parse{"isntall"} end, "unknown command 'isntall'")
    end)
 end)

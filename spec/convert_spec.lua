@@ -19,7 +19,7 @@ describe("tests related to converters", function()
          args = "+"
       }
 
-      assert.has_error(function() parser:parse{"foo", "bar", "baz"} end, "malformed argument foo")
+      assert.has_error(function() parser:parse{"foo", "bar", "baz"} end, "malformed argument 'foo'")
    end)
 
    it("second return value is used as error message", function()
