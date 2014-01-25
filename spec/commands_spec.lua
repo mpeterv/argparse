@@ -57,6 +57,6 @@ describe("tests related to commands", function()
       local parser = argparse.parser "name"
       local install = parser:command "install"
 
-      assert.has_error(function() parser:parse{"isntall"} end, "unknown command 'isntall'")
+      assert.has_error(function() parser:parse{"run"} end, "unknown command 'run'")
    end)
 end)
