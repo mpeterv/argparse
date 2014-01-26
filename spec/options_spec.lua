@@ -201,7 +201,7 @@ describe("tests related to options", function()
       it("doesn't accept GNU-like long options when it doesn't need arguments", function()
          local parser = argparse.parser()
          parser:flag("-q", "--quiet")
-         assert.has_error(function() parser:parse{"--quiet=very_quiet"} end, "option '--quiet' doesn't take arguments")
+         assert.has_error(function() parser:parse{"--quiet=very_quiet"} end, "option '--quiet' does not take arguments")
       end)
 
       it("handles too many invocations correctly", function()

@@ -299,7 +299,7 @@ function Parser:prepare()
       self:flag "-h" "--help"
          :description "Show this help message and exit. "
          :action(function()
-            print(self:get_help())
+            io.stdout:write(self:get_help() .. "\r\n")
             os.exit(0)
          end)
    end
@@ -700,7 +700,7 @@ function Parser:parse(args)
                         if equal then
                            name = data:sub(1, equal-1)
                            option = get_option(name)
-                           parser:assert(option._maxargs > 0, "option '%s' doesn't take arguments", name)
+                           parser:assert(option._maxargs > 0, "option '%s' does not take arguments", name)
 
                            handle_option(data:sub(1, equal-1))
                            handle_argument(data:sub(equal+1))
