@@ -4,8 +4,6 @@
 
 __argparse__ is a feature-rich command line parser for Lua inspired by argparse for Python. 
 
-Not everything stated here is implemented. 
-
 Features: 
 
 * Declarative and classic interfaces. 
@@ -33,6 +31,7 @@ Features:
        count = "*"
     })
     ```
+
 * Parses: 
     * Short options(e.g. `-q`); 
     * Combined short options(e.g. `-zx`); 
@@ -42,8 +41,6 @@ Features:
     * GNU-style long options with arguments(e.g. `--from=there`). 
 * Supports named arguments consuming several arguments. 
 * Supports options and flags which can be invoked several times, consuming several arguments. 
-
-    Example: 
 
     ```lua
     parser:option "-p" "--pair"
@@ -64,11 +61,9 @@ Features:
     ```
 
 * Supports default values and automatic conversions for arguments. 
-* Automatically generates error, usage  and help(__NYI__) messages. 
+* Automatically generates error, usage  and help messages. 
 * Supports commands(e.g. in [git](http://git-scm.com/) CLI `add`, `commit`, `push`, etc. are commands). Each command has its own set of options and arguments. 
-* Automatically generates tips on typos. 
-
-    Example: 
+* Automatically generates hints on typos. 
 
     ```lua
     parser:option "-f" "--from"
