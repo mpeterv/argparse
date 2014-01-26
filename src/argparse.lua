@@ -51,9 +51,10 @@ local Parser = class {
    _options = {},
    _commands = {},
    _require_command = false,
+   _add_help = true,
    _fields = {
       "name", "description", "target", "require_command",
-      "action", "usage"
+      "action", "usage", "help", "add_help"
    }
 }:include(Declarative)
 
@@ -169,7 +170,7 @@ function Parser:error(fmt, ...)
    if _TEST then
       error(msg)
    else
-      io.stderr:write(("%s\r\nError: %s\r\n"):format(self:get_usage(), msg))
+      io.stderr:write(("%s\r\n\r\nError: %s\r\n"):format(self:get_usage(), msg))
       os.exit(1)
    end
 end
@@ -275,7 +276,7 @@ function Parser:make_types()
          if element._maxcount == 1 then
             if element._maxargs == 0 then
                element._type = "flag"
-            elseif element._maxargs == 1 and element._minargs == 1 then
+            elseif element._maxargs == 1 and (element._minargs == 1 or element._mincount == 1) then
                element._type = "arg"
             else
                element._type = "multi-arg"
@@ -294,11 +295,21 @@ function Parser:make_types()
 end
 
 function Parser:prepare()
+   if self._add_help then
+      self:flag "-h" "--help"
+         :description "Show this help message and exit. "
+         :action(function()
+            print(self:get_help())
+            os.exit(0)
+         end)
+   end
+
    self:make_charset()
    self:make_targets()
    self:make_boundaries()
    self:make_command_names()
    self:make_types()
+
    return self
 end
 
@@ -327,6 +338,88 @@ function Parser:get_usage()
    end
 
    return self._usage
+end
+
+local function make_two_columns(s1, s2)
+   if #s1 < 22 then
+      return "   " .. s1 .. (" "):rep(22 - #s1) .. s2
+   else
+      if s2 == "" then
+         return "   " .. s1
+      else
+         return "   " .. s1 .. "\r\n" .. (" "):rep(25) .. s2
+      end
+   end
+end
+
+local function make_description(element)
+   if element._default then
+      if element._description then
+         return ("%s (default: %s)"):format(element._description, element._default)
+      else
+         return ("default: %s"):format(element._default)
+      end
+   else
+      return element._description or ""
+   end
+end
+
+local function make_name(option)
+   local variants = {}
+   local variant
+
+   for _, alias in ipairs(option._aliases) do
+      variant = option:get_arg_usage("<" .. option._target .. ">")
+      table.insert(variant, 1, alias)
+      variant = table.concat(variant, " ")
+      table.insert(variants, variant)
+   end
+
+   return table.concat(variants, ", ")
+end
+
+function Parser:get_help()
+   if not self._help then
+      local blocks = {self:get_usage()}
+      
+      if self._description then
+         table.insert(blocks, self._description)
+      end
+
+      if #self._arguments > 0 then
+         local buf = {"Arguments: "}
+
+         for _, argument in ipairs(self._arguments) do
+            table.insert(buf, make_two_columns(argument._name, make_description(argument)))
+         end
+
+         table.insert(blocks, table.concat(buf, "\r\n"))
+      end
+
+      if #self._options > 0 then
+         local buf = {"Options: "}
+
+         for _, option in ipairs(self._options) do
+            table.insert(buf, make_two_columns(make_name(option), make_description(option)))
+         end
+
+         table.insert(blocks, table.concat(buf, "\r\n"))
+      end
+
+      if #self._commands > 0 then
+         local buf = {"Commands: "}
+
+         for _, command in ipairs(self._commands) do
+            table.insert(buf, make_two_columns(table.concat(command._aliases, ", "), command._description or ""))
+         end
+
+         table.insert(blocks, table.concat(buf, "\r\n"))
+      end
+
+      self._help = table.concat(blocks, "\r\n\r\n")
+   end
+
+   return self._help
 end
 
 local function get_tip(context, wrong_name)

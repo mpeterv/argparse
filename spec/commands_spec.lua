@@ -13,6 +13,7 @@ describe("tests related to commands", function()
 
    it("switches context properly", function()
       local parser = argparse.parser "name"
+         :add_help(false)
       local install = parser:command "install"
       install:flag "-q" "--quiet"
 

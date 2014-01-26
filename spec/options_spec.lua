@@ -185,6 +185,7 @@ describe("tests related to options", function()
 
       it("handles unknown options correctly", function()
          local parser = argparse.parser()
+            :add_help(false)
          assert.has_error(function() parser:parse{"--server"} end, "unknown option '--server'")
          assert.has_error(function() parser:parse{"--server=localhost"} end, "unknown option '--server'")
          assert.has_error(function() parser:parse{"-s"} end, "unknown option '-s'")

@@ -15,6 +15,14 @@ describe("tests related to positional arguments", function()
          assert.same({foo = "bar"}, args)
       end)
 
+      it("handles optional argument correctly", function()
+         local parser = argparse.parser()
+         parser:argument "foo"
+            :args "?"
+         local args = parser:parse({"bar"})
+         assert.same({foo = "bar"}, args)
+      end)
+
       it("handles several arguments correctly", function()
          local parser = argparse.parser()
          parser:argument "foo1"
@@ -86,6 +94,7 @@ describe("tests related to positional arguments", function()
 
       it("handles sudden option correctly", function()
          local parser = argparse.parser()
+            :add_help(false)
          parser:argument "foo"
 
          assert.has_error(function() parser:parse{"-q"} end, "unknown option '-q'")
