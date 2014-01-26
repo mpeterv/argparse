@@ -341,14 +341,14 @@ function Parser:get_usage()
 end
 
 local function make_two_columns(s1, s2)
+   if s2 == "" then
+      return "   " .. s1
+   end
+
    if #s1 < 22 then
       return "   " .. s1 .. (" "):rep(22 - #s1) .. s2
    else
-      if s2 == "" then
-         return "   " .. s1
-      else
-         return "   " .. s1 .. "\r\n" .. (" "):rep(25) .. s2
-      end
+      return "   " .. s1 .. "\r\n" .. (" "):rep(25) .. s2
    end
 end
 
