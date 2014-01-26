@@ -24,7 +24,7 @@ curl http://luarocks.org/releases/luarocks-2.1.1.tar.gz | tar xz
 cd luarocks-2.1.1
 
 if [ "$LUA" == "LuaJIT 2.0" ]; then
-  ./configure --lua-suffix=jit --with-lua-include=/usr/local/include/luajit-2.0;
+  ./configure --with-lua-include=/usr/local/include/luajit-2.0;
 else
   ./configure;
 fi
