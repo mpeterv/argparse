@@ -179,24 +179,20 @@ function Parser:assert(assertion, ...)
    return assertion or self:error(...)
 end
 
-function Parser:make_charset()
-   if not self._charset then
-      self._charset = {["-"] = true}
+function Parser:update_charset(charset)
+   charset = charset or {}
 
-      for _, command in ipairs(self._commands) do
-         command:make_charset()
+   for _, command in ipairs(self._commands) do
+      command:update_charset(charset)
+   end
 
-         for char in pairs(command._charset) do
-            self._charset[char] = true
-         end
-      end
-
-      for _, option in ipairs(self._options) do
-         for _, alias in ipairs(option._aliases) do
-            self._charset[alias:sub(1, 1)] = true
-         end
+   for _, option in ipairs(self._options) do
+      for _, alias in ipairs(option._aliases) do
+         charset[alias:sub(1, 1)] = true
       end
    end
+
+   return charset
 end
 
 function Parser:make_targets()
@@ -304,7 +300,6 @@ function Parser:prepare()
          end)
    end
 
-   self:make_charset()
    self:make_targets()
    self:make_boundaries()
    self:make_command_names()
@@ -588,7 +583,6 @@ function Parser:parse(args)
 
    local function switch(p)
       parser = p:prepare()
-      charset = parser._charset
 
       if parser._action then
          table.insert(com_callbacks, parser._action)
@@ -721,6 +715,7 @@ function Parser:parse(args)
    end
 
    switch(self)
+   charset = parser:update_charset()
    mainloop()
 
    if cur_option then

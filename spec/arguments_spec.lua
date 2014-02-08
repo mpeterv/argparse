@@ -92,14 +92,6 @@ describe("tests related to positional arguments", function()
          assert.has_error(function() parser:parse{"bar", "baz"} end, "too many arguments")
       end)
 
-      it("handles sudden option correctly", function()
-         local parser = argparse.parser()
-            :add_help(false)
-         parser:argument "foo"
-
-         assert.has_error(function() parser:parse{"-q"} end, "unknown option '-q'")
-      end)
-
       it("handles too few arguments with one argument correctly", function()
          local parser = argparse.parser()
          parser:argument "foo"

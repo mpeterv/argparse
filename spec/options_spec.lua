@@ -80,6 +80,30 @@ describe("tests related to options", function()
          assert.same({quiet = true, server = "foo"}, args)
       end)
 
+      describe("Special chars set", function()
+         it("handles windows-style options", function()
+            local parser = argparse.parser()
+               :add_help(false)
+            parser:option "\\I"
+               :count "*"
+               :target "include"
+            local args = parser:parse{"\\I", "src", "\\I", "misc"}
+            assert.same({include = {"src", "misc"}}, args)
+         end)
+
+         it("corrects charset in commands", function()
+            local parser = argparse.parser "name"
+               :add_help(false)
+            parser:flag "-v" "--verbose"
+               :count "*"
+            parser:command "deep"
+               :add_help(false)
+               :option "\\s"
+            local args = parser:parse{"-v", "deep", "\\s", "foo", "-vv"}
+            assert.same({verbose = 3, deep = true, s = "foo"}, args)
+         end)
+      end)
+
       describe("Options with optional argument", function()
          it("handles emptiness correctly", function()
             local parser = argparse.parser()
@@ -186,6 +210,7 @@ describe("tests related to options", function()
       it("handles unknown options correctly", function()
          local parser = argparse.parser()
             :add_help(false)
+         parser:option "--option"
          assert.has_error(function() parser:parse{"--server"} end, "unknown option '--server'")
          assert.has_error(function() parser:parse{"--server=localhost"} end, "unknown option '--server'")
          assert.has_error(function() parser:parse{"-s"} end, "unknown option '-s'")
