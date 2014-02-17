@@ -126,95 +126,29 @@ function Argument:get_usage()
    return self._usage
 end
 
-function Option:get_usage()
-   if not self._usage then
-      self._usage = self:get_arg_usage("<" .. self._target .. ">")
-      table.insert(self._usage, 1, self._name)
-      self._usage = table.concat(self._usage, " ")
-
-      if self._mincount == 0 then
-         self._usage = "[" .. self._usage .. "]"
-      end
+function Argument:make_target()
+   if not self._target then
+      self._target = self._name
    end
-
-   return self._usage
 end
 
-function Parser:argument(...)
-   local argument = Argument:new(...)
-   table.insert(self._arguments, argument)
-   return argument
-end
-
-function Parser:option(...)
-   local option = Option:new(...)
-   table.insert(self._options, option)
-   return option
-end
-
-function Parser:flag(...)
-   local flag = Flag:new(...)
-   table.insert(self._options, flag)
-   return flag
-end
-
-function Parser:command(...)
-   local command = Command:new(...)
-   table.insert(self._commands, command)
-   return command
-end
-
-function Parser:error(fmt, ...)
-   local msg = fmt:format(...)
-
-   if _TEST then
-      error(msg)
+function Argument:make_type()
+   if self._maxcount == 1 then
+      if self._maxargs == 0 then
+         self._type = "flag"
+      elseif self._maxargs == 1 and (self._minargs == 1 or self._mincount == 1) then
+         self._type = "arg"
+      else
+         self._type = "multi-arg"
+      end
    else
-      io.stderr:write(("%s\r\n\r\nError: %s\r\n"):format(self:get_usage(), msg))
-      os.exit(1)
-   end
-end
-
-function Parser:assert(assertion, ...)
-   return assertion or self:error(...)
-end
-
-function Parser:update_charset(charset)
-   charset = charset or {}
-
-   for _, command in ipairs(self._commands) do
-      command:update_charset(charset)
-   end
-
-   for _, option in ipairs(self._options) do
-      for _, alias in ipairs(option._aliases) do
-         charset[alias:sub(1, 1)] = true
+      if self._maxargs == 0 then
+         self._type = "counter"
+      elseif self._maxargs == 1 and self._minargs == 1 then
+         self._type = "multi-count"
+      else
+         self._type = "multi-count multi-arg"
       end
-   end
-
-   return charset
-end
-
-function Parser:make_targets()
-   for _, option in ipairs(self._options) do
-      if not option._target then
-         for _, alias in ipairs(option._aliases) do
-            if alias:sub(1, 1) == alias:sub(2, 2) then
-               option._target = alias:sub(3)
-               break
-            end
-         end
-      end
-
-      option._target = option._target or option._aliases[1]:sub(2)
-   end
-
-   for _, argument in ipairs(self._arguments) do
-      argument._target = argument._target or argument._name
-   end
-
-   for _, command in ipairs(self._commands) do
-      command._target = command._target or command._name
    end
 end
 
@@ -246,48 +180,72 @@ local function parse_boundaries(boundaries)
    end
 end
 
-function Parser:make_boundaries()
-   for _, elements in ipairs{self._arguments, self._options} do
-      for _, element in ipairs(elements) do
-         if not element._minargs or not element._maxargs then
-            element._minargs, element._maxargs = parse_boundaries(element._args)
-         end
+function Argument:make_boundaries()
+   if not self._minargs or not self._maxargs then
+      self._minargs, self._maxargs = parse_boundaries(self._args)
+   end
 
-         if not element._mincount or not element._maxcount then
-            element._mincount, element._maxcount = parse_boundaries(element._count)
-         end
-      end
+   if not self._mincount or not self._maxcount then
+      self._mincount, self._maxcount = parse_boundaries(self._count)
    end
 end
 
-function Parser:make_command_names()
-   for _, command in ipairs(self._commands) do
-      command._name = self._name .. " " .. command._name
-   end
+function Argument:prepare()
+   self:make_target()
+   self:make_boundaries()
+   self:make_type()
+   return self
 end
 
-function Parser:make_types()
-   for _, elements in ipairs{self._arguments, self._options} do
-      for _, element in ipairs(elements) do
-         if element._maxcount == 1 then
-            if element._maxargs == 0 then
-               element._type = "flag"
-            elseif element._maxargs == 1 and (element._minargs == 1 or element._mincount == 1) then
-               element._type = "arg"
-            else
-               element._type = "multi-arg"
-            end
-         else
-            if element._maxargs == 0 then
-               element._type = "counter"
-            elseif element._maxargs == 1 and element._minargs == 1 then
-               element._type = "multi-count"
-            else
-               element._type = "multi-count multi-arg"
-            end
+function Option:get_usage()
+   if not self._usage then
+      self._usage = self:get_arg_usage("<" .. self._target .. ">")
+      table.insert(self._usage, 1, self._name)
+      self._usage = table.concat(self._usage, " ")
+
+      if self._mincount == 0 then
+         self._usage = "[" .. self._usage .. "]"
+      end
+   end
+
+   return self._usage
+end
+
+function Option:make_target()
+   if not self._target then
+      for _, alias in ipairs(self._aliases) do
+         if alias:sub(1, 1) == alias:sub(2, 2) then
+            self._target = alias:sub(3)
+            break
          end
       end
    end
+
+   self._target = self._target or self._aliases[1]:sub(2)
+end
+
+function Parser:argument(...)
+   local argument = Argument:new(...)
+   table.insert(self._arguments, argument)
+   return argument
+end
+
+function Parser:option(...)
+   local option = Option:new(...)
+   table.insert(self._options, option)
+   return option
+end
+
+function Parser:flag(...)
+   local flag = Flag:new(...)
+   table.insert(self._options, flag)
+   return flag
+end
+
+function Parser:command(...)
+   local command = Command:new(...)
+   table.insert(self._commands, command)
+   return command
 end
 
 function Parser:prepare()
@@ -300,12 +258,49 @@ function Parser:prepare()
          end)
    end
 
-   self:make_targets()
-   self:make_boundaries()
-   self:make_command_names()
-   self:make_types()
+   for _, elements in ipairs{self._arguments, self._options} do
+      for _, element in ipairs(elements) do
+         element:prepare()
+      end
+   end
+
+   for _, command in ipairs(self._commands) do
+      command._target =command._target or command._name
+      command._name = self._name .. " " .. command._name
+   end
 
    return self
+end
+
+function Parser:error(fmt, ...)
+   local msg = fmt:format(...)
+
+   if _TEST then
+      error(msg)
+   else
+      io.stderr:write(("%s\r\n\r\nError: %s\r\n"):format(self:get_usage(), msg))
+      os.exit(1)
+   end
+end
+
+function Parser:assert(assertion, ...)
+   return assertion or self:error(...)
+end
+
+function Parser:update_charset(charset)
+   charset = charset or {}
+
+   for _, command in ipairs(self._commands) do
+      command:update_charset(charset)
+   end
+
+   for _, option in ipairs(self._options) do
+      for _, alias in ipairs(option._aliases) do
+         charset[alias:sub(1, 1)] = true
+      end
+   end
+
+   return charset
 end
 
 function Parser:get_usage()
@@ -449,7 +444,6 @@ local function get_tip(context, wrong_name)
 
    for i=1, #wrong_name+1 do
       possible_name = wrong_name:sub(1, i-1) .. wrong_name:sub(i+1)
-
 
       if context[possible_name] then
          possible_names[possible_name] = true
