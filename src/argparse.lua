@@ -222,6 +222,7 @@ function Option:make_target()
    end
 
    self._target = self._target or self._aliases[1]:sub(2)
+   self._name = self._name or self._aliases[1]
 end
 
 function Parser:argument(...)
@@ -249,13 +250,20 @@ function Parser:command(...)
 end
 
 function Parser:prepare()
-   if self._add_help then
-      self:flag "-h" "--help"
-         :description "Show this help message and exit. "
+   if self._add_help and not self._help_option then
+      self._help_option = self:flag(self._add_help)
          :action(function()
             io.stdout:write(self:get_help() .. "\r\n")
             os.exit(0)
          end)
+
+      if #self._help_option._aliases == 0 then
+         self._help_option "-h" "--help"
+      end
+
+      if not self._help_option._description then
+         self._help_option:description "Show this help message and exit. "
+      end
    end
 
    for _, elements in ipairs{self._arguments, self._options} do

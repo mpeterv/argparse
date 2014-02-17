@@ -11,6 +11,27 @@ describe("tests related to help message generation", function()
       }, "\r\n"), parser:prepare():get_help())
    end)
 
+   it("does not create extra help options when :prepare is called several times", function()
+      local parser = argparse.parser "foo"
+      assert.equal(table.concat({
+         "Usage: foo [-h]",
+         "",
+         "Options: ",
+         "   -h, --help            Show this help message and exit. "
+      }, "\r\n"), parser:prepare():prepare():get_help())
+   end)
+
+   it("uses custom help option", function()
+      local parser = argparse.parser "foo"
+         :add_help {aliases = {"\\?"}}
+      assert.equal(table.concat({
+         "Usage: foo [\\?]",
+         "",
+         "Options: ",
+         "   \\?                    Show this help message and exit. "
+      }, "\r\n"), parser:prepare():get_help())
+   end)
+
    it("creates correct help message for arguments", function()
       local parser = argparse.parser "foo"
       parser:argument "first"
