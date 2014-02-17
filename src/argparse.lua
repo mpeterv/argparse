@@ -335,15 +335,28 @@ function Parser:get_usage()
    return self._usage
 end
 
+local margin_len = 3
+local margin_len2 = 25
+local margin = (" "):rep(margin_len)
+local margin2 = (" "):rep(margin_len2)
+
 local function make_two_columns(s1, s2)
    if s2 == "" then
-      return "   " .. s1
+      return margin .. s1
    end
 
-   if #s1 < 22 then
-      return "   " .. s1 .. (" "):rep(22 - #s1) .. s2
+   s2 = s2:gsub("[\r\n][\r\n]?", function(sub)
+      if #sub == 1 or sub == "\r\n" then
+         return "\r\n" .. margin2
+      else
+         return "\r\n\r\n" .. margin2
+      end
+   end)
+
+   if #s1 < (margin_len2-margin_len) then
+      return margin .. s1 .. (" "):rep(margin_len2-margin_len-#s1) .. s2
    else
-      return "   " .. s1 .. "\r\n" .. (" "):rep(25) .. s2
+      return margin .. s1 .. "\r\n" .. margin2 .. s2
    end
 end
 
