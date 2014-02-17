@@ -55,6 +55,27 @@ describe("tests related to help message generation", function()
       }, "\r\n"), parser:prepare():get_help())
    end)
 
+   it("adds margin for multiline descriptions", function()
+      local parser = argparse.parser "foo"
+      parser:flag "-v"
+         :count "0-2"
+         :target "verbosity"
+         :description [[
+Sets verbosity level. 
+-v: Report all warnings. 
+-vv: Report all debugging information. ]]
+
+      assert.equal(table.concat({
+         "Usage: foo [-v] [-h]",
+         "",
+         "Options: ",
+         "   -v                    Sets verbosity level. ",
+         "                         -v: Report all warnings. ",
+         "                         -vv: Report all debugging information. ",
+         "   -h, --help            Show this help message and exit. "
+      }, "\r\n"), parser:prepare():get_help())
+   end)
+
    it("creates correct help message for commands", function()
       local parser = argparse.parser "foo"
       parser:flag "-q" "--quiet"
