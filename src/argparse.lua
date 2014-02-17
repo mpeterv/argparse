@@ -135,19 +135,19 @@ end
 function Argument:make_type()
    if self._maxcount == 1 then
       if self._maxargs == 0 then
-         self._type = "flag"
+         self.flag = true
       elseif self._maxargs == 1 and (self._minargs == 1 or self._mincount == 1) then
-         self._type = "arg"
+         self.arg = true
       else
-         self._type = "multi-arg"
+         self.multiarg = true
       end
    else
       if self._maxargs == 0 then
-         self._type = "counter"
+         self.counter = true
       elseif self._maxargs == 1 and self._minargs == 1 then
-         self._type = "multi-count"
+         self.multicount = true
       else
-         self._type = "multi-count multi-arg"
+         self.twodimensional = true
       end
    end
 end
@@ -519,19 +519,19 @@ function Parser:parse(args)
 
       passed[element] = 0
 
-      if element._type == "flag" then
+      if element.flag then
          result[element._target] = true
-      elseif element._type == "multi-arg" then
+      elseif element.multiarg then
          result[element._target] = {}
-      elseif element._type == "counter" then
+      elseif element.counter then
          if not overwrite then
             result[element._target] = result[element._target]+1
          end
-      elseif element._type == "multi-count" then
+      elseif element.multicount then
          if overwrite then
             table.remove(result[element._target], 1)
          end
-      elseif element._type == "multi-count multi-arg" then
+      elseif element.twodimensional then
          table.insert(result[element._target], {})
 
          if overwrite then
@@ -548,11 +548,11 @@ function Parser:parse(args)
       passed[element] = passed[element]+1
       data = convert(element, data)
 
-      if element._type == "arg" then
+      if element.arg then
          result[element._target] = data
-      elseif element._type == "multi-arg" or element._type == "multi-count" then
+      elseif element.multiarg or element.multicount then
          table.insert(result[element._target], data)
-      elseif element._type == "multi-count multi-arg" then
+      elseif element.twodimensional then
          table.insert(result[element._target][#result[element._target]], data)
       end
 
@@ -579,7 +579,7 @@ function Parser:parse(args)
          end
 
          if element._action then
-            if element._type == "multi-count" or element._type == "multi-count multi-arg" then
+            if element.multicount or element.twodimensional then
                element._action(result[element._target][#result[element._target]])
             else
                element._action(result[element._target])
@@ -602,9 +602,9 @@ function Parser:parse(args)
             opt_context[alias] = option
          end
 
-         if option._type == "counter" then
+         if option.counter then
             result[option._target] = 0
-         elseif option._type == "multi-count" or option._type == "multi-count multi-arg" then
+         elseif option.multicount or option.twodimensional then
             result[option._target] = {}
          end
 
