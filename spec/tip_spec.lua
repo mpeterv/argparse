@@ -1,9 +1,9 @@
-local argparse = require "argparse"
+local Parser = require "argparse"
 
 describe("tests related to tips", function()
    describe("provides tips when data is too long", function()
       it("for options", function()
-         local parser = argparse.parser()
+         local parser = Parser()
          parser:option "-q" "--quiet"
 
          assert.has_error(function() parser:parse{"--quiett=true"} end,
@@ -11,7 +11,7 @@ describe("tests related to tips", function()
       end)
 
       it("for commands", function()
-         local parser = argparse.parser "name"
+         local parser = Parser "name"
          parser:command "install"
 
          assert.has_error(function() parser:parse{"installq"} end,
@@ -21,7 +21,7 @@ describe("tests related to tips", function()
 
    describe("provides tips when data is too short", function()
       it("for options", function()
-         local parser = argparse.parser()
+         local parser = Parser()
          parser:option "-q" "--quiet"
 
          assert.has_error(function() parser:parse{"--quet=true"} end,
@@ -29,7 +29,7 @@ describe("tests related to tips", function()
       end)
 
       it("for commands", function()
-         local parser = argparse.parser "name"
+         local parser = Parser "name"
          parser:command "install"
 
          assert.has_error(function() parser:parse{"nstall"} end,
@@ -39,7 +39,7 @@ describe("tests related to tips", function()
 
    describe("provides tips on substitution", function()
       it("for options", function()
-         local parser = argparse.parser()
+         local parser = Parser()
          parser:option "-q" "--quiet"
 
          assert.has_error(function() parser:parse{"--qriet=true"} end,
@@ -47,7 +47,7 @@ describe("tests related to tips", function()
       end)
 
       it("for commands", function()
-         local parser = argparse.parser "name"
+         local parser = Parser "name"
          parser:command "install"
 
          assert.has_error(function() parser:parse{"inntall"} end,
@@ -57,7 +57,7 @@ describe("tests related to tips", function()
 
    describe("provides tips on transpositions", function()
       it("for options", function()
-         local parser = argparse.parser()
+         local parser = Parser()
          parser:option "-q" "--quiet"
 
          assert.has_error(function() parser:parse{"--queit=true"} end,
@@ -65,7 +65,7 @@ describe("tests related to tips", function()
       end)
 
       it("for commands", function()
-         local parser = argparse.parser "name"
+         local parser = Parser "name"
          parser:command "install"
 
          assert.has_error(function() parser:parse{"isntall"} end,
@@ -75,7 +75,7 @@ describe("tests related to tips", function()
 
    describe("provides multiple tips", function()
       it("for options", function()
-         local parser = argparse.parser()
+         local parser = Parser()
          parser:option "-q" "--quiet"
          parser:option "--quick"
 
@@ -84,7 +84,7 @@ describe("tests related to tips", function()
       end)
 
       it("for commands", function()
-         local parser = argparse.parser "name"
+         local parser = Parser "name"
          parser:command "install"
          parser:command "instant"
 

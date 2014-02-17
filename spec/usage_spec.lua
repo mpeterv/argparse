@@ -1,14 +1,14 @@
-local argparse = require "argparse"
+local Parser = require "argparse"
 
 describe("tests related to usage message generation", function()
    it("creates correct usage message for empty parser", function()
-      local parser = argparse.parser "foo"
+      local parser = Parser "foo"
          :add_help(false)
       assert.equal(parser:prepare():get_usage(), "Usage: foo")
    end)
 
    it("creates correct usage message for arguments", function()
-      local parser = argparse.parser "foo"
+      local parser = Parser "foo"
          :add_help(false)
       parser:argument "first"
       parser:argument "second-and-third"
@@ -25,7 +25,7 @@ describe("tests related to usage message generation", function()
    end)
 
    it("creates correct usage message for options", function()
-      local parser = argparse.parser "foo"
+      local parser = Parser "foo"
          :add_help(false)
       parser:flag "-q" "--quiet"
       parser:option "--from"
@@ -40,7 +40,7 @@ describe("tests related to usage message generation", function()
    end)
 
    it("creates correct usage message for commands", function()
-      local parser = argparse.parser "foo"
+      local parser = Parser "foo"
          :add_help(false)
       parser:flag "-q" "--quiet"
       local run = parser:command "run"
@@ -53,7 +53,7 @@ describe("tests related to usage message generation", function()
    end)
 
    it("creates correct usage message for subcommands", function()
-      local parser = argparse.parser "foo"
+      local parser = Parser "foo"
          :add_help(false)
       parser:flag "-q" "--quiet"
       local run = parser:command "run"
@@ -70,7 +70,7 @@ describe("tests related to usage message generation", function()
 
    describe("usage generation can be customized", function()
       it("uses message provided by user", function()
-         local parser = argparse.parser "foo"
+         local parser = Parser "foo"
             :usage "Usage: obvious"
             :add_help(false)
          parser:flag "-q" "--quiet"
@@ -82,7 +82,7 @@ describe("tests related to usage message generation", function()
       end)
 
       it("uses per-option message provided by user", function()
-         local parser = argparse.parser "foo"
+         local parser = Parser "foo"
             :add_help(false)
          parser:flag "-q" "--quiet"
             :usage "[-q | --quiet]"
@@ -94,7 +94,7 @@ describe("tests related to usage message generation", function()
       end)
 
       it("uses argnames provided by user", function()
-         local parser = argparse.parser "foo"
+         local parser = Parser "foo"
             :add_help(false)
          parser:argument "inputs"
             :args "1-2"

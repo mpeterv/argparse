@@ -1,7 +1,7 @@
 #!/usr/bin/env lua
-local argparse = require "argparse"
+local Parser = require "argparse"
 
-local parser = argparse.parser "test"
+local parser = Parser "test"
    :description "A testing program. "
 
 parser:argument "input"

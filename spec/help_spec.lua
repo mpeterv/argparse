@@ -1,8 +1,8 @@
-local argparse = require "argparse"
+local Parser = require "argparse"
 
 describe("tests related to help message generation", function()
    it("creates correct help message for empty parser", function()
-      local parser = argparse.parser "foo"
+      local parser = Parser "foo"
       assert.equal(table.concat({
          "Usage: foo [-h]",
          "",
@@ -12,7 +12,7 @@ describe("tests related to help message generation", function()
    end)
 
    it("does not create extra help options when :prepare is called several times", function()
-      local parser = argparse.parser "foo"
+      local parser = Parser "foo"
       assert.equal(table.concat({
          "Usage: foo [-h]",
          "",
@@ -22,7 +22,7 @@ describe("tests related to help message generation", function()
    end)
 
    it("uses custom help option", function()
-      local parser = argparse.parser "foo"
+      local parser = Parser "foo"
          :add_help {aliases = {"\\?"}}
       assert.equal(table.concat({
          "Usage: foo [\\?]",
@@ -33,7 +33,7 @@ describe("tests related to help message generation", function()
    end)
 
    it("creates correct help message for arguments", function()
-      local parser = argparse.parser "foo"
+      local parser = Parser "foo"
       parser:argument "first"
       parser:argument "second-and-third"
          :args "2"
@@ -58,7 +58,7 @@ describe("tests related to help message generation", function()
    end)
 
    it("creates correct help message for options", function()
-      local parser = argparse.parser "foo"
+      local parser = Parser "foo"
       parser:flag "-q" "--quiet"
       parser:option "--from"
          :count "1"
@@ -77,7 +77,7 @@ describe("tests related to help message generation", function()
    end)
 
    it("adds margin for multiline descriptions", function()
-      local parser = argparse.parser "foo"
+      local parser = Parser "foo"
       parser:flag "-v"
          :count "0-2"
          :target "verbosity"
@@ -98,7 +98,7 @@ Sets verbosity level.
    end)
 
    it("creates correct help message for commands", function()
-      local parser = argparse.parser "foo"
+      local parser = Parser "foo"
       parser:flag "-q" "--quiet"
       local run = parser:command "run"
          :description "Run! "
@@ -117,7 +117,7 @@ Sets verbosity level.
    end)
 
    it("creates correct help message for subcommands", function()
-      local parser = argparse.parser "foo"
+      local parser = Parser "foo"
       parser:flag "-q" "--quiet"
       local run = parser:command "run"
       run:option "--where"
@@ -134,7 +134,7 @@ Sets verbosity level.
    end)
 
    it("uses message provided by user", function()
-      local parser = argparse.parser "foo"
+      local parser = Parser "foo"
          :help "I don't like your format of help messages"
       parser:flag "-q" "--quiet"
 

@@ -1,30 +1,30 @@
-local argparse = require "argparse"
+local Parser = require "argparse"
 
 describe("tests related to options", function()
    describe("passing correct options", function()
       it("handles no options passed correctly", function()
-         local parser = argparse.parser()
+         local parser = Parser()
          parser:option("-s", "--server")
          local args = parser:parse({})
          assert.same({}, args)
       end)
 
       it("handles one option correctly", function()
-         local parser = argparse.parser()
+         local parser = Parser()
          parser:option("-s", "--server")
          local args = parser:parse({"--server", "foo"})
          assert.same({server = "foo"}, args)
       end)
 
       it("handles GNU-style long options", function()
-         local parser = argparse.parser()
+         local parser = Parser()
          parser:option("-s", "--server")
          local args = parser:parse({"--server=foo"})
          assert.same({server = "foo"}, args)
       end)
 
       it("handles GNU-style long options even when it could take more arguments", function()
-         local parser = argparse.parser()
+         local parser = Parser()
          parser:option("-s", "--server", {
             args = "*"
          })
@@ -33,7 +33,7 @@ describe("tests related to options", function()
       end)
 
       it("handles GNU-style long options for multi-argument options", function()
-         local parser = argparse.parser()
+         local parser = Parser()
          parser:option("-s", "--server", {
             args = "1-2"
          })
@@ -42,14 +42,14 @@ describe("tests related to options", function()
       end)
 
       it("handles short option correclty", function()
-         local parser = argparse.parser()
+         local parser = Parser()
          parser:option("-s", "--server")
          local args = parser:parse({"-s", "foo"})
          assert.same({server = "foo"}, args)
       end)
 
       it("handles flag correclty", function()
-         local parser = argparse.parser()
+         local parser = Parser()
          parser:flag("-q", "--quiet")
          local args = parser:parse({"--quiet"})
          assert.same({quiet = true}, args)
@@ -58,7 +58,7 @@ describe("tests related to options", function()
       end)
 
       it("handles combined flags correclty", function()
-         local parser = argparse.parser()
+         local parser = Parser()
          parser:flag("-q", "--quiet")
          parser:flag("-f", "--fast")
          local args = parser:parse({"-qf"})
@@ -66,14 +66,14 @@ describe("tests related to options", function()
       end)
 
       it("handles short options without space between option and argument", function()
-         local parser = argparse.parser()
+         local parser = Parser()
          parser:option("-s", "--server")
          local args = parser:parse({"-sfoo"})
          assert.same({server = "foo"}, args)
       end)
 
       it("handles flags combined with short option correclty", function()
-         local parser = argparse.parser()
+         local parser = Parser()
          parser:flag("-q", "--quiet")
          parser:option("-s", "--server")
          local args = parser:parse({"-qsfoo"})
@@ -82,7 +82,7 @@ describe("tests related to options", function()
 
       describe("Special chars set", function()
          it("handles windows-style options", function()
-            local parser = argparse.parser()
+            local parser = Parser()
                :add_help(false)
             parser:option "\\I"
                :count "*"
@@ -92,7 +92,7 @@ describe("tests related to options", function()
          end)
 
          it("corrects charset in commands", function()
-            local parser = argparse.parser "name"
+            local parser = Parser "name"
                :add_help(false)
             parser:flag "-v" "--verbose"
                :count "*"
@@ -106,7 +106,7 @@ describe("tests related to options", function()
 
       describe("Options with optional argument", function()
          it("handles emptiness correctly", function()
-            local parser = argparse.parser()
+            local parser = Parser()
             parser:option("-p", "--password", {
                args = "?"
             })
@@ -115,7 +115,7 @@ describe("tests related to options", function()
          end)
 
          it("handles option without argument correctly", function()
-            local parser = argparse.parser()
+            local parser = Parser()
             parser:option("-p", "--password", {
                args = "?"
             })
@@ -124,7 +124,7 @@ describe("tests related to options", function()
          end)
 
          it("handles option with argument correctly", function()
-            local parser = argparse.parser()
+            local parser = Parser()
             parser:option("-p", "--password", {
                args = "?"
             })
@@ -134,7 +134,7 @@ describe("tests related to options", function()
       end)
 
       it("handles multi-argument options correctly", function()
-         local parser = argparse.parser()
+         local parser = Parser()
          parser:option("--pair", {
             args = 2
          })
@@ -144,7 +144,7 @@ describe("tests related to options", function()
 
       describe("Multi-count options", function()
          it("handles multi-count option correctly", function()
-            local parser = argparse.parser()
+            local parser = Parser()
             parser:option("-e", "--exclude", {
                count = "*"
             })
@@ -153,7 +153,7 @@ describe("tests related to options", function()
          end)
 
          it("handles not used multi-count option correctly", function()
-            local parser = argparse.parser()
+            local parser = Parser()
             parser:option("-e", "--exclude", {
                count = "*"
             })
@@ -162,7 +162,7 @@ describe("tests related to options", function()
          end)
 
          it("handles multi-count multi-argument option correctly", function()
-            local parser = argparse.parser()
+            local parser = Parser()
             parser:option("-e", "--exclude", {
                count = "*",
                args = 2
@@ -172,7 +172,7 @@ describe("tests related to options", function()
          end)
 
          it("handles multi-count flag correctly", function()
-            local parser = argparse.parser()
+            local parser = Parser()
             parser:flag("-q", "--quiet", {
                count = "*"
             })
@@ -181,7 +181,7 @@ describe("tests related to options", function()
          end)
 
          it("overwrites old invocations", function()
-            local parser = argparse.parser()
+            local parser = Parser()
             parser:option("-u", "--user", {
                count = "0-2"
             })
@@ -190,7 +190,7 @@ describe("tests related to options", function()
          end)
 
          it("handles not used multi-count flag correctly", function()
-            local parser = argparse.parser()
+            local parser = Parser()
             parser:flag("-q", "--quiet", {
                count = "*"
             })
@@ -202,13 +202,13 @@ describe("tests related to options", function()
 
    describe("passing incorrect options", function()
       it("handles lack of required argument correctly", function()
-         local parser = argparse.parser()
+         local parser = Parser()
          parser:option("-s", "--server")
          assert.has_error(function() parser:parse{"--server"} end, "too few arguments")
       end)
 
       it("handles unknown options correctly", function()
-         local parser = argparse.parser()
+         local parser = Parser()
             :add_help(false)
          parser:option "--option"
          assert.has_error(function() parser:parse{"--server"} end, "unknown option '--server'")
@@ -218,19 +218,19 @@ describe("tests related to options", function()
       end)
 
       it("handles too many arguments correctly", function()
-         local parser = argparse.parser()
+         local parser = Parser()
          parser:option("-s", "--server")
          assert.has_error(function() parser:parse{"-sfoo", "bar"} end, "too many arguments")
       end)
 
       it("doesn't accept GNU-like long options when it doesn't need arguments", function()
-         local parser = argparse.parser()
+         local parser = Parser()
          parser:flag("-q", "--quiet")
          assert.has_error(function() parser:parse{"--quiet=very_quiet"} end, "option '--quiet' does not take arguments")
       end)
 
       it("handles too many invocations correctly", function()
-         local parser = argparse.parser()
+         local parser = Parser()
          parser:flag("-q", "--quiet", {
             count = 1,
             overwrite = false
@@ -239,7 +239,7 @@ describe("tests related to options", function()
       end)
 
       it("handles too few invocations correctly", function()
-         local parser = argparse.parser()
+         local parser = Parser()
          parser:option("-f", "--foo", {
             count = "3-4"
          })

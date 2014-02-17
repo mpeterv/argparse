@@ -1,4 +1,4 @@
-local argparse = require "argparse"
+local Parser = require "argparse"
 
 describe("tests related to CLI behaviour #unsafe", function()
    describe("error messages", function()

@@ -1,9 +1,9 @@
-local argparse = require "argparse"
+local Parser = require "argparse"
 
 describe("tests related to default values", function()
    describe("default values for arguments", function()
       it("handles default argument correctly", function()
-         local parser = argparse.parser()
+         local parser = Parser()
          parser:argument("foo", {
             default = "bar"
          })
@@ -12,7 +12,7 @@ describe("tests related to default values", function()
       end)
 
       it("handles default multi-argument correctly", function()
-         local parser = argparse.parser()
+         local parser = Parser()
          parser:argument("foo", {
             args = 3,
             default = "bar"
@@ -22,7 +22,7 @@ describe("tests related to default values", function()
       end)
 
       it("does not use default values if not needed", function()
-         local parser = argparse.parser()
+         local parser = Parser()
          parser:argument("foo", {
             args = "1-2",
             default = "bar"
@@ -34,7 +34,7 @@ describe("tests related to default values", function()
 
    describe("default values for options", function()
       it("handles option with default value correctly", function()
-         local parser = argparse.parser()
+         local parser = Parser()
          parser:option("-f", "--foo", {
             default = "bar"
          })
@@ -43,7 +43,7 @@ describe("tests related to default values", function()
       end)
 
       it("doesn't use default if option is not invoked", function()
-         local parser = argparse.parser()
+         local parser = Parser()
          parser:option("-f", "--foo", {
             default = "bar"
          })
@@ -52,7 +52,7 @@ describe("tests related to default values", function()
       end)
 
       it("handles default multi-argument correctly", function()
-         local parser = argparse.parser()
+         local parser = Parser()
          parser:option("-f", "--foo", {
             args = 3,
             default = "bar"
@@ -62,7 +62,7 @@ describe("tests related to default values", function()
       end)
 
       it("does not use default values if not needed", function()
-         local parser = argparse.parser()
+         local parser = Parser()
           parser:option("-f", "--foo", {
             args = "1-2",
             default = "bar"
@@ -72,7 +72,7 @@ describe("tests related to default values", function()
       end)
 
       it("handles multi-count options with default value correctly", function()
-         local parser = argparse.parser()
+         local parser = Parser()
           parser:option("-f", "--foo", {
             count = "*",
             default = "bar"

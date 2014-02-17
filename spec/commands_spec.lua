@@ -1,8 +1,8 @@
-local argparse = require "argparse"
+local Parser = require "argparse"
 
 describe("tests related to commands", function()
    it("handles commands after arguments", function()
-      local parser = argparse.parser "name"
+      local parser = Parser "name"
       parser:argument "file"
       parser:command "create"
       parser:command "remove"
@@ -12,7 +12,7 @@ describe("tests related to commands", function()
    end)
 
    it("switches context properly", function()
-      local parser = argparse.parser "name"
+      local parser = Parser "name"
          :add_help(false)
       local install = parser:command "install"
       install:flag "-q" "--quiet"
@@ -23,7 +23,7 @@ describe("tests related to commands", function()
    end)
 
    it("allows to continue passing old options", function()
-      local parser = argparse.parser "name"
+      local parser = Parser "name"
       parser:flag "-v" "--verbose" {
          count = "*"
       }
@@ -34,7 +34,7 @@ describe("tests related to commands", function()
    end)
 
    it("handles nested commands", function()
-      local parser = argparse.parser "name"
+      local parser = Parser "name"
       local foo = parser:command "foo"
       local bar = foo:command "bar"
       local baz = foo:command "baz"
@@ -44,7 +44,7 @@ describe("tests related to commands", function()
    end)
 
    it("handles no commands depending on parser.require_command", function()
-      local parser = argparse.parser "name"
+      local parser = Parser "name"
       parser:command "install"
 
       local args = parser:parse{}
@@ -55,7 +55,7 @@ describe("tests related to commands", function()
    end)
 
    it("Detects wrong commands", function()
-      local parser = argparse.parser "name"
+      local parser = Parser "name"
       local install = parser:command "install"
 
       assert.has_error(function() parser:parse{"run"} end, "unknown command 'run'")

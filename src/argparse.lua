@@ -1,5 +1,3 @@
-local argparse = {}
-
 local class = require "30log"
 
 local Declarative = {}
@@ -637,11 +635,7 @@ function Parser:parse(args)
    end
 
    local function get_option(name)
-      if opt_context[name] then
-         return opt_context[name]
-      else
-         parser:error("unknown option '%s'%s", name, get_tip(opt_context, name))
-      end
+      return parser:assert(opt_context[name], "unknown option '%s'%s", name, get_tip(opt_context, name))
    end
 
    local function handle_argument(data)
@@ -758,6 +752,4 @@ function Parser:parse(args)
    return result
 end
 
-argparse.parser = Parser
-
-return argparse
+return Parser

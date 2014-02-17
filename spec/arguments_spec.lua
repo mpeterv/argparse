@@ -1,22 +1,22 @@
-local argparse = require "argparse"
+local Parser = require "argparse"
 
 describe("tests related to positional arguments", function()
    describe("passing correct arguments", function()
       it("handles empty parser correctly", function()
-         local parser = argparse.parser()
+         local parser = Parser()
          local args = parser:parse({})
          assert.same({}, args)
       end)
 
       it("handles one argument correctly", function()
-         local parser = argparse.parser()
+         local parser = Parser()
          parser:argument "foo"
          local args = parser:parse({"bar"})
          assert.same({foo = "bar"}, args)
       end)
 
       it("handles optional argument correctly", function()
-         local parser = argparse.parser()
+         local parser = Parser()
          parser:argument "foo"
             :args "?"
          local args = parser:parse({"bar"})
@@ -24,7 +24,7 @@ describe("tests related to positional arguments", function()
       end)
 
       it("handles several arguments correctly", function()
-         local parser = argparse.parser()
+         local parser = Parser()
          parser:argument "foo1"
          parser:argument "foo2"
          local args = parser:parse({"bar", "baz"})
@@ -32,7 +32,7 @@ describe("tests related to positional arguments", function()
       end)
 
       it("handles multi-argument correctly", function()
-         local parser = argparse.parser()
+         local parser = Parser()
          parser:argument("foo", {
             args = "*"
          })
@@ -41,7 +41,7 @@ describe("tests related to positional arguments", function()
       end)
 
       it("handles restrained multi-argument correctly", function()
-         local parser = argparse.parser()
+         local parser = Parser()
          parser:argument("foo", {
             args = "2-4"
          })
@@ -50,7 +50,7 @@ describe("tests related to positional arguments", function()
       end)
 
       it("handles several multi-arguments correctly", function()
-         local parser = argparse.parser()
+         local parser = Parser()
          parser:argument("foo1", {
             args = "1-2"
          })
@@ -64,14 +64,14 @@ describe("tests related to positional arguments", function()
       end)
 
       it("handles hyphen correctly", function()
-         local parser = argparse.parser()
+         local parser = Parser()
          parser:argument "foo"
          local args = parser:parse({"-"})
          assert.same({foo = "-"}, args)
       end)
 
       it("handles double hyphen correctly", function()
-         local parser = argparse.parser()
+         local parser = Parser()
          parser:argument "foo"
          local args = parser:parse({"--", "-q"})
          assert.same({foo = "-q"}, args)
@@ -80,27 +80,27 @@ describe("tests related to positional arguments", function()
 
    describe("passing incorrect arguments", function()
       it("handles extra arguments with empty parser correctly", function()
-         local parser = argparse.parser()
+         local parser = Parser()
 
          assert.has_error(function() parser:parse{"foo"} end, "too many arguments")
       end)
 
       it("handles extra arguments with one argument correctly", function()
-         local parser = argparse.parser()
+         local parser = Parser()
          parser:argument "foo"
 
          assert.has_error(function() parser:parse{"bar", "baz"} end, "too many arguments")
       end)
 
       it("handles too few arguments with one argument correctly", function()
-         local parser = argparse.parser()
+         local parser = Parser()
          parser:argument "foo"
 
          assert.has_error(function() parser:parse{} end, "too few arguments")
       end)
 
       it("handles extra arguments with several arguments correctly", function()
-         local parser = argparse.parser()
+         local parser = Parser()
          parser:argument "foo1"
          parser:argument "foo2"
 
@@ -108,7 +108,7 @@ describe("tests related to positional arguments", function()
       end)
 
       it("handles too few arguments with several arguments correctly", function()
-         local parser = argparse.parser()
+         local parser = Parser()
          parser:argument "foo1"
          parser:argument "foo2"
 
@@ -116,7 +116,7 @@ describe("tests related to positional arguments", function()
       end)
 
       it("handles too few arguments with multi-argument correctly", function()
-         local parser = argparse.parser()
+         local parser = Parser()
          parser:argument "foo" {
             args = "+"
          }
@@ -124,7 +124,7 @@ describe("tests related to positional arguments", function()
       end)
 
       it("handles too many arguments with multi-argument correctly", function()
-         local parser = argparse.parser()
+         local parser = Parser()
          parser:argument "foo" {
             args = "2-4"
          }
@@ -132,7 +132,7 @@ describe("tests related to positional arguments", function()
       end)
 
       it("handles too few arguments with multi-argument correctly", function()
-         local parser = argparse.parser()
+         local parser = Parser()
          parser:argument("foo", {
             args = "2-4"
          })
@@ -140,7 +140,7 @@ describe("tests related to positional arguments", function()
       end)
 
       it("handles too many arguments with several multi-arguments correctly", function()
-         local parser = argparse.parser()
+         local parser = Parser()
          parser:argument("foo1", {
             args = "1-2"
          })
@@ -151,7 +151,7 @@ describe("tests related to positional arguments", function()
       end)
 
       it("handles too few arguments with several multi-arguments correctly", function()
-         local parser = argparse.parser()
+         local parser = Parser()
          parser:argument("foo1", {
             args = "1-2"
          })

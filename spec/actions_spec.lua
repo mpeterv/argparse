@@ -1,11 +1,11 @@
-local argparse = require "argparse"
+local Parser = require "argparse"
 
 describe("tests related to actions", function()
    it("calls actions for options", function()
       local action1 = spy.new(function(x) end)
       local action2 = spy.new(function(x) end)
 
-      local parser = argparse.parser()
+      local parser = Parser()
       parser:option "-f" "--from" {
          action = action1
       }
@@ -29,7 +29,7 @@ describe("tests related to actions", function()
       local action2 = spy.new(function(x) end)
       local action3 = spy.new(function(x) end)
 
-      local parser = argparse.parser()
+      local parser = Parser()
       parser:flag "-v" "--verbose" {
          action = action1,
          count = "0-3"
@@ -52,7 +52,7 @@ describe("tests related to actions", function()
       local action1 = spy.new(function(x) end)
       local action2 = spy.new(function(x) end)
 
-      local parser = argparse.parser()
+      local parser = Parser()
       parser:argument "input" {
          action = action1
       }
@@ -73,7 +73,7 @@ describe("tests related to actions", function()
       local action1 = spy.new(function(x) end)
       local action2 = spy.new(function(x) end)
 
-      local parser = argparse.parser "name" {
+      local parser = Parser "name" {
          action = action1
       }
       parser:flag "-v" "--verbose" {
