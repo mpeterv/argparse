@@ -769,7 +769,7 @@ end
 function Parser:pparse(args)
    local errmsg
    local ok, result = pcall(function()
-      return self:_parse(args, function(err)
+      return self:_parse(args, function(parser, err)
          errmsg = err
          return error()
       end)
