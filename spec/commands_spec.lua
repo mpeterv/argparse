@@ -51,7 +51,7 @@ describe("tests related to commands", function()
       assert.same({}, args)
 
       parser:require_command(true)
-      assert.has_error(function() parser:parse{} end, "command is required")
+      assert.has_error(function() parser:parse{} end, "a command is required")
    end)
 
    it("Detects wrong commands", function()

@@ -746,7 +746,7 @@ function Parser:parse(args)
    end
 
    if parser._require_command and #commands > 0 then
-      parser:error("command is required")
+      parser:error("a command is required")
    end
 
    for _, option in ipairs(options) do
