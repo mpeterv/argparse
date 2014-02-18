@@ -778,6 +778,7 @@ function Parser:pparse(args)
    if ok then
       return true, result
    else
+      assert(errmsg, result)
       return false, errmsg
    end
 end

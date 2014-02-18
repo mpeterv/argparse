@@ -16,4 +16,11 @@ describe("tests related to :pparse()", function()
       assert.is_false(ok)
       assert.equal("too few arguments", errmsg)
    end)
+
+   it("still raises an error if it is caused by misconfiguration", function()
+      local parser = Parser()
+      parser:option "--foo"
+         :count "a lot"
+      assert.has_error(function() parser:pparse{} end)
+   end)
 end)
