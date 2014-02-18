@@ -51,14 +51,19 @@ local Parser = class {
    _require_command = false,
    _add_help = true,
    _fields = {
-      "name", "description", "target", "require_command",
+      "name", "description", "require_command",
       "action", "usage", "help", "add_help"
    }
 }:include(Declarative)
 
 local Command = Parser:extends {
    __name = "Command",
-   _aliases = {}
+   _aliases = {},
+   _fields = {
+      "name", "aliases", "description", "target",
+      "require_command", "action", "usage", "help",
+      "add_help"
+   }
 }
 
 local Argument = class {
