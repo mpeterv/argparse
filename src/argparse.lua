@@ -278,21 +278,6 @@ function Parser:prepare()
    return self
 end
 
-function Parser:error(fmt, ...)
-   local msg = fmt:format(...)
-
-   if _TEST then
-      error(msg)
-   else
-      io.stderr:write(("%s\r\n\r\nError: %s\r\n"):format(self:get_usage(), msg))
-      os.exit(1)
-   end
-end
-
-function Parser:assert(assertion, ...)
-   return assertion or self:error(...)
-end
-
 function Parser:update_charset(charset)
    charset = charset or {}
 
@@ -489,7 +474,7 @@ local function get_tip(context, wrong_name)
    end
 end
 
-function Parser:parse(args)
+function Parser:_parse(args, errhandler)
    args = args or arg
    self._name = self._name or args[0]
 
@@ -508,11 +493,19 @@ function Parser:parse(args)
    local cur_arg_i = 1
    local cur_arg
 
+   local function error_(fmt, ...)
+      return errhandler(parser, fmt:format(...))
+   end
+
+   local function assert_(assertion, ...)
+      return assertion or error_(...)
+   end
+
    local function convert(element, data)
       if element._convert then
          local ok, err = element._convert(data)
 
-         return parser:assert(ok, "%s", err or "malformed argument '" .. data .. "'")
+         return assert_(ok, "%s", err or "malformed argument '" .. data .. "'")
       else
          return data
       end
@@ -527,7 +520,7 @@ function Parser:parse(args)
          if element._overwrite then
             overwrite = true
          else
-            parser:error("option '%s' must be used at most %d times", element._name, element._maxcount)
+            error_("option '%s' must be used at most %d times", element._name, element._maxcount)
          end
       else
          invocations[element] = invocations[element]+1
@@ -584,7 +577,7 @@ function Parser:parse(args)
                pass(element, element._default)
             end
          else
-            parser:error("too few arguments")
+            error_("too few arguments")
          end
       else
          if element == cur_option then
@@ -645,7 +638,7 @@ function Parser:parse(args)
    end
 
    local function get_option(name)
-      return parser:assert(opt_context[name], "unknown option '%s'%s", name, get_tip(opt_context, name))
+      return assert_(opt_context[name], "unknown option '%s'%s", name, get_tip(opt_context, name))
    end
 
    local function handle_argument(data)
@@ -658,9 +651,9 @@ function Parser:parse(args)
 
          if not com then
             if #commands > 0 then
-               parser:error("unknown command '%s'%s", data, get_tip(com_context, data))
+               error_("unknown command '%s'%s", data, get_tip(com_context, data))
             else
-               parser:error("too many arguments")
+               error_("too many arguments")
             end
          else
             result[com._target] = true
@@ -713,7 +706,7 @@ function Parser:parse(args)
                         if equal then
                            name = data:sub(1, equal-1)
                            option = get_option(name)
-                           parser:assert(option._maxargs > 0, "option '%s' does not take arguments", name)
+                           assert_(option._maxargs > 0, "option '%s' does not take arguments", name)
 
                            handle_option(data:sub(1, equal-1))
                            handle_argument(data:sub(equal+1))
@@ -746,11 +739,11 @@ function Parser:parse(args)
    end
 
    if parser._require_command and #commands > 0 then
-      parser:error("a command is required")
+      error_("a command is required")
    end
 
    for _, option in ipairs(options) do
-      parser:assert(invocations[option] >= option._mincount,
+      assert_(invocations[option] >= option._mincount,
          "option '%s' must be used at least %d times", option._name, option._mincount
       )
    end
@@ -760,6 +753,33 @@ function Parser:parse(args)
    end
 
    return result
+end
+
+function Parser:parse(args)
+   return self:_parse(args, function(parser, msg)
+      if _TEST then
+         error(msg)
+      else
+         io.stderr:write(("%s\r\n\r\nError: %s\r\n"):format(parser:get_usage(), msg))
+         os.exit(1)
+      end
+   end)
+end
+
+function Parser:pparse(args)
+   local errmsg
+   local ok, result = pcall(function()
+      return self:_parse(args, function(err)
+         errmsg = err
+         return error()
+      end)
+   end)
+
+   if ok then
+      return true, result
+   else
+      return false, errmsg
+   end
 end
 
 return Parser
