@@ -44,7 +44,8 @@ describe("tests related to help message generation", function()
          :args "*"
 
       assert.equal(table.concat({
-         "Usage: foo [-h] <first> <second-and-third> <second-and-third> [<maybe-fourth>] [<others>] ...",
+         "Usage: foo [-h] <first> <second-and-third> <second-and-third>",
+         "       [<maybe-fourth>] [<others>] ...",
          "",
          "Arguments: ",
          "   first",

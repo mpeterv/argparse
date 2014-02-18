@@ -18,9 +18,10 @@ describe("tests related to usage message generation", function()
       parser:argument "others"
          :args "*"
 
-      assert.equal(
-         [=[Usage: foo <first> <second-and-third> <second-and-third> [<maybe-fourth>] [<others>] ...]=],
-         parser:prepare():get_usage()
+      assert.equal(table.concat({
+         "Usage: foo <first> <second-and-third> <second-and-third>",
+         "       [<maybe-fourth>] [<others>] ..."
+         }, "\r\n"), parser:prepare():get_usage()
       )
    end)
 

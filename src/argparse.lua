@@ -309,28 +309,38 @@ function Parser:update_charset(charset)
    return charset
 end
 
+local max_usage_width = 70
+local usage_welcome = "Usage: "
+
 function Parser:get_usage()
    if not self._usage then
-      local buf = {"Usage:", self._name}
+      local lines = {usage_welcome .. self._name}
+
+      local function add(s)
+         if #lines[#lines]+1+#s <= max_usage_width then
+            lines[#lines] = lines[#lines] .. " " .. s
+         else
+            lines[#lines+1] = (" "):rep(#usage_welcome) .. s
+         end
+      end
 
       for _, elements in ipairs{self._options, self._arguments} do
          for _, element in ipairs(elements) do
-            table.insert(buf, element:get_usage())
+            add(element:get_usage())
          end
       end
 
       if #self._commands > 0 then
          if self._require_command then
-            table.insert(buf, "<command>")
+            add("<command>")
          else
-            table.insert(buf, "[<command>]")
+            add("[<command>]")
          end
 
-         table.insert(buf, "...")
+         add("...")
       end
 
-      -- TODO: prettify
-      self._usage = table.concat(buf, " ")
+      self._usage = table.concat(lines, "\r\n")
    end
 
    return self._usage
