@@ -2,7 +2,7 @@
 
 [![Build Status](https://travis-ci.org/mpeterv/argparse.png?branch=master)](https://travis-ci.org/mpeterv/argparse)
 
-__argparse__ is a feature-rich command line parser for Lua inspired by argparse for Python. 
+argparse is a feature-rich command line parser for Lua inspired by argparse for Python. 
 
 ## Example
 
@@ -41,7 +41,7 @@ $ lua script.lua in.txt --output=out.txt
 $ lua script.lua in.txt -oout.txt
 ```
 
-Does it have help?
+Does it provide help?
 
 ```bash
 $ lua script.lua --help
@@ -83,75 +83,33 @@ Error: unknown option '--outptu'
 Did you mean '--output'?
 ```
 
-##Features
+## Installation
 
-* Declarative and classic interfaces. 
+### Using luarocks
 
-    Declarative: 
+Installing argparse using luarocks ~~is~~ will be easy. 
 
-    ```lua
-    parser:argument "input"
-       :description "Path to input file. "
-       :convert(io.open)
-    parser:option "-v" "--verbose"
-       :description "Sets logging level. "
-       :count "*"
-    ```
+```bash
+luarocks install argparse
+```
 
-    Classic: 
+#### Problems with old luarocks versions
 
-    ```lua
-    parser:argument("input", {
-       description = "Path to input file. ",
-       convert = io.open
-    })
-    parser:option("-v", "--verbose", {
-       description  = "Sets logging level. ",
-       count = "*"
-    })
-    ```
+You may get an error like `Parse error processing dependency '30log >= 0.8'` if you use luarocks 2.1 or older. In this case, either upgrade to at least luarocks 2.1.1 or install [30log](http://yonaba.github.io/30log/) manually, then download the rockspec for argparse, remove the line `"30log >= 0.8"` and run
 
-* Parses: 
-    * Short options(e.g. `-q`); 
-    * Combined short options(e.g. `-zx`); 
-    * Short options combined with arguments(e.g. `-I/usr/local/include`); 
-    * Long options(e.g. `--quiet`); 
-    * Long options with arguments(e.g. `--from there`); 
-    * GNU-style long options with arguments(e.g. `--from=there`). 
-* Supports named arguments consuming several arguments. 
-* Supports options and flags which can be invoked several times, consuming several arguments. 
+```bash
+luarocks install /path/to/argparse/rockspec
+```
 
-    ```lua
-    parser:option "-p" "--pair"
-       :count "*"
-       :args(2)
+### Without luarocks
 
-    parser:flag "-v" "--verbose"
-       :count "*"
+Download `/src/argparse.lua` file and put it into the directory for libraries or your working directory. Install 30log using luarocks or manually download `30log.lua` file from [30log repo](https://github.com/Yonaba/30log). 
 
-    local args = parser:parse{"--pair", "Alice", "Bob", "-p", "Emma", "John", "-vvv"}
-    -- args = {
-    --    pair = {
-    --       {"Alice", "Bob"},
-    --       {"Emma", "John"}
-    --    },
-    --    verbose = 3
-    -- }
-    ```
+## Documentation
 
-* Supports default values and automatic conversions for arguments. 
-* Automatically generates error, usage  and help messages. 
-* Supports commands(e.g. in [git](http://git-scm.com/) CLI `add`, `commit`, `push`, etc. are commands). Each command has its own set of options and arguments. 
-* Automatically generates hints on typos. 
+Documentation is availible in the `doc` directory and [online](http://mpeterv.github.io/argparse). If argparse was installed using luarocks 2.1.2 or later, it can be viewed using `luarocks doc argparse` command. 
 
-    ```lua
-    parser:option "-f" "--from"
-    parser:command "install"
+## Testing
 
-    parser:parse{"--form", "there"}
-    -- Error: unknown option '--form'
-    -- Did you mean '--from'?
+argparse comes with a testing suite located in `spec` directory. [busted](http://olivinelabs.com/busted/) is required for testing, it can be installed using luarocks. Run the tests using `busted spec` command from the argparse folder. 
 
-    parser:parse{"isntall"}
-    -- Error: unknown command 'isntall'
-    -- Did you mean 'install'?
