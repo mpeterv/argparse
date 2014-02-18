@@ -4,7 +4,86 @@
 
 __argparse__ is a feature-rich command line parser for Lua inspired by argparse for Python. 
 
-Features: 
+## Example
+
+Let's create a command-line script which takes one positional argument and an option. 
+
+```lua
+-- script.lua
+local argparse = require "argparse"
+
+local parser = argparse:new()
+parser:argument "input"
+parser:option "-o" "--output"
+
+local args = parser:parse()
+for k, v in pairs(args) do
+   print(k, v)
+end
+```
+
+Does it work?
+
+```bash
+$ lua script.lua -o out.txt in.txt
+```
+
+```
+input	in.txt
+output	out.txt
+```
+
+There are several ways to pass options. 
+
+```bash
+$ lua script.lua --output out.txt in.txt
+$ lua script.lua in.txt --output=out.txt
+$ lua script.lua in.txt -oout.txt
+```
+
+Does it have help?
+
+```bash
+$ lua script.lua --help
+```
+
+```
+Usage: test.lua [-o <output>] [-h] <input>
+
+Arguments: 
+   input
+
+Options: 
+   -o <output>, --output <output>
+   -h, --help            Show this help message and exit. 
+```
+
+What if we do something wrong?
+
+```bash
+$ lua script.lua foo bar
+```
+
+```
+Usage: test.lua [-o <output>] [-h] <input>
+
+Error: too many arguments
+```
+
+What if we make a typo?
+
+```bash
+$ lua script.lua in.txt --outptu out.txt
+```
+
+```
+Usage: test.lua [-o <output>] [-h] <input>
+
+Error: unknown option '--outptu'
+Did you mean '--output'?
+```
+
+##Features
 
 * Declarative and classic interfaces. 
 
