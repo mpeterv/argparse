@@ -760,15 +760,17 @@ function Parser:_parse(args, errhandler)
    return result
 end
 
+function Parser:error(msg)
+   if _TEST then
+      error(msg)
+   else
+      io.stderr:write(("%s\r\n\r\nError: %s\r\n"):format(self:get_usage(), msg))
+      os.exit(1)
+   end
+end
+
 function Parser:parse(args)
-   return self:_parse(args, function(parser, msg)
-      if _TEST then
-         error(msg)
-      else
-         io.stderr:write(("%s\r\n\r\nError: %s\r\n"):format(parser:get_usage(), msg))
-         os.exit(1)
-      end
-   end)
+   return self:_parse(args, Parser.error)
 end
 
 function Parser:pparse(args)
