@@ -43,13 +43,16 @@ describe("tests related to usage message generation", function()
    it("creates correct usage message for elements with default value", function()
       local parser = Parser "foo"
          :add_help(false)
-      parser:argument "output"
-         :default "a.out"
-      parser:option "--from" "-f"
+      parser:argument "input"
+         :default "a.in"
+      parser:option "-f" "--from"
          :default "there"
+      parser:option "-o" "--output"
+         :default "a.out"
+         :count(1)
 
       assert.equal(
-         [=[Usage: foo [--from [<from>]] [<output>]]=],
+         [=[Usage: foo [-f [<from>]] [-o [<output>]] [<input>]]=],
          parser:prepare():get_usage()
       )
    end)

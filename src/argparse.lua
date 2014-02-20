@@ -212,7 +212,7 @@ function Option:get_usage()
       table.insert(self._usage, 1, self._name)
       self._usage = table.concat(self._usage, " ")
 
-      if self._mincount == 0 then
+      if self._mincount == 0 or self._default then
          self._usage = "[" .. self._usage .. "]"
       end
    end
