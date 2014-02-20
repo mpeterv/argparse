@@ -98,10 +98,16 @@ local Flag = Option:extends {
 function Argument:get_arg_usage(argname)
    argname = self._argname or argname
    local buf = {}
+   local required_argname = argname
+
+   if self._default then
+      required_argname = "[" .. argname .. "]"
+   end
+
    local i = 1
 
    while i <= math.min(self._minargs, 3) do
-      table.insert(buf, argname)
+      table.insert(buf, required_argname)
       i = i+1
    end
 

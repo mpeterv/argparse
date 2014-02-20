@@ -40,6 +40,20 @@ describe("tests related to usage message generation", function()
       )
    end)
 
+   it("creates correct usage message for elements with default value", function()
+      local parser = Parser "foo"
+         :add_help(false)
+      parser:argument "output"
+         :default "a.out"
+      parser:option "--from" "-f"
+         :default "there"
+
+      assert.equal(
+         [=[Usage: foo [--from [<from>]] [<output>]]=],
+         parser:prepare():get_usage()
+      )
+   end)
+
    it("creates correct usage message for commands", function()
       local parser = Parser "foo"
          :add_help(false)
