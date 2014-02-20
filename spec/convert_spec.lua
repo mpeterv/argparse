@@ -12,6 +12,22 @@ describe("tests related to converters", function()
       assert.same({numbers = {1, 2, 500}}, args)
    end)
 
+   it("converts arguments using mapping", function()
+      local choice = {
+         foo = 1,
+         bar = 2
+      }
+
+      local parser = Parser()
+      parser:argument "choice" {
+         convert = choice,
+         args = "+"
+      }
+
+      local args = parser:parse{"foo", "bar"}
+      assert.same({choice = {1, 2}}, args)
+   end)
+
    it("accepts false", function()
       local function toboolean(x)
          if x == "true" then

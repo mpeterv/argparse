@@ -508,7 +508,14 @@ function Parser:_parse(args, errhandler)
 
    local function convert(element, data)
       if element._convert then
-         local ok, err = element._convert(data)
+         local ok, err
+
+         if type(element._convert) == "function" then
+            ok, err = element._convert(data)
+         else
+            ok, err = element._convert[data]
+         end
+
          assert_(ok ~= nil, "%s", err or "malformed argument '" .. data .. "'")
          data = ok
       end
