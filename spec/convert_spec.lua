@@ -12,6 +12,25 @@ describe("tests related to converters", function()
       assert.same({numbers = {1, 2, 500}}, args)
    end)
 
+   it("accepts false", function()
+      local function toboolean(x)
+         if x == "true" then
+            return true
+         elseif x == "false" then
+            return false
+         end
+      end
+
+      local parser = Parser()
+      parser:argument "booleans" {
+         convert = toboolean,
+         args = "+"
+      }
+
+      local args = parser:parse{"true", "false"}
+      assert.same({booleans = {true, false}}, args)
+   end)
+
    it("raises an error when it can't convert", function()
       local parser = Parser()
       parser:argument "numbers" {

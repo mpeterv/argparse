@@ -509,11 +509,11 @@ function Parser:_parse(args, errhandler)
    local function convert(element, data)
       if element._convert then
          local ok, err = element._convert(data)
-
-         return assert_(ok, "%s", err or "malformed argument '" .. data .. "'")
-      else
-         return data
+         assert_(ok ~= nil, "%s", err or "malformed argument '" .. data .. "'")
+         data = ok
       end
+
+      return data
    end
 
    local invoke, pass, close
