@@ -42,6 +42,15 @@ describe("tests related to default values", function()
          assert.same({foo = "bar"}, args)
       end)
 
+      it("handles underused option with default value correctly", function()
+         local parser = Parser()
+         parser:option "-o" "--output"
+            :count(1)
+            :default "a.out"
+         local args = parser:parse{}
+         assert.same({output = "a.out"}, args)
+      end)
+
       it("doesn't use default if option is not invoked", function()
          local parser = Parser()
          parser:option("-f", "--foo", {

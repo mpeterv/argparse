@@ -761,9 +761,16 @@ function Parser:_parse(args, errhandler)
    end
 
    for _, option in ipairs(options) do
-      assert_(invocations[option] >= option._mincount,
-         "option '%s' must be used at least %d times", option._name, option._mincount
-      )
+      if invocations[option] < option._mincount then
+         if option._default then
+            while invocations[option] < option._mincount do
+               invoke(option)
+               close(option)
+            end
+         else
+            error_("option '%s' must be used at least %d times", option._name, option._mincount)
+         end
+      end
    end
 
    for _, callback in ipairs(com_callbacks) do
