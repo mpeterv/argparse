@@ -9,7 +9,6 @@ TODO:
 * Finish tutorial
 * Check grammar
 * Write some documentation
-* If an option has a default value and is under-used, invoke it with default value
 * Don't invoke arguments if they are not used
 * Make cli test windows friendly
 
