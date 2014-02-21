@@ -113,7 +113,7 @@ Did you mean '--help'?
 
 ### Configuring parser
 
-Parsers have several fields affecting their behaviour. For example, `description` field sets the text to be displayed in the help message between the usage message and the listings of options and arguments. Another is `name`, which overwrites the name of the program which is used in the usage message(default value is inferred from command line arguments). 
+Parsers have several fields affecting their behavior. For example, `description` field sets the text to be displayed in the help message between the usage message and the listings of options and arguments. Another is `name`, which overwrites the name of the program which is used in the usage message(default value is inferred from command line arguments). 
 
 There are several ways to set fields. The first is to call a parser with a table containing some fields. 
 
@@ -168,7 +168,7 @@ String `"A-B"`, where `A` and `B` are numbers | From `A` to `B` arguments
 String `"N+"`, where `N` is a number | `N` or more arguments
 String `"?"` | An optional argument
 String `"*"` | Any number of arguments
-Srting `"+"` | At least one argument
+String `"+"` | At least one argument
 
 If more than one argument can be passed, a table is used to store the data. 
 
@@ -200,7 +200,7 @@ optional	baz
 
 ### Adding options
 
-Options can be added using `:option()` method. It returns an Option instance, which can be configured in the same way as Parsers. The `name` field is required. An option can have several aliases, which can be set using `aliases` field or by continuesly calling the Option instance. 
+Options can be added using `:option()` method. It returns an Option instance, which can be configured in the same way as Parsers. The `name` field is required. An option can have several aliases, which can be set using `aliases` field or by continuously calling the Option instance. 
 
 ```lua
 parser:option "-f" "--from"
@@ -221,7 +221,7 @@ For an option, default index used to store data is the first 'long' alias (an al
 
 #### Flags
 
-Flags are almost indentical to options, except that they don't take an argument by default. 
+Flags are almost identical to options, except that they don't take an argument by default. 
 
 ```lua
 parser:flag "-q" "--quiet"
@@ -237,7 +237,7 @@ quiet	true
 
 #### Control characters
 
-The first characters of all aliases of all options of a parser form the set of control characters, used to distinguish options from arguments. Typically the set only consists of a nyphen. 
+The first characters of all aliases of all options of a parser form the set of control characters, used to distinguish options from arguments. Typically the set only consists of a hyphen. 
 
 #### Setting number of arguments
 
@@ -275,11 +275,11 @@ $ lua script3.lua --optional=baz
 optional	{baz}
 ```
 
-Note that the data passed to `optional` option is stored in an array. That is necessary to distiguish whether the option was invoked without an argument or it was not invoked at all. 
+Note that the data passed to `optional` option is stored in an array. That is necessary to distinguish whether the option was invoked without an argument or it was not invoked at all. 
 
 #### Setting number of invocations
 
-For options, it is possible to control how many times they can be used. argparse uses `count` field to set how many times an option can be invoced. The value of the field is interpreted in the same way `args` is. 
+For options, it is possible to control how many times they can be used. argparse uses `count` field to set how many times an option can be invoked. The value of the field is interpreted in the same way `args` is. 
 
 ```lua
 parser:option "-e" "--exclude"
