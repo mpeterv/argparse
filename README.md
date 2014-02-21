@@ -219,6 +219,33 @@ from	there
 
 For an option, default index used to store data is the first 'long' alias (an alias starting with two control characters) or just the first alias, without control characters. 
 
+Sometimes it is useful to explicitly set the index using `target` field to improve readability of help messages. 
+
+```lua
+parser:option "-f" "--from"
+   :target "server"
+```
+
+```bash
+$ lua script.lua --help
+```
+
+```
+Usage: script.lua [-f <server>] [-h]
+
+Options: 
+   -f <server>, --from <server>
+   -h, --help            Show this help message and exit. 
+```
+
+```bash
+$ lua script.lua --from there
+```
+
+```
+server	there
+```
+
 #### Flags
 
 Flags are almost identical to options, except that they don't take an argument by default. 
@@ -316,6 +343,84 @@ verbosity	2
 ```
 
 ### Commands
+
+A command is a subparser invoked when its name is passed as an argument. For example, in luarocks CLI `install`, `make`, `build`, etc. are commands. Each command has its own set of arguments and options. 
+
+Commands can be added using `:command()` method. Just as options, commands can have several aliases. 
+
+```lua
+parser:command "install" "i"
+```
+
+If a command it used, `true` is stored in the corresponding field of the result table. 
+
+```bash
+$ lua script.lua install
+```
+
+```
+install	true
+```
+
+A typo will result in appropriate error message: 
+
+```bash
+$ lua script.lua instal
+```
+
+```
+Usage: script.lua [-h] [<command>] ...
+
+Error: unknown command 'instal'
+Did you mean 'install'?
+```
+
+#### Adding elements to commands
+
+The Command class is subclass of the Parser class, so all the Parser's methods for adding elements work on commands, too. 
+
+```lua
+local install = parser:command "install"
+install:argument "rock"
+install:option "-f" "--from"
+```
+
+```bash
+$ lua script.lua install foo --from=bar
+```
+
+```
+install	true
+rock	foo
+from	bar
+```
+
+Commands have their own usage and help messages. 
+
+```bash
+$ lua script.lua install
+```
+
+```
+Usage: script.lua install [-f <from>] [-h] <rock>
+
+Error: too few arguments
+```
+
+```bash
+$ lua script.lua install --help
+```
+
+```
+Usage: script.lua install [-f <from>] [-h] <rock>
+
+Arguments: 
+   rock
+
+Options: 
+   -f <from>, --from <from>
+   -h, --help            Show this help message and exit. 
+```
 
 ### Default values
 
