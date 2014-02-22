@@ -65,7 +65,7 @@ $ lua script.lua
 
 #### Error handling
 
-If the provided command line arguments are not recognized by the parser, it will print an error message and calls `os.exit(1)`. 
+If the provided command line arguments are not recognized by the parser, it will print an error message and call `os.exit(1)`. 
 
 ```bash
 $ lua script.lua foo
@@ -362,7 +362,7 @@ $ lua script.lua install
 install	true
 ```
 
-A typo will result in appropriate error message: 
+A typo will result in an appropriate error message: 
 
 ```bash
 $ lua script.lua instal
@@ -377,7 +377,7 @@ Did you mean 'install'?
 
 #### Adding elements to commands
 
-The Command class is subclass of the Parser class, so all the Parser's methods for adding elements work on commands, too. 
+The Command class is a subclass of the Parser class, so all the Parser's methods for adding elements work on commands, too. 
 
 ```lua
 local install = parser:command "install"
@@ -424,9 +424,151 @@ Options:
 
 ### Default values
 
+For arguments and options, if `default` field is set, its value is used as default argument. 
+
+```lua
+parser:argument "input"
+   :default "input.txt"
+```
+
+```bash
+$ lua script.lua
+```
+
+```
+input	input.txt
+```
+
+The existence of a default value is reflected in help message. 
+
+```bash
+$ lua script.lua --help
+```
+
+```
+Usage: script.lua [-h] [<input>]
+
+Arguments: 
+   input                 default: input.txt
+
+Options: 
+   -h, --help            Show this help message and exit. 
+```
+
+#### Default values and options
+
+Note that if an option is not invoked, its default value will not be stored. 
+
+```lua
+parser:option "-o" "--output"
+   :default "a.out"
+```
+
+```bash
+$ lua script.lua -o
+```
+
+```
+output	a.out
+```
+
+But
+
+```bash
+$ lua script.lua
+```
+
+produces nothing. 
+
+That is because by default options can be not used at all. If default value must be used even when the option is not invoked, make the invocation obligatory. 
+
+```lua
+parser:option "-o" "--output"
+   :default "a.out"
+   :count(1)
+```
+
+```bash
+$ lua script.lua
+```
+
+```
+output	a.out
+```
+
 ### Converters
 
+argparse can perform automatic validation and conversion on arguments. If `convert` field of an element is a function, it will be applied to all the arguments passed to it. The function should return `nil` and, optionally, an error message if conversion failed. Standard `tonumber` and `io.open` functions work exactly like that. 
+
+```lua
+parser:argument "input"
+   :convert(io.open)
+parser:option "-t" "--times"
+   :convert(tonumber)
+```
+
+```bash
+$ lua script.lua foo.txt -t5
+```
+
+```
+input	file (0xadress)
+times	5 (number)
+```
+
+```bash
+$ lua script.lua nonexistent.txt
+```
+
+```
+Usage: script.lua [-t <times>] [-h] <input>
+
+Error: nonexistent.txt: No such file or directory
+```
+
+```bash
+$ lua script.lua foo.txt --times=many
+```
+
+```
+Usage: script.lua [-t <times>] [-h] <input>
+
+Error: malformed argument 'many'
+```
+
+#### Table converters
+
+If `convert` field of an element contains a table, arguments passed to it will be used as keys. If a key is missing, an error is raised. 
+
+```lua
+parser:argument "choice"
+   :convert {
+      foo = "Something foo-related",
+      bar = "Something bar-related"
+   }
+```
+
+```bash
+$ lua script.lua bar
+```
+
+```
+choice	Something bar-related
+```
+
+```bash
+$ lua script.lua baz
+```
+
+```
+Usage: script.lua [-h] <choice>
+
+Error: malformed argument 'baz'
+```
+
 ### Actions
+
+(Not yet written)
 
 ## Documentation
 
