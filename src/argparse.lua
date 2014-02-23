@@ -51,7 +51,7 @@ local Parser = class {
    _require_command = true,
    _add_help = true,
    _fields = {
-      "name", "description", "require_command",
+      "name", "description", "epilog", "require_command",
       "action", "usage", "help", "add_help"
    }
 }:include(Declarative)
@@ -60,9 +60,9 @@ local Command = Parser:extends {
    __name = "Command",
    _aliases = {},
    _fields = {
-      "name", "aliases", "description", "target",
-      "require_command", "action", "usage", "help",
-      "add_help"
+      "name", "aliases", "description", "epilog", 
+      "target", "require_command", "action", "usage",
+      "help", "add_help"
    }
 }
 
@@ -433,6 +433,10 @@ function Parser:get_help()
          end
 
          table.insert(blocks, table.concat(buf, "\r\n"))
+      end
+
+      if self._epilog then
+         table.insert(blocks, self._epilog)
       end
 
       self._help = table.concat(blocks, "\r\n\r\n")

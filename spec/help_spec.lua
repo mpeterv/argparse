@@ -32,6 +32,23 @@ describe("tests related to help message generation", function()
       }, "\r\n"), parser:prepare():get_help())
    end)
 
+   it("uses description and epilog", function()
+      local parser = Parser "foo"
+         :description "A description. "
+         :epilog "An epilog. "
+
+      assert.equal(table.concat({
+         "Usage: foo [-h]",
+         "",
+         "A description. ",
+         "",
+         "Options: ",
+         "   -h, --help            Show this help message and exit. ",
+         "",
+         "An epilog. "
+      }, "\r\n"), parser:prepare():get_help())
+   end)
+
    it("creates correct help message for arguments", function()
       local parser = Parser "foo"
       parser:argument "first"
