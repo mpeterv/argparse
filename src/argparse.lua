@@ -267,7 +267,11 @@ function Parser:prepare()
          end)
 
       if #self._help_option._aliases == 0 then
-         self._help_option "-h" "--help"
+         if self._help_option._name then
+            self._help_option._aliases[1] = self._help_option._name
+         else
+            self._help_option "-h" "--help"
+         end
       end
 
       if not self._help_option._description then
@@ -282,7 +286,7 @@ function Parser:prepare()
    end
 
    for _, command in ipairs(self._commands) do
-      command._target =command._target or command._name
+      command._target = command._target or command._name
       command._name = self._name .. " " .. command._name
    end
 
@@ -700,26 +704,11 @@ function Parser:_parse(args, errhandler)
             first = data:sub(1, 1)
             if charset[first] then
                if #data > 1 then
-                  if data:sub(2, 2):match "[a-zA-Z]" then
-                     plain = false
-
-                     for i = 2, #data do
-                        name = first .. data:sub(i, i)
-                        option = get_option(name)
-                        handle_option(name)
-
-                        if i ~= #data and option._minargs > 0 then
-                           handle_argument(data:sub(i+1))
-                           break
-                        end
-                     end
-                  elseif data:sub(2, 2) == first then
+                  plain = false
+                  if data:sub(2, 2) == first then
                      if #data == 2 then
-                        plain = false
                         handle_options = false
-                     elseif data:sub(3, 3):match "[a-zA-Z]" then
-                        plain = false
-
+                     else
                         local equal = data:find "="
                         if equal then
                            name = data:sub(1, equal-1)
@@ -731,6 +720,17 @@ function Parser:_parse(args, errhandler)
                         else
                            get_option(data)
                            handle_option(data)
+                        end
+                     end
+                  else
+                     for i = 2, #data do
+                        name = first .. data:sub(i, i)
+                        option = get_option(name)
+                        handle_option(name)
+
+                        if i ~= #data and option._minargs > 0 then
+                           handle_argument(data:sub(i+1))
+                           break
                         end
                      end
                   end

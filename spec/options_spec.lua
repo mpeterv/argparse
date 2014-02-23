@@ -16,6 +16,14 @@ describe("tests related to options", function()
          assert.same({server = "foo"}, args)
       end)
 
+      it("handles non-standard charset", function()
+         local parser = Parser()
+         parser:option "/s"
+         parser:flag "/?"
+         local args = parser:parse{"/s", "foo", "/?"}
+         assert.same({s = "foo", ["?"] = true}, args)
+      end)
+
       it("handles GNU-style long options", function()
          local parser = Parser()
          parser:option("-s", "--server")

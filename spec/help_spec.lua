@@ -23,12 +23,12 @@ describe("tests related to help message generation", function()
 
    it("uses custom help option", function()
       local parser = Parser "foo"
-         :add_help {aliases = {"\\?"}}
+         :add_help {name = "/?"}
       assert.equal(table.concat({
-         "Usage: foo [\\?]",
+         "Usage: foo [/?]",
          "",
          "Options: ",
-         "   \\?                    Show this help message and exit. "
+         "   /?                    Show this help message and exit. "
       }, "\r\n"), parser:prepare():get_help())
    end)
 
