@@ -79,6 +79,18 @@ Error: too many arguments
 
 If halting the program is undesirable, `:pparse([cmdline])` method should be used. It returns boolean flag indicating success of parsing and result or error message. 
 
+An error can raised manually using `:error()` method. 
+
+```lua
+parser:error("manual argument validation failed")
+```
+
+```
+Usage: script.lua [-h]
+
+Error: manual argument validation failed
+```
+
 #### Help option
 
 As the automatically generated usage message states, there is a help option `-h` added to any parser by default. 
@@ -369,7 +381,7 @@ $ lua script.lua instal
 ```
 
 ```
-Usage: script.lua [-h] [<command>] ...
+Usage: script.lua [-h] <command> ...
 
 Error: unknown command 'instal'
 Did you mean 'install'?
@@ -421,6 +433,41 @@ Options:
    -f <from>, --from <from>
    -h, --help            Show this help message and exit. 
 ```
+
+#### Making a command optional
+
+By default, if a parser has commands, using one of them is obligatory. 
+
+```lua
+local parser = argparse()
+parser:command "install"
+```
+
+```bash
+$ lua script.lua
+```
+
+```
+Usage: script.lua [-h] <command> ...
+
+Error: a command is required
+```
+
+This can be changed using the `require_command` field. 
+
+```lua
+local parser = argparse()
+   :require_command(false)
+parser:command "install"
+```
+
+Now not using a command is not an error:
+
+```bash
+$ lua script.lua
+```
+
+produces nothing. 
 
 ### Default values
 
@@ -512,7 +559,7 @@ $ lua script.lua foo.txt -t5
 ```
 
 ```
-input	file (0xadress)
+input	file (0xaddress)
 times	5 (number)
 ```
 
@@ -568,7 +615,133 @@ Error: malformed argument 'baz'
 
 ### Actions
 
-(Not yet written)
+argparse can trigger a callback when an option, argument or command is processed. The callback can be set using `action` field. 
+
+Action are mostly useful for creating flags triggering immediate reaction regardless of whether the rest of command line arguments are correct. 
+
+```lua
+parser:flag "-v" "--version"
+   :description "Show version info and exit. "
+   :action(function()
+      print("script.lua v1.0.0")
+      os.exit(0)
+   end)
+```
+
+```bash
+$ lua script.lua -v
+```
+
+```
+script.lua v1.0.0
+```
+
+This example would work even if the script had mandatory arguments. 
+
+### Miscellaneous
+
+#### Overwriting default help option
+
+If the field `add_help` of a parser is set to false, no help option will be added to it. Otherwise, the value of the field will be used to configure it. 
+
+```lua
+local parser = argparse()
+   :add_help {name = "/?"}
+```
+
+```bash
+$ lua script.lua /?
+```
+
+```
+Usage: script.lua [/?]
+
+Options: 
+   /?                    Show this help message and exit.
+```
+
+#### Configuring usage and help messages
+
+##### Description and epilog
+
+The value of `description` field of a parser is placed between the usage message and the argument list in the help message. 
+
+The value of `epilog` field is appended to the help message. 
+
+```lua
+local parser = argparse "script"
+   :description "A description. "
+   :epilog "An epilog. "
+```
+
+```bash
+$ lua script.lua --help
+```
+
+```
+Usage: script [-h]
+
+A description. 
+
+Options: 
+   -h, --help            Show this help message and exit. 
+
+An epilog. 
+```
+
+##### Argument placeholder
+
+For options and arguments, `argname` field controls the placeholder for the argument in the usage message. 
+
+```lua
+parser:option "-f" "--from"
+   :argname "<server>"
+```
+
+```bash
+$ lua script.lua --help
+```
+
+```
+Usage: script.lua [-f <server>] [-h]
+
+Options: 
+   -f <server>, --from <server>
+   -h, --help            Show this help message and exit. 
+```
+
+#### Prohibiting overuse of options
+
+By default, if an option is invoked too many times, latest invocations overwrite the data passed earlier. 
+
+```lua
+parser:option "-o" "--output"
+```
+
+```bash
+$ lua script.lua -oFOO -oBAR
+```
+
+```
+output   BAR
+```
+
+Set the `overwrite` field to false to prohibit this behavior. 
+
+```lua
+parser:option "-o" "--output"
+   :overwrite(false)
+```
+
+```bash
+$ lua script.lua -oFOO -oBAR
+```
+
+```
+Usage: script.lua [-o <output>] [-h]
+
+Error: option '-o' must be used at most 1 time
+```
 
 ## Documentation
 
@@ -577,4 +750,3 @@ Documentation is not available in the `doc` directory and [online](http://mpeter
 ## Testing
 
 argparse comes with a testing suite located in `spec` directory. [busted](http://olivinelabs.com/busted/) is required for testing, it can be installed using luarocks. Run the tests using `busted spec` command from the argparse folder. 
-
