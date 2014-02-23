@@ -65,7 +65,7 @@ describe("tests related to usage message generation", function()
       run:option "--where"
 
       assert.equal(
-         [=[Usage: foo [-q] [<command>] ...]=],
+         [=[Usage: foo [-q] <command> ...]=],
          parser:prepare():get_usage()
       )
    end)

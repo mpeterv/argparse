@@ -48,7 +48,7 @@ local Parser = class {
    _arguments = {},
    _options = {},
    _commands = {},
-   _require_command = false,
+   _require_command = true,
    _add_help = true,
    _fields = {
       "name", "description", "require_command",

@@ -106,7 +106,7 @@ Sets verbosity level.
       run:option "--where"
 
       assert.equal(table.concat({
-         "Usage: foo [-q] [-h] [<command>] ...",
+         "Usage: foo [-q] [-h] <command> ...",
          "",
          "Options: ",
          "   -q, --quiet",

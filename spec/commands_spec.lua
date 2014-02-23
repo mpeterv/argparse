@@ -47,11 +47,11 @@ describe("tests related to commands", function()
       local parser = Parser "name"
       parser:command "install"
 
+      assert.has_error(function() parser:parse{} end, "a command is required")
+
+      parser:require_command(false)
       local args = parser:parse{}
       assert.same({}, args)
-
-      parser:require_command(true)
-      assert.has_error(function() parser:parse{} end, "a command is required")
    end)
 
    it("Detects wrong commands", function()
