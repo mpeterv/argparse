@@ -493,6 +493,14 @@ local function get_tip(context, wrong_name)
    end
 end
 
+local function plural(x)
+   if x == 1 then
+      return ""
+   end
+
+   return "s"
+end
+
 function Parser:_parse(args, errhandler)
    args = args or arg
    self._name = self._name or args[0]
@@ -546,7 +554,7 @@ function Parser:_parse(args, errhandler)
          if element._overwrite then
             overwrite = true
          else
-            error_("option '%s' must be used at most %d times", element._name, element._maxcount)
+            error_("option '%s' must be used at most %d time%s", element._name, element._maxcount, plural(element._maxcount))
          end
       else
          invocations[element] = invocations[element]+1
@@ -772,7 +780,7 @@ function Parser:_parse(args, errhandler)
                close(option)
             end
          else
-            error_("option '%s' must be used at least %d times", option._name, option._mincount)
+            error_("option '%s' must be used at least %d time%s", option._name, option._mincount, plural(option._mincount))
          end
       end
    end

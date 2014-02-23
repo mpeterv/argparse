@@ -243,7 +243,7 @@ describe("tests related to options", function()
             count = 1,
             overwrite = false
          })
-         assert.has_error(function() parser:parse{"-qq"} end, "option '-q' must be used at most 1 times")
+         assert.has_error(function() parser:parse{"-qq"} end, "option '-q' must be used at most 1 time")
       end)
 
       it("handles too few invocations correctly", function()
