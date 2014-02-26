@@ -52,7 +52,7 @@ local Parser = class {
    _add_help = true,
    _fields = {
       "name", "description", "epilog", "require_command",
-      "action", "usage", "help", "add_help"
+      "usage", "help", "add_help"
    }
 }:include(Declarative)
 
@@ -73,7 +73,7 @@ local Argument = class {
    _fields = {
       "name", "description", "target", "args",
       "minargs", "maxargs", "default", "convert",
-      "action", "usage", "argname"
+      "usage", "argname"
    }
 }:include(Declarative)
 
@@ -515,7 +515,6 @@ function Parser:_parse(args, errhandler)
    local result = {}
    local invocations = {}
    local passed = {}
-   local com_callbacks = {}
    local cur_option
    local cur_arg_i = 1
    local cur_arg
@@ -620,23 +619,11 @@ function Parser:_parse(args, errhandler)
             cur_arg_i = cur_arg_i+1
             cur_arg = arguments[cur_arg_i]
          end
-
-         if element._action then
-            if element.multicount or element.twodimensional then
-               element._action(result[element._target][#result[element._target]])
-            else
-               element._action(result[element._target])
-            end
-         end
       end
    end
 
    local function switch(p)
       parser = p:prepare()
-
-      if parser._action then
-         table.insert(com_callbacks, parser._action)
-      end
 
       for _, option in ipairs(parser._options) do
          table.insert(options, option)
@@ -675,6 +662,12 @@ function Parser:_parse(args, errhandler)
       return assert_(opt_context[name], "unknown option '%s'%s", name, get_tip(opt_context, name))
    end
 
+   local function do_action(element)
+      if element._action then
+         element._action()
+      end
+   end
+
    local function handle_argument(data)
       if cur_option then
          pass(cur_option, data)
@@ -691,6 +684,7 @@ function Parser:_parse(args, errhandler)
             end
          else
             result[com._target] = true
+            do_action(com)
             switch(com)
          end
       end
@@ -702,6 +696,7 @@ function Parser:_parse(args, errhandler)
       end
 
       cur_option = opt_context[data]
+      do_action(cur_option)
       invoke(cur_option)
    end
 
@@ -783,10 +778,6 @@ function Parser:_parse(args, errhandler)
             error_("option '%s' must be used at least %d time%s", option._name, option._mincount, plural(option._mincount))
          end
       end
-   end
-
-   for _, callback in ipairs(com_callbacks) do
-      callback(result)
    end
 
    return result

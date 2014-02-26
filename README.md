@@ -615,9 +615,7 @@ Error: malformed argument 'baz'
 
 ### Actions
 
-argparse can trigger a callback when an option, argument or command is processed. The callback can be set using `action` field. 
-
-Action are mostly useful for creating flags triggering immediate reaction regardless of whether the rest of command line arguments are correct. 
+argparse can trigger a callback when an option or a command is encountered. The callback can be set using `action` field. Actions are called regardless of whether the rest of command line arguments are correct. 
 
 ```lua
 parser:flag "-v" "--version"

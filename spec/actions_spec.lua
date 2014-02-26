@@ -18,10 +18,7 @@ describe("tests related to actions", function()
       local args = parser:parse{"-fnowhere", "--pair", "Alice", "Bob", "-p", "Emma", "John"}
       assert.same({from = "nowhere", pair = {{"Alice", "Bob"}, {"Emma", "John"}}}, args)
       assert.spy(action1).called(1)
-      assert.spy(action1).called_with("nowhere")
       assert.spy(action2).called(2)
-      assert.spy(action2).called_with({"Alice", "Bob"})
-      assert.spy(action2).called_with({"Emma", "John"})
    end)
 
    it("properly calls actions for flags", function()
@@ -48,47 +45,20 @@ describe("tests related to actions", function()
       assert.spy(action3).called(0)
    end)
 
-   it("calls actions for arguments", function()
-      local action1 = spy.new(function(x) end)
-      local action2 = spy.new(function(x) end)
-
-      local parser = Parser()
-      parser:argument "input" {
-         action = action1
-      }
-      parser:argument "other" {
-         action = action2,
-         args = "*"
-      }
-
-      local args = parser:parse{"nothing"}
-      assert.same({input = "nothing", other = {}}, args)
-      assert.spy(action1).called(1)
-      assert.spy(action1).called_with("nothing")
-      assert.spy(action2).called(1)
-      assert.spy(action2).called_with({})
-   end)
-
    it("calls actions for commands", function()
-      local action1 = spy.new(function(x) end)
-      local action2 = spy.new(function(x) end)
+      local action = spy.new(function(x) end)
 
-      local parser = Parser "name" {
-         action = action1
-      }
+      local parser = Parser "name"
       parser:flag "-v" "--verbose" {
          count = "0-3"
       }
       local add = parser:command "add" {
-         action = action2
+         action = action
       }
       add:argument "something"
 
       local args = parser:parse{"add", "me"}
       assert.same({add = true, verbose = 0, something = "me"}, args)
-      assert.spy(action1).called(1)
-      assert.spy(action1).called_with(args)
-      assert.spy(action2).called(1)
-      assert.spy(action2).called_with(args)
+      assert.spy(action).called(1)
    end)
 end)
