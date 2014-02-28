@@ -70,10 +70,11 @@ local Argument = class {
    __name = "Argument",
    _args = 1,
    _count = 1,
+   _defmode = "count",
    _fields = {
       "name", "description", "target", "args",
-      "minargs", "maxargs", "default", "convert",
-      "usage", "argname"
+      "minargs", "maxargs", "default", "defmode",
+      "convert", "usage", "argname"
    }
 }:include(Declarative)
 
@@ -85,8 +86,9 @@ local Option = Argument:extends {
    _fields = {
       "name", "aliases", "description", "target", 
       "args", "minargs", "maxargs", "count",
-      "mincount", "maxcount", "default", "convert",
-      "overwrite", "action", "usage", "argname"
+      "mincount", "maxcount", "default", "defmode",
+      "convert", "overwrite", "action", "usage",
+      "argname"
    }
 }
 
@@ -603,12 +605,16 @@ function Parser:_parse(args, errhandler)
       end
    end
 
+   local function complete_invocation(element)
+      while passed[element] < element._minargs do
+         pass(element, element._default)
+      end
+   end
+
    function close(element)
       if passed[element] < element._minargs then
-         if element._default then
-            while passed[element] < element._minargs do
-               pass(element, element._default)
-            end
+         if element._default and element._defmode:find "a" then
+            complete_invocation(element)
          else
             error_("too few arguments")
          end
@@ -760,7 +766,11 @@ function Parser:_parse(args, errhandler)
    end
 
    while cur_arg do
-      close(cur_arg)
+      if passed[cur_arg] == 0 and cur_arg._default and cur_arg._defmode:find "c" then
+         complete_invocation(cur_arg)
+      else
+         close(cur_arg)
+      end
    end
 
    if parser._require_command and #commands > 0 then
@@ -768,8 +778,16 @@ function Parser:_parse(args, errhandler)
    end
 
    for _, option in ipairs(options) do
+      if invocations[option] == 0 then
+         if option._default and option._defmode:find "c" then
+            invoke(option)
+            complete_invocation(option)
+            close(option)
+         end
+      end
+
       if invocations[option] < option._mincount then
-         if option._default then
+         if option._default and option._defmode:find "a" then
             while invocations[option] < option._mincount do
                invoke(option)
                close(option)
