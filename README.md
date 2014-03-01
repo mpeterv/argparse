@@ -4,13 +4,27 @@
 
 argparse is a feature-rich command line parser for Lua inspired by argparse for Python. 
 
-TODO: 
+## Status
 
-* Finish tutorial
-* Check grammar
-* Write some documentation
-* Don't invoke arguments if they are not used
-* Make cli test windows friendly
+Almost everything is implemented, and a WIP version will be available soon. 
+
+TODO till first release: 
+
+* Add `Content` section to this README. 
+* Add information about the parsing algorithm to the tutorial. 
+* Add information about the way arguments are stored in the result table to the tutorial. 
+* Add a small example to the beginning of this README. 
+* Check the grammar in this README. 
+* Generate .html file from the tutorial part of this README and put it into `doc` directory. 
+* Write a rockspec for `v0.1` and push it to moonrocks. 
+
+TODO till first 'stable' release: 
+
+* Write a formal reference. 
+* Write more tests. Some cases are still poorly covered. 
+* Add mutually exclusive groups(`:mutex{option1, option2, ...}`). 
+* Optionally(?): Add comments to the source. 
+* Optionally: get rid of `30log` dependency. It's great but can cause problems with old luarocks versions. 
 
 ## Installation
 
@@ -38,7 +52,7 @@ Download `/src/argparse.lua` file and put it into the directory for libraries or
 
 ### Creating a parser
 
-The module contains the Parser class. To create an instance, call it or its `:new()` method. 
+The module is a function which, when called, creates an instance of the Parser class. 
 
 ```lua
 -- script.lua
@@ -769,9 +783,13 @@ Usage: script.lua [-o <output>] [-h]
 Error: option '-o' must be used at most 1 time
 ```
 
+#### Generating usage and help messages
+
+`get_help` and `get_usage` methods of Parser and Command classes can be used to generate their help and usage messages. 
+
 ## Documentation
 
-Documentation is not available in the `doc` directory and [online](http://mpeterv.github.io/argparse). If argparse was installed using luarocks 2.1.2 or later, it can not be viewed using `luarocks doc argparse` command. 
+The tutorial ~~is~~ will be available in the `doc` directory. If argparse was installed using luarocks 2.1.2 or later, it can be viewed using `luarocks doc argparse` command. 
 
 ## Testing
 
