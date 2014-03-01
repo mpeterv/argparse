@@ -267,6 +267,8 @@ function Parser:command(...)
 end
 
 function Parser:prepare()
+   self._fullname = self._fullname or self._name
+
    if self._add_help and not self._help_option then
       self._help_option = self:flag(self._add_help)
          :action(function()
@@ -295,7 +297,7 @@ function Parser:prepare()
 
    for _, command in ipairs(self._commands) do
       command._target = command._target or command._name
-      command._name = self._name .. " " .. command._name
+      command._fullname = self._fullname .. " " .. command._name
    end
 
    return self
@@ -322,7 +324,7 @@ local usage_welcome = "Usage: "
 
 function Parser:get_usage()
    if not self._usage then
-      local lines = {usage_welcome .. self._name}
+      local lines = {usage_welcome .. self._fullname}
 
       local function add(s)
          if #lines[#lines]+1+#s <= max_usage_width then
