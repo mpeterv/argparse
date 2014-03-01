@@ -4,7 +4,7 @@ describe("tests related to usage message generation", function()
    it("creates correct usage message for empty parser", function()
       local parser = Parser "foo"
          :add_help(false)
-      assert.equal(parser:prepare():get_usage(), "Usage: foo")
+      assert.equal(parser:get_usage(), "Usage: foo")
    end)
 
    it("creates correct usage message for arguments", function()
@@ -21,7 +21,7 @@ describe("tests related to usage message generation", function()
       assert.equal(table.concat({
          "Usage: foo <first> <second-and-third> <second-and-third>",
          "       [<maybe-fourth>] [<others>] ..."
-         }, "\r\n"), parser:prepare():get_usage()
+         }, "\r\n"), parser:get_usage()
       )
    end)
 
@@ -36,7 +36,7 @@ describe("tests related to usage message generation", function()
 
       assert.equal(
          [=[Usage: foo [-q] --from <server> [--config <config>]]=],
-         parser:prepare():get_usage()
+         parser:get_usage()
       )
    end)
 
@@ -55,7 +55,7 @@ describe("tests related to usage message generation", function()
 
       assert.equal(
          [=[Usage: foo [<input>] [<pair> <pair>] [<pair2>] [<pair2>]]=],
-         parser:prepare():get_usage()
+         parser:get_usage()
       )
    end)
 
@@ -70,7 +70,7 @@ describe("tests related to usage message generation", function()
 
       assert.equal(
          [=[Usage: foo [-f <from>] [-o [<output>]]]=],
-         parser:prepare():get_usage()
+         parser:get_usage()
       )
    end)
 
@@ -83,7 +83,7 @@ describe("tests related to usage message generation", function()
 
       assert.equal(
          [=[Usage: foo [-q] <command> ...]=],
-         parser:prepare():get_usage()
+         parser:get_usage()
       )
    end)
 
@@ -95,15 +95,13 @@ describe("tests related to usage message generation", function()
          :add_help(false)
       run:option "--where"
 
-      parser:prepare()
-
       assert.equal(
          [=[Usage: foo run [--where <where>]]=],
-         run:prepare():get_usage()
+         run:get_usage()
       )
    end)
 
-   it("usage messages for commands are correct after several :prepare() invocations", function()
+   it("usage messages for commands are correct after several invocations", function()
       local parser = Parser "foo"
          :add_help(false)
       parser:flag "-q" "--quiet"
@@ -111,12 +109,12 @@ describe("tests related to usage message generation", function()
          :add_help(false)
       run:option "--where"
 
-      parser:prepare()
-      parser:prepare()
+      parser:parse{"run"}
+      parser:parse{"run"}
 
       assert.equal(
          [=[Usage: foo run [--where <where>]]=],
-         run:prepare():get_usage()
+         run:get_usage()
       )
    end)
 
@@ -129,7 +127,7 @@ describe("tests related to usage message generation", function()
 
          assert.equal(
             [=[Usage: obvious]=],
-            parser:prepare():get_usage()
+            parser:get_usage()
          )
       end)
 
@@ -141,7 +139,7 @@ describe("tests related to usage message generation", function()
 
          assert.equal(
             [=[Usage: foo [-q | --quiet]]=],
-            parser:prepare():get_usage()
+            parser:get_usage()
          )
       end)
 
@@ -154,7 +152,7 @@ describe("tests related to usage message generation", function()
 
          assert.equal(
             [=[Usage: foo <input> [<input>]]=],
-            parser:prepare():get_usage()
+            parser:get_usage()
          )
       end)
    end)

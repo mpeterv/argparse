@@ -88,8 +88,6 @@ local typecheck = setmetatable({}, {
    end
 })
 
-local noop = false
-
 local function aliased_name(self, name)
    typecheck.string "name" (self, name)
 
@@ -129,16 +127,14 @@ local Parser = add_setters(class {
    _arguments = {},
    _options = {},
    _commands = {},
-   _require_command = true,
-   _add_help = true
+   _require_command = true
 }, {
    name = typecheck.string "name",
    description = typecheck.string "description",
    epilog = typecheck.string "epilog",
    require_command = typecheck.boolean "require_command",
    usage = typecheck.string "usage",
-   help = typecheck.string "help",
-   add_help = noop
+   help = typecheck.string "help"
 })
 
 local Command = add_setters(Parser:extends {
@@ -153,8 +149,7 @@ local Command = add_setters(Parser:extends {
    require_command = typecheck.boolean "require_command",
    action = typecheck["function"] "action",
    usage = typecheck.string "usage",
-   help = typecheck.string "help",
-   add_help = noop
+   help = typecheck.string "help"
 })
 
 local Argument = add_setters(class {
@@ -303,51 +298,69 @@ end
 
 function Parser:option(...)
    local option = Option:new(...)
-   table.insert(self._options, option)
+
+   if self._has_help then
+      table.insert(self._options, #self._options, option)
+   else
+      table.insert(self._options, option)
+   end
+
    return option
 end
 
 function Parser:flag(...)
-   local flag = Option:new():args(0)(...)
-   table.insert(self._options, flag)
-   return flag
+   return self:option():args(0)(...)
 end
 
 function Parser:command(...)
-   local command = Command:new(...)
+   local command = Command:new():add_help(true)(...)
+   command._parent = self
    table.insert(self._commands, command)
    return command
 end
 
-function Parser:prepare()
-   self._fullname = self._fullname or self._name
-
-   if self._add_help and not self._help_option then
-      self._help_option = self:flag()
+function Parser:add_help(param)
+   if self._has_help then
+      table.remove(self._options)
+      self._has_help = false
+   end
+   
+   if param then
+      local help = self:flag()
          :description "Show this help message and exit. "
          :action(function()
             io.stdout:write(self:get_help() .. "\r\n")
             os.exit(0)
          end)
-         (self._add_help)
+         (param)
 
-      if not self._help_option._name then
-         self._help_option "-h" "--help"
+      if not help._name then
+         help "-h" "--help"
       end
-   end
 
-   for _, command in ipairs(self._commands) do
-      command._fullname = self._fullname .. " " .. command._name
+      self._has_help = true
    end
 
    return self
 end
 
-function Parser:update_charset(charset)
+function Parser:_get_fullname()
+   local parent = self._parent
+   local buf = {self._name}
+
+   while parent do
+      table.insert(buf, 1, parent._name)
+      parent = parent._parent
+   end
+
+   return table.concat(buf, " ")
+end
+
+function Parser:_update_charset(charset)
    charset = charset or {}
 
    for _, command in ipairs(self._commands) do
-      command:update_charset(charset)
+      command:_update_charset(charset)
    end
 
    for _, option in ipairs(self._options) do
@@ -367,7 +380,7 @@ function Parser:get_usage()
       return self._usage
    end
 
-   local lines = {usage_welcome .. self._fullname}
+   local lines = {usage_welcome .. self:_get_fullname()}
 
    local function add(s)
       if #lines[#lines]+1+#s <= max_usage_width then
@@ -553,7 +566,12 @@ end
 
 function Parser:_parse(args, errhandler)
    args = args or arg
-   self._name = self._name or args[0]
+   local noname
+
+   if not self._name then
+      noname = true
+      self._name = args[0]
+   end
 
    local parser
    local charset
@@ -682,7 +700,7 @@ function Parser:_parse(args, errhandler)
    end
 
    local function switch(p)
-      parser = p:prepare()
+      parser = p
 
       for _, option in ipairs(parser._options) do
          table.insert(options, option)
@@ -817,7 +835,7 @@ function Parser:_parse(args, errhandler)
    end
 
    switch(self)
-   charset = parser:update_charset()
+   charset = parser:_update_charset()
    mainloop()
 
    if cur_option then
@@ -857,6 +875,10 @@ function Parser:_parse(args, errhandler)
       end
    end
 
+   if noname then
+      self._name = nil
+   end
+
    return result
 end
 
@@ -890,4 +912,6 @@ function Parser:pparse(args)
    end
 end
 
-return Parser
+return function(...)
+   return Parser():add_help(true)(...)
+end

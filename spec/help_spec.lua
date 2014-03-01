@@ -8,7 +8,7 @@ describe("tests related to help message generation", function()
          "",
          "Options: ",
          "   -h, --help            Show this help message and exit. "
-      }, "\r\n"), parser:prepare():get_help())
+      }, "\r\n"), parser:get_help())
    end)
 
    it("does not create extra help options when :prepare is called several times", function()
@@ -18,7 +18,7 @@ describe("tests related to help message generation", function()
          "",
          "Options: ",
          "   -h, --help            Show this help message and exit. "
-      }, "\r\n"), parser:prepare():prepare():get_help())
+      }, "\r\n"), parser:get_help())
    end)
 
    it("uses custom help option", function()
@@ -29,7 +29,7 @@ describe("tests related to help message generation", function()
          "",
          "Options: ",
          "   /?                    Show this help message and exit. "
-      }, "\r\n"), parser:prepare():get_help())
+      }, "\r\n"), parser:get_help())
    end)
 
    it("uses description and epilog", function()
@@ -46,7 +46,7 @@ describe("tests related to help message generation", function()
          "   -h, --help            Show this help message and exit. ",
          "",
          "An epilog. "
-      }, "\r\n"), parser:prepare():get_help())
+      }, "\r\n"), parser:get_help())
    end)
 
    it("creates correct help message for arguments", function()
@@ -72,7 +72,7 @@ describe("tests related to help message generation", function()
          "",
          "Options: ",
          "   -h, --help            Show this help message and exit. "
-      }, "\r\n"), parser:prepare():get_help())
+      }, "\r\n"), parser:get_help())
    end)
 
    it("creates correct help message for options", function()
@@ -91,7 +91,7 @@ describe("tests related to help message generation", function()
          "   --from <server>",
          "   --config <config>",
          "   -h, --help            Show this help message and exit. "
-      }, "\r\n"), parser:prepare():get_help())
+      }, "\r\n"), parser:get_help())
    end)
 
    it("adds margin for multiline descriptions", function()
@@ -112,7 +112,7 @@ Sets verbosity level.
          "                         -v: Report all warnings. ",
          "                         -vv: Report all debugging information. ",
          "   -h, --help            Show this help message and exit. "
-      }, "\r\n"), parser:prepare():get_help())
+      }, "\r\n"), parser:get_help())
    end)
 
    it("creates correct help message for commands", function()
@@ -131,7 +131,7 @@ Sets verbosity level.
          "",
          "Commands: ",
          "   run                   Run! "
-      }, "\r\n"), parser:prepare():get_help())
+      }, "\r\n"), parser:get_help())
    end)
 
    it("creates correct help message for subcommands", function()
@@ -140,15 +140,13 @@ Sets verbosity level.
       local run = parser:command "run"
       run:option "--where"
 
-      parser:prepare()
-
       assert.equal(table.concat({
          "Usage: foo run [--where <where>] [-h]",
          "",
          "Options: ",
          "   --where <where>",
          "   -h, --help            Show this help message and exit. ",
-      }, "\r\n"), run:prepare():get_help())
+      }, "\r\n"), run:get_help())
    end)
 
    it("uses message provided by user", function()
@@ -158,7 +156,7 @@ Sets verbosity level.
 
       assert.equal(
          [=[I don't like your format of help messages]=],
-         parser:prepare():get_help()
+         parser:get_help()
       )
    end)
 end)
