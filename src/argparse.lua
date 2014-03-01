@@ -363,8 +363,7 @@ function Parser:add_help(param)
          :action(function()
             io.stdout:write(self:get_help() .. "\r\n")
             os.exit(0)
-         end)
-         (param)
+         end)(param)
 
       if not help._name then
          help "-h" "--help"
