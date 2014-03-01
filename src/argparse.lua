@@ -197,7 +197,7 @@ local Option = add_setters(Argument:extends {
    argname = typecheck.string "argname"
 })
 
-function Argument:get_arg_usage(argname)
+function Argument:_get_arg_usage(argname)
    argname = self._argname or argname
    local buf = {}
    local required_argname = argname
@@ -229,78 +229,70 @@ function Argument:get_arg_usage(argname)
    return buf
 end
 
-function Argument:get_usage()
-   if not self._usage then
-      self._usage = table.concat(self:get_arg_usage("<" .. self._name .. ">"), " ")
+function Argument:_get_usage()
+   if self._usage then
+      return self._usage
+   end
 
-      if self._default and self._defmode:find "u" then
-         if self._maxargs > 1 or (self._minargs == 1 and not self._defmode:find "a") then
-            self._usage = "[" .. self._usage .. "]"
-         end
+   local usage = table.concat(self:_get_arg_usage("<" .. self._name .. ">"), " ")
+
+   if self._default and self._defmode:find "u" then
+      if self._maxargs > 1 or (self._minargs == 1 and not self._defmode:find "a") then
+         usage = "[" .. usage .. "]"
       end
    end
 
-   return self._usage
+   return usage
 end
 
-function Argument:make_target()
-   if not self._target then
-      self._target = self._name
-   end
-end
-
-function Argument:make_type()
+function Argument:_get_type()
    if self._maxcount == 1 then
       if self._maxargs == 0 then
-         self.flag = true
+         return "flag"
       elseif self._maxargs == 1 and (self._minargs == 1 or self._mincount == 1) then
-         self.arg = true
+         return "arg"
       else
-         self.multiarg = true
+         return "multiarg"
       end
    else
       if self._maxargs == 0 then
-         self.counter = true
+         return "counter"
       elseif self._maxargs == 1 and self._minargs == 1 then
-         self.multicount = true
+         return "multicount"
       else
-         self.twodimensional = true
+         return "twodimensional"
       end
    end
 end
 
-function Argument:prepare()
-   self:make_target()
-   self:make_type()
-   return self
+function Option:_get_usage()
+   if self._usage then
+      return self._usage
+   end
+
+   local usage = self:_get_arg_usage("<" .. self:_get_target() .. ">")
+   table.insert(usage, 1, self._name)
+   usage = table.concat(usage, " ")
+
+   if self._mincount == 0 or self._default then
+      usage = "[" .. usage .. "]"
+   end
+
+   return usage
 end
 
-function Option:get_usage()
-   if not self._usage then
-      self._usage = self:get_arg_usage("<" .. self._target .. ">")
-      table.insert(self._usage, 1, self._name)
-      self._usage = table.concat(self._usage, " ")
+function Option:_get_target()
+   if self._target then
+      return self._target
+   end
 
-      if self._mincount == 0 or self._default then
-         self._usage = "[" .. self._usage .. "]"
+   for _, alias in ipairs(self._aliases) do
+      if alias:sub(1, 1) == alias:sub(2, 2) then
+         return alias:sub(3)
       end
    end
 
-   return self._usage
-end
-
-function Option:make_target()
-   if not self._target then
-      for _, alias in ipairs(self._aliases) do
-         if alias:sub(1, 1) == alias:sub(2, 2) then
-            self._target = alias:sub(3)
-            break
-         end
-      end
-   end
-
-   self._target = self._target or self._aliases[1]:sub(2)
-   self._name = self._name or self._aliases[1]
+   return self._name:sub(2)
 end
 
 function Parser:argument(...)
@@ -344,14 +336,7 @@ function Parser:prepare()
       end
    end
 
-   for _, elements in ipairs{self._arguments, self._options} do
-      for _, element in ipairs(elements) do
-         element:prepare()
-      end
-   end
-
    for _, command in ipairs(self._commands) do
-      command._target = command._target or command._name
       command._fullname = self._fullname .. " " .. command._name
    end
 
@@ -378,37 +363,37 @@ local max_usage_width = 70
 local usage_welcome = "Usage: "
 
 function Parser:get_usage()
-   if not self._usage then
-      local lines = {usage_welcome .. self._fullname}
-
-      local function add(s)
-         if #lines[#lines]+1+#s <= max_usage_width then
-            lines[#lines] = lines[#lines] .. " " .. s
-         else
-            lines[#lines+1] = (" "):rep(#usage_welcome) .. s
-         end
-      end
-
-      for _, elements in ipairs{self._options, self._arguments} do
-         for _, element in ipairs(elements) do
-            add(element:get_usage())
-         end
-      end
-
-      if #self._commands > 0 then
-         if self._require_command then
-            add("<command>")
-         else
-            add("[<command>]")
-         end
-
-         add("...")
-      end
-
-      self._usage = table.concat(lines, "\r\n")
+   if self._usage then
+      return self._usage
    end
 
-   return self._usage
+   local lines = {usage_welcome .. self._fullname}
+
+   local function add(s)
+      if #lines[#lines]+1+#s <= max_usage_width then
+         lines[#lines] = lines[#lines] .. " " .. s
+      else
+         lines[#lines+1] = (" "):rep(#usage_welcome) .. s
+      end
+   end
+
+   for _, elements in ipairs{self._options, self._arguments} do
+      for _, element in ipairs(elements) do
+         add(element:_get_usage())
+      end
+   end
+
+   if #self._commands > 0 then
+      if self._require_command then
+         add("<command>")
+      else
+         add("[<command>]")
+      end
+
+      add("...")
+   end
+
+   return table.concat(lines, "\r\n")
 end
 
 local margin_len = 3
@@ -453,7 +438,7 @@ local function make_name(option)
    local variant
 
    for _, alias in ipairs(option._aliases) do
-      variant = option:get_arg_usage("<" .. option._target .. ">")
+      variant = option:_get_arg_usage("<" .. option:_get_target() .. ">")
       table.insert(variant, 1, alias)
       variant = table.concat(variant, " ")
       table.insert(variants, variant)
@@ -463,51 +448,51 @@ local function make_name(option)
 end
 
 function Parser:get_help()
-   if not self._help then
-      local blocks = {self:get_usage()}
-      
-      if self._description then
-         table.insert(blocks, self._description)
-      end
-
-      if #self._arguments > 0 then
-         local buf = {"Arguments: "}
-
-         for _, argument in ipairs(self._arguments) do
-            table.insert(buf, make_two_columns(argument._name, make_description(argument)))
-         end
-
-         table.insert(blocks, table.concat(buf, "\r\n"))
-      end
-
-      if #self._options > 0 then
-         local buf = {"Options: "}
-
-         for _, option in ipairs(self._options) do
-            table.insert(buf, make_two_columns(make_name(option), make_description(option)))
-         end
-
-         table.insert(blocks, table.concat(buf, "\r\n"))
-      end
-
-      if #self._commands > 0 then
-         local buf = {"Commands: "}
-
-         for _, command in ipairs(self._commands) do
-            table.insert(buf, make_two_columns(table.concat(command._aliases, ", "), command._description or ""))
-         end
-
-         table.insert(blocks, table.concat(buf, "\r\n"))
-      end
-
-      if self._epilog then
-         table.insert(blocks, self._epilog)
-      end
-
-      self._help = table.concat(blocks, "\r\n\r\n")
+   if self._help then
+      return self._help
    end
 
-   return self._help
+   local blocks = {self:get_usage()}
+   
+   if self._description then
+      table.insert(blocks, self._description)
+   end
+
+   if #self._arguments > 0 then
+      local buf = {"Arguments: "}
+
+      for _, argument in ipairs(self._arguments) do
+         table.insert(buf, make_two_columns(argument._name, make_description(argument)))
+      end
+
+      table.insert(blocks, table.concat(buf, "\r\n"))
+   end
+
+   if #self._options > 0 then
+      local buf = {"Options: "}
+
+      for _, option in ipairs(self._options) do
+         table.insert(buf, make_two_columns(make_name(option), make_description(option)))
+      end
+
+      table.insert(blocks, table.concat(buf, "\r\n"))
+   end
+
+   if #self._commands > 0 then
+      local buf = {"Commands: "}
+
+      for _, command in ipairs(self._commands) do
+         table.insert(buf, make_two_columns(table.concat(command._aliases, ", "), command._description or ""))
+      end
+
+      table.insert(blocks, table.concat(buf, "\r\n"))
+   end
+
+   if self._epilog then
+      table.insert(blocks, self._epilog)
+   end
+
+   return table.concat(blocks, "\r\n\r\n")
 end
 
 local function get_tip(context, wrong_name)
@@ -583,6 +568,7 @@ function Parser:_parse(args, errhandler)
    local cur_option
    local cur_arg_i = 1
    local cur_arg
+   local targets = {}
 
    local function error_(fmt, ...)
       return errhandler(parser, fmt:format(...))
@@ -625,24 +611,26 @@ function Parser:_parse(args, errhandler)
       end
 
       passed[element] = 0
+      local type_ = element:_get_type()
+      local target = targets[element]
 
-      if element.flag then
-         result[element._target] = true
-      elseif element.multiarg then
-         result[element._target] = {}
-      elseif element.counter then
+      if type_ == "flag" then
+         result[target] = true
+      elseif type_ == "multiarg" then
+         result[target] = {}
+      elseif type_ == "counter" then
          if not overwrite then
-            result[element._target] = result[element._target]+1
+            result[target] = result[target]+1
          end
-      elseif element.multicount then
+      elseif type_ == "multicount" then
          if overwrite then
-            table.remove(result[element._target], 1)
+            table.remove(result[target], 1)
          end
-      elseif element.twodimensional then
-         table.insert(result[element._target], {})
+      elseif type_ == "twodimensional" then
+         table.insert(result[target], {})
 
          if overwrite then
-            table.remove(result[element._target], 1)
+            table.remove(result[target], 1)
          end
       end
 
@@ -654,13 +642,15 @@ function Parser:_parse(args, errhandler)
    function pass(element, data)
       passed[element] = passed[element]+1
       data = convert(element, data)
+      local type_ = element:_get_type()
+      local target = targets[element]
 
-      if element.arg then
-         result[element._target] = data
-      elseif element.multiarg or element.multicount then
-         table.insert(result[element._target], data)
-      elseif element.twodimensional then
-         table.insert(result[element._target][#result[element._target]], data)
+      if type_ == "arg" then
+         result[target] = data
+      elseif type_ == "multiarg" or type_ == "multicount" then
+         table.insert(result[target], data)
+      elseif type_ == "twodimensional" then
+         table.insert(result[target][#result[target]], data)
       end
 
       if passed[element] == element._maxargs then
@@ -701,10 +691,13 @@ function Parser:_parse(args, errhandler)
             opt_context[alias] = option
          end
 
-         if option.counter then
-            result[option._target] = 0
-         elseif option.multicount or option.twodimensional then
-            result[option._target] = {}
+         local type_ = option:_get_type()
+         targets[option] = option:_get_target()
+
+         if type_ == "counter" then
+            result[targets[option]] = 0
+         elseif type_ == "multicount" or type_ == "twodimensional" then
+            result[targets[option]] = {}
          end
 
          invocations[option] = 0
@@ -713,6 +706,7 @@ function Parser:_parse(args, errhandler)
       for _, argument in ipairs(parser._arguments) do
          table.insert(arguments, argument)
          invocations[argument] = 0
+         targets[argument] = argument._target or argument._name
          invoke(argument)
       end
 
@@ -721,6 +715,8 @@ function Parser:_parse(args, errhandler)
       com_context = {}
 
       for _, command in ipairs(commands) do
+         targets[command] = command._target or command._name
+
          for _, alias in ipairs(command._aliases) do
             com_context[alias] = command
          end
@@ -752,7 +748,7 @@ function Parser:_parse(args, errhandler)
                error_("too many arguments")
             end
          else
-            result[com._target] = true
+            result[targets[com]] = true
             do_action(com)
             switch(com)
          end
