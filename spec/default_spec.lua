@@ -49,6 +49,7 @@ describe("tests related to default values", function()
          local parser = Parser()
          parser:option "-o" "--output"
             :default "a.out"
+            :defmode "unused"
          local args = parser:parse{}
          assert.same({output = "a.out"}, args)
          args = parser:parse{"--output", "foo.txt"}

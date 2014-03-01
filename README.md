@@ -471,11 +471,11 @@ produces nothing.
 
 ### Default values
 
-For arguments and options, if `default` field is set, its value is used as default argument. 
+For elements such as arguments and options, if `default` field is set, its value is stored in case the element was not used. 
 
 ```lua
-parser:argument "input"
-   :default "input.txt"
+parser:option "-o" "--output"
+   :default "a.out"
 ```
 
 ```bash
@@ -483,7 +483,7 @@ $ lua script.lua
 ```
 
 ```
-input	input.txt
+output	a.out
 ```
 
 The existence of a default value is reflected in help message. 
@@ -493,22 +493,72 @@ $ lua script.lua --help
 ```
 
 ```
-Usage: script.lua [-h] [<input>]
-
-Arguments: 
-   input                 default: input.txt
+Usage: script [-o <output>] [-h]
 
 Options: 
+   -o <output>, --output <output>
+                         default: a.out
    -h, --help            Show this help message and exit. 
 ```
 
-#### Default values and options
+Note that invocation without required arguments is still an error. 
 
-Note that if an option is not invoked, its default value will not be stored. 
+```bash
+$ lua script.lua -o
+```
 
-```lua
-parser:option "-o" "--output"
+```
+Usage: script [-o <output>] [-h]
+
+Error: too few arguments
+```
+
+#### Default mode
+
+The `defmode` field regulates how argparse should use the default value of an element. 
+
+If `defmode` contains `"u"`(for `unused`), the default value will be automatically passed to the element if it was not invoked at all. This is the default behavior. 
+
+If `defmode` contains `"a"`(for `argument`), the default value will be automatically passed to the element if not enough arguments were passed, or not enough invocations were made. 
+
+Consider the difference: 
+
+```
+parser:option "-o"
    :default "a.out"
+parser:option "-p"
+   :default "password"
+   :defmode "arg"
+```
+
+```bash
+$ lua script.lua -h
+```
+
+```
+Usage: script [-o <o>] [-p [<p>]] [-h]
+
+Options: 
+   -o <o>                default: a.out
+   -p [<p>]              default: password
+   -h, --help            Show this help message and exit. 
+```
+
+```bash
+$ lua script.lua
+```
+
+```
+o	a.out
+```
+
+```bash
+$ lua script.lua -p
+```
+
+```
+o	a.out
+p	password
 ```
 
 ```bash
@@ -516,31 +566,9 @@ $ lua script.lua -o
 ```
 
 ```
-output	a.out
-```
+Usage: script [-o <o>] [-p [<p>]] [-h]
 
-But
-
-```bash
-$ lua script.lua
-```
-
-produces nothing. 
-
-That is because by default options can be not used at all. If default value must be used even when the option is not invoked, make the invocation obligatory. 
-
-```lua
-parser:option "-o" "--output"
-   :default "a.out"
-   :count(1)
-```
-
-```bash
-$ lua script.lua
-```
-
-```
-output	a.out
+Error: too few arguments
 ```
 
 ### Converters

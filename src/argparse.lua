@@ -70,7 +70,7 @@ local Argument = class {
    __name = "Argument",
    _args = 1,
    _count = 1,
-   _defmode = "count",
+   _defmode = "unused",
    _fields = {
       "name", "description", "target", "args",
       "minargs", "maxargs", "default", "defmode",
@@ -133,7 +133,7 @@ function Argument:get_usage()
    if not self._usage then
       self._usage = table.concat(self:get_arg_usage("<" .. self._name .. ">"), " ")
 
-      if self._default and self._defmode:find "c" then
+      if self._default and self._defmode:find "u" then
          if self._maxargs > 1 or (self._minargs == 1 and not self._defmode:find "a") then
             self._usage = "[" .. self._usage .. "]"
          end
@@ -772,7 +772,7 @@ function Parser:_parse(args, errhandler)
    end
 
    while cur_arg do
-      if passed[cur_arg] == 0 and cur_arg._default and cur_arg._defmode:find "c" then
+      if passed[cur_arg] == 0 and cur_arg._default and cur_arg._defmode:find "u" then
          complete_invocation(cur_arg)
       else
          close(cur_arg)
@@ -785,7 +785,7 @@ function Parser:_parse(args, errhandler)
 
    for _, option in ipairs(options) do
       if invocations[option] == 0 then
-         if option._default and option._defmode:find "c" then
+         if option._default and option._defmode:find "u" then
             invoke(option)
             complete_invocation(option)
             close(option)
