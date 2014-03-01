@@ -20,7 +20,7 @@ describe("tests related to :pparse()", function()
    it("still raises an error if it is caused by misconfiguration", function()
       local parser = Parser()
       parser:option "--foo"
-         :count "a lot"
+         :aliases {1, 2, 3}
       assert.has_error(function() parser:pparse{} end)
    end)
 end)

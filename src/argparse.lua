@@ -1,101 +1,201 @@
 local class = require "30log"
 
-local Declarative = {}
+local function parse_boundaries(boundaries)
+   if tonumber(boundaries) then
+      return tonumber(boundaries), tonumber(boundaries)
+   end
 
-function Declarative:__init(...)
-   local cl = getmetatable(self)
+   if boundaries == "*" then
+      return 0, math.huge
+   end
 
-   for _, field in ipairs(self._fields) do
-      if not cl[field] then
-         cl[field] = function(s, value)
-            s["_" .. field] = value
-            return s
+   if boundaries == "+" then
+      return 1, math.huge
+   end
+
+   if boundaries == "?" then
+      return 0, 1
+   end
+
+   if boundaries:match "^%d+%-%d+$" then
+      local min, max = boundaries:match "^(%d+)%-(%d+)$"
+      return tonumber(min), tonumber(max)
+   end
+
+   if boundaries:match "^%d+%+$" then
+      local min = boundaries:match "^(%d+)%+$"
+      return tonumber(min), math.huge
+   end
+end
+
+local function add_setters(cl, fields)
+   for field, setter in pairs(fields) do
+      cl[field] = function(self, value)
+         if setter then
+            setter(self, value)
          end
+
+         self["_"..field] = value
+         return self
       end
    end
 
-   self(...)
-end
+   cl.__init = function(self, ...)
+      return self(...)
+   end
 
-function Declarative:__call(...)
-   local name_or_options
+   cl.__call = function(self, ...)
+      local name_or_options
 
-   for i=1, select("#", ...) do
-      name_or_options = select(i, ...)
+      for i=1, select("#", ...) do
+         name_or_options = select(i, ...)
 
-      if type(name_or_options) == "string" then
-         if self._aliases then
-            table.insert(self._aliases, name_or_options)
-         end
+         if type(name_or_options) == "string" then
+            if self._aliases then
+               table.insert(self._aliases, name_or_options)
+            end
 
-         if not self._name then
-            self._name = name_or_options
-         end
-      elseif type(name_or_options) == "table" then
-         for _, field in ipairs(self._fields) do
-            if name_or_options[field] ~= nil then
-               self["_" .. field] = name_or_options[field]
+            if not self._name then
+               self._name = name_or_options
+            end
+         elseif type(name_or_options) == "table" then
+            for field, setter in pairs(fields) do
+               if name_or_options[field] ~= nil then
+                  self[field](self, name_or_options[field])
+               end
             end
          end
       end
+
+      return self
    end
 
-   return self
+   return cl
 end
 
-local Parser = class {
+local typecheck = setmetatable({}, {
+   __index = function(self, type_)
+      local typechecker_factory = function(field)
+         return function(_, value)
+            if type(value) ~= type_ then
+               error(("bad field '%s' (%s expected, got %s)"):format(field, type_, type(value)))
+            end
+         end
+      end
+
+      self[type_] = typechecker_factory
+      return typechecker_factory
+   end
+})
+
+local noop = false
+
+local function aliased_name(self, name)
+   typecheck.string "name" (self, name)
+
+   table.insert(self._aliases, name)
+end
+
+local function aliased_aliases(self, aliases)
+   typecheck.table "aliases" (self, aliases)
+
+   if not self._name then
+      self._name = aliases[1]
+   end
+end
+
+local function boundaries(field)
+   return function(self, value)
+      local min, max = parse_boundaries(value)
+
+      if not min then
+         error(("bad field '%s'"):format(field))
+      end
+
+      self["_min"..field], self["_max"..field] = min, max
+   end
+end
+
+local function convert(self, value)
+   if type(value) ~= "function" then
+      if type(value) ~= "table" then
+         error(("bad field 'convert' (function or table expected, got %s)"):format(type(value)))
+      end
+   end
+end
+
+local Parser = add_setters(class {
    __name = "Parser",
    _arguments = {},
    _options = {},
    _commands = {},
    _require_command = true,
-   _add_help = true,
-   _fields = {
-      "name", "description", "epilog", "require_command",
-      "usage", "help", "add_help"
-   }
-}:include(Declarative)
+   _add_help = true
+}, {
+   name = typecheck.string "name",
+   description = typecheck.string "description",
+   epilog = typecheck.string "epilog",
+   require_command = typecheck.boolean "require_command",
+   usage = typecheck.string "usage",
+   help = typecheck.string "help",
+   add_help = noop
+})
 
-local Command = Parser:extends {
+local Command = add_setters(Parser:extends {
    __name = "Command",
-   _aliases = {},
-   _fields = {
-      "name", "aliases", "description", "epilog", 
-      "target", "require_command", "action", "usage",
-      "help", "add_help"
-   }
-}
+   _aliases = {}
+}, {
+   name = aliased_name,
+   aliases = aliased_aliases,
+   description = typecheck.string "description",
+   epilog = typecheck.string "epilog",
+   target = typecheck.string "target",
+   require_command = typecheck.boolean "require_command",
+   action = typecheck["function"] "action",
+   usage = typecheck.string "usage",
+   help = typecheck.string "help",
+   add_help = noop
+})
 
-local Argument = class {
+local Argument = add_setters(class {
    __name = "Argument",
-   _args = 1,
-   _count = 1,
-   _defmode = "unused",
-   _fields = {
-      "name", "description", "target", "args",
-      "minargs", "maxargs", "default", "defmode",
-      "convert", "usage", "argname"
-   }
-}:include(Declarative)
+   _minargs = 1,
+   _maxargs = 1,
+   _mincount = 1,
+   _maxcount = 1,
+   _defmode = "unused"
+}, {
+   name = typecheck.string "name",
+   description = typecheck.string "description",
+   target = typecheck.string "target",
+   args = boundaries "args",
+   default = typecheck.string "default",
+   defmode = typecheck.string "defmode",
+   convert = convert,
+   usage = typecheck.string "usage",
+   argname = typecheck.string "argname"
+})
 
-local Option = Argument:extends {
+local Option = add_setters(Argument:extends {
    __name = "Option",
    _aliases = {},
-   _count = "?",
-   _overwrite = true,
-   _fields = {
-      "name", "aliases", "description", "target", 
-      "args", "minargs", "maxargs", "count",
-      "mincount", "maxcount", "default", "defmode",
-      "convert", "overwrite", "action", "usage",
-      "argname"
-   }
-}
-
-local Flag = Option:extends {
-   __name = "Flag",
-   _args = 0
-}
+   _mincount = 0,
+   _overwrite = true
+}, {
+   name = aliased_name,
+   aliases = aliased_aliases,
+   description = typecheck.string "description",
+   target = typecheck.string "target",
+   args = boundaries "args",
+   count = boundaries "count",
+   default = typecheck.string "default",
+   defmode = typecheck.string "defmode",
+   convert = convert,
+   overwrite = typecheck.boolean "overwrite",
+   action = typecheck["function"] "action",
+   usage = typecheck.string "usage",
+   argname = typecheck.string "argname"
+})
 
 function Argument:get_arg_usage(argname)
    argname = self._argname or argname
@@ -169,47 +269,8 @@ function Argument:make_type()
    end
 end
 
-local function parse_boundaries(boundaries)
-   if tonumber(boundaries) then
-      return tonumber(boundaries), tonumber(boundaries)
-   end
-
-   if boundaries == "*" then
-      return 0, math.huge
-   end
-
-   if boundaries == "+" then
-      return 1, math.huge
-   end
-
-   if boundaries == "?" then
-      return 0, 1
-   end
-
-   if boundaries:match "^%d+%-%d+$" then
-      local min, max = boundaries:match "^(%d+)%-(%d+)$"
-      return tonumber(min), tonumber(max)
-   end
-
-   if boundaries:match "^%d+%+$" then
-      local min = boundaries:match "^(%d+)%+$"
-      return tonumber(min), math.huge
-   end
-end
-
-function Argument:make_boundaries()
-   if not self._minargs or not self._maxargs then
-      self._minargs, self._maxargs = parse_boundaries(self._args)
-   end
-
-   if not self._mincount or not self._maxcount then
-      self._mincount, self._maxcount = parse_boundaries(self._count)
-   end
-end
-
 function Argument:prepare()
    self:make_target()
-   self:make_boundaries()
    self:make_type()
    return self
 end
@@ -255,7 +316,7 @@ function Parser:option(...)
 end
 
 function Parser:flag(...)
-   local flag = Flag:new(...)
+   local flag = Option:new():args(0)(...)
    table.insert(self._options, flag)
    return flag
 end
@@ -270,22 +331,16 @@ function Parser:prepare()
    self._fullname = self._fullname or self._name
 
    if self._add_help and not self._help_option then
-      self._help_option = self:flag(self._add_help)
+      self._help_option = self:flag()
+         :description "Show this help message and exit. "
          :action(function()
             io.stdout:write(self:get_help() .. "\r\n")
             os.exit(0)
          end)
+         (self._add_help)
 
-      if #self._help_option._aliases == 0 then
-         if self._help_option._name then
-            self._help_option._aliases[1] = self._help_option._name
-         else
-            self._help_option "-h" "--help"
-         end
-      end
-
-      if not self._help_option._description then
-         self._help_option:description "Show this help message and exit. "
+      if not self._help_option._name then
+         self._help_option "-h" "--help"
       end
    end
 

@@ -7,10 +7,10 @@ describe("tests related to actions", function()
 
       local parser = Parser()
       parser:option "-f" "--from" {
-         action = action1
+         action = function(...) return action1(...) end
       }
       parser:option "-p" "--pair" {
-         action = action2,
+         action = function(...) return action2(...) end,
          count = "*",
          args = 2
       }
@@ -28,14 +28,14 @@ describe("tests related to actions", function()
 
       local parser = Parser()
       parser:flag "-v" "--verbose" {
-         action = action1,
+         action = function(...) return action1(...) end,
          count = "0-3"
       }
       parser:flag "-q" "--quiet" {
-         action = action2
+         action = function(...) return action2(...) end
       }
       parser:flag "-a" "--another-flag" {
-         action = action3
+         action = function(...) return action3(...) end
       }
 
       local args = parser:parse{"-vv", "--quiet"}
@@ -53,7 +53,7 @@ describe("tests related to actions", function()
          count = "0-3"
       }
       local add = parser:command "add" {
-         action = action
+         action = function(...) return action(...) end
       }
       add:argument "something"
 
