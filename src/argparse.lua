@@ -1,196 +1,200 @@
-local class = require "30log"
+local Parser, Command, Argument, Option
 
-local function parse_boundaries(boundaries)
-   if tonumber(boundaries) then
-      return tonumber(boundaries), tonumber(boundaries)
-   end
+do -- Create classes with setters
+   local class = require "30log"
 
-   if boundaries == "*" then
-      return 0, math.huge
-   end
+   local function add_setters(cl, fields)
+      for field, setter in pairs(fields) do
+         cl[field] = function(self, value)
+            if setter then
+               setter(self, value)
+            end
 
-   if boundaries == "+" then
-      return 1, math.huge
-   end
-
-   if boundaries == "?" then
-      return 0, 1
-   end
-
-   if boundaries:match "^%d+%-%d+$" then
-      local min, max = boundaries:match "^(%d+)%-(%d+)$"
-      return tonumber(min), tonumber(max)
-   end
-
-   if boundaries:match "^%d+%+$" then
-      local min = boundaries:match "^(%d+)%+$"
-      return tonumber(min), math.huge
-   end
-end
-
-local function add_setters(cl, fields)
-   for field, setter in pairs(fields) do
-      cl[field] = function(self, value)
-         if setter then
-            setter(self, value)
+            self["_"..field] = value
+            return self
          end
-
-         self["_"..field] = value
-         return self
       end
-   end
 
-   cl.__init = function(self, ...)
-      return self(...)
-   end
+      cl.__init = function(self, ...)
+         return self(...)
+      end
 
-   cl.__call = function(self, ...)
-      local name_or_options
+      cl.__call = function(self, ...)
+         local name_or_options
 
-      for i=1, select("#", ...) do
-         name_or_options = select(i, ...)
+         for i=1, select("#", ...) do
+            name_or_options = select(i, ...)
 
-         if type(name_or_options) == "string" then
-            if self._aliases then
-               table.insert(self._aliases, name_or_options)
-            end
+            if type(name_or_options) == "string" then
+               if self._aliases then
+                  table.insert(self._aliases, name_or_options)
+               end
 
-            if not self._name then
-               self._name = name_or_options
-            end
-         elseif type(name_or_options) == "table" then
-            for field, setter in pairs(fields) do
-               if name_or_options[field] ~= nil then
-                  self[field](self, name_or_options[field])
+               if not self._name then
+                  self._name = name_or_options
+               end
+            elseif type(name_or_options) == "table" then
+               for field, setter in pairs(fields) do
+                  if name_or_options[field] ~= nil then
+                     self[field](self, name_or_options[field])
+                  end
                end
             end
          end
+
+         return self
       end
 
-      return self
+      return cl
    end
 
-   return cl
-end
-
-local typecheck = setmetatable({}, {
-   __index = function(self, type_)
-      local typechecker_factory = function(field)
-         return function(_, value)
-            if type(value) ~= type_ then
-               error(("bad field '%s' (%s expected, got %s)"):format(field, type_, type(value)))
+   local typecheck = setmetatable({}, {
+      __index = function(self, type_)
+         local typechecker_factory = function(field)
+            return function(_, value)
+               if type(value) ~= type_ then
+                  error(("bad field '%s' (%s expected, got %s)"):format(field, type_, type(value)))
+               end
             end
          end
+
+         self[type_] = typechecker_factory
+         return typechecker_factory
       end
+   })
 
-      self[type_] = typechecker_factory
-      return typechecker_factory
+   local function aliased_name(self, name)
+      typecheck.string "name" (self, name)
+
+      table.insert(self._aliases, name)
    end
-})
 
-local function aliased_name(self, name)
-   typecheck.string "name" (self, name)
+   local function aliased_aliases(self, aliases)
+      typecheck.table "aliases" (self, aliases)
 
-   table.insert(self._aliases, name)
-end
-
-local function aliased_aliases(self, aliases)
-   typecheck.table "aliases" (self, aliases)
-
-   if not self._name then
-      self._name = aliases[1]
-   end
-end
-
-local function boundaries(field)
-   return function(self, value)
-      local min, max = parse_boundaries(value)
-
-      if not min then
-         error(("bad field '%s'"):format(field))
-      end
-
-      self["_min"..field], self["_max"..field] = min, max
-   end
-end
-
-local function convert(self, value)
-   if type(value) ~= "function" then
-      if type(value) ~= "table" then
-         error(("bad field 'convert' (function or table expected, got %s)"):format(type(value)))
+      if not self._name then
+         self._name = aliases[1]
       end
    end
+
+   local function parse_boundaries(boundaries)
+      if tonumber(boundaries) then
+         return tonumber(boundaries), tonumber(boundaries)
+      end
+
+      if boundaries == "*" then
+         return 0, math.huge
+      end
+
+      if boundaries == "+" then
+         return 1, math.huge
+      end
+
+      if boundaries == "?" then
+         return 0, 1
+      end
+
+      if boundaries:match "^%d+%-%d+$" then
+         local min, max = boundaries:match "^(%d+)%-(%d+)$"
+         return tonumber(min), tonumber(max)
+      end
+
+      if boundaries:match "^%d+%+$" then
+         local min = boundaries:match "^(%d+)%+$"
+         return tonumber(min), math.huge
+      end
+   end
+
+   local function boundaries(field)
+      return function(self, value)
+         local min, max = parse_boundaries(value)
+
+         if not min then
+            error(("bad field '%s'"):format(field))
+         end
+
+         self["_min"..field], self["_max"..field] = min, max
+      end
+   end
+
+   local function convert(self, value)
+      if type(value) ~= "function" then
+         if type(value) ~= "table" then
+            error(("bad field 'convert' (function or table expected, got %s)"):format(type(value)))
+         end
+      end
+   end
+
+   Parser = add_setters(class {
+      __name = "Parser",
+      _arguments = {},
+      _options = {},
+      _commands = {},
+      _require_command = true
+   }, {
+      name = typecheck.string "name",
+      description = typecheck.string "description",
+      epilog = typecheck.string "epilog",
+      require_command = typecheck.boolean "require_command",
+      usage = typecheck.string "usage",
+      help = typecheck.string "help"
+   })
+
+   Command = add_setters(Parser:extends {
+      __name = "Command",
+      _aliases = {}
+   }, {
+      name = aliased_name,
+      aliases = aliased_aliases,
+      description = typecheck.string "description",
+      epilog = typecheck.string "epilog",
+      target = typecheck.string "target",
+      require_command = typecheck.boolean "require_command",
+      action = typecheck["function"] "action",
+      usage = typecheck.string "usage",
+      help = typecheck.string "help"
+   })
+
+   Argument = add_setters(class {
+      __name = "Argument",
+      _minargs = 1,
+      _maxargs = 1,
+      _mincount = 1,
+      _maxcount = 1,
+      _defmode = "unused"
+   }, {
+      name = typecheck.string "name",
+      description = typecheck.string "description",
+      target = typecheck.string "target",
+      args = boundaries "args",
+      default = typecheck.string "default",
+      defmode = typecheck.string "defmode",
+      convert = convert,
+      usage = typecheck.string "usage",
+      argname = typecheck.string "argname"
+   })
+
+   Option = add_setters(Argument:extends {
+      __name = "Option",
+      _aliases = {},
+      _mincount = 0,
+      _overwrite = true
+   }, {
+      name = aliased_name,
+      aliases = aliased_aliases,
+      description = typecheck.string "description",
+      target = typecheck.string "target",
+      args = boundaries "args",
+      count = boundaries "count",
+      default = typecheck.string "default",
+      defmode = typecheck.string "defmode",
+      convert = convert,
+      overwrite = typecheck.boolean "overwrite",
+      action = typecheck["function"] "action",
+      usage = typecheck.string "usage",
+      argname = typecheck.string "argname"
+   })
 end
-
-local Parser = add_setters(class {
-   __name = "Parser",
-   _arguments = {},
-   _options = {},
-   _commands = {},
-   _require_command = true
-}, {
-   name = typecheck.string "name",
-   description = typecheck.string "description",
-   epilog = typecheck.string "epilog",
-   require_command = typecheck.boolean "require_command",
-   usage = typecheck.string "usage",
-   help = typecheck.string "help"
-})
-
-local Command = add_setters(Parser:extends {
-   __name = "Command",
-   _aliases = {}
-}, {
-   name = aliased_name,
-   aliases = aliased_aliases,
-   description = typecheck.string "description",
-   epilog = typecheck.string "epilog",
-   target = typecheck.string "target",
-   require_command = typecheck.boolean "require_command",
-   action = typecheck["function"] "action",
-   usage = typecheck.string "usage",
-   help = typecheck.string "help"
-})
-
-local Argument = add_setters(class {
-   __name = "Argument",
-   _minargs = 1,
-   _maxargs = 1,
-   _mincount = 1,
-   _maxcount = 1,
-   _defmode = "unused"
-}, {
-   name = typecheck.string "name",
-   description = typecheck.string "description",
-   target = typecheck.string "target",
-   args = boundaries "args",
-   default = typecheck.string "default",
-   defmode = typecheck.string "defmode",
-   convert = convert,
-   usage = typecheck.string "usage",
-   argname = typecheck.string "argname"
-})
-
-local Option = add_setters(Argument:extends {
-   __name = "Option",
-   _aliases = {},
-   _mincount = 0,
-   _overwrite = true
-}, {
-   name = aliased_name,
-   aliases = aliased_aliases,
-   description = typecheck.string "description",
-   target = typecheck.string "target",
-   args = boundaries "args",
-   count = boundaries "count",
-   default = typecheck.string "default",
-   defmode = typecheck.string "defmode",
-   convert = convert,
-   overwrite = typecheck.boolean "overwrite",
-   action = typecheck["function"] "action",
-   usage = typecheck.string "usage",
-   argname = typecheck.string "argname"
-})
 
 function Argument:_get_arg_usage(argname)
    argname = self._argname or argname
@@ -290,6 +294,34 @@ function Option:_get_target()
    return self._name:sub(2)
 end
 
+function Parser:_get_fullname()
+   local parent = self._parent
+   local buf = {self._name}
+
+   while parent do
+      table.insert(buf, 1, parent._name)
+      parent = parent._parent
+   end
+
+   return table.concat(buf, " ")
+end
+
+function Parser:_update_charset(charset)
+   charset = charset or {}
+
+   for _, command in ipairs(self._commands) do
+      command:_update_charset(charset)
+   end
+
+   for _, option in ipairs(self._options) do
+      for _, alias in ipairs(option._aliases) do
+         charset[alias:sub(1, 1)] = true
+      end
+   end
+
+   return charset
+end
+
 function Parser:argument(...)
    local argument = Argument:new(...)
    table.insert(self._arguments, argument)
@@ -342,34 +374,6 @@ function Parser:add_help(param)
    end
 
    return self
-end
-
-function Parser:_get_fullname()
-   local parent = self._parent
-   local buf = {self._name}
-
-   while parent do
-      table.insert(buf, 1, parent._name)
-      parent = parent._parent
-   end
-
-   return table.concat(buf, " ")
-end
-
-function Parser:_update_charset(charset)
-   charset = charset or {}
-
-   for _, command in ipairs(self._commands) do
-      command:_update_charset(charset)
-   end
-
-   for _, option in ipairs(self._options) do
-      for _, alias in ipairs(option._aliases) do
-         charset[alias:sub(1, 1)] = true
-      end
-   end
-
-   return charset
 end
 
 local max_usage_width = 70
