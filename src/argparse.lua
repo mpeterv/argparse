@@ -102,7 +102,7 @@ function Argument:get_arg_usage(argname)
    local buf = {}
    local required_argname = argname
 
-   if self._default then
+   if self._default and self._defmode:find "a" then
       required_argname = "[" .. argname .. "]"
    end
 
@@ -132,6 +132,12 @@ end
 function Argument:get_usage()
    if not self._usage then
       self._usage = table.concat(self:get_arg_usage("<" .. self._name .. ">"), " ")
+
+      if self._default and self._defmode:find "c" then
+         if self._maxargs > 1 or (self._minargs == 1 and not self._defmode:find "a") then
+            self._usage = "[" .. self._usage .. "]"
+         end
+      end
    end
 
    return self._usage
