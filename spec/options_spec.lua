@@ -88,6 +88,35 @@ describe("tests related to options", function()
          assert.same({quiet = true, server = "foo"}, args)
       end)
 
+      it("interprets extra option arguments as positional arguments", function()
+         local parser = Parser()
+         parser:argument "input"
+            :args "2+"
+         parser:option "-s" "--server"
+         local args = parser:parse{"foo", "-sFROM", "bar"}
+         assert.same({input = {"foo", "bar"}, server = "FROM"}, args)
+      end)
+
+      it("does not interpret extra option arguments as other option's arguments", function()
+         local parser = Parser()
+         parser:argument "output"
+         parser:option "--input"
+            :args "+"
+         parser:option "-s" "--server"
+         local args = parser:parse{"--input", "foo", "-sFROM", "bar"}
+         assert.same({input = {"foo"}, server = "FROM", output = "bar"}, args)
+      end)
+
+      it("does not pass arguments to options after double hyphen", function()
+         local parser = Parser()
+         parser:argument "input"
+            :args "?"
+         parser:option "--exclude"
+            :args "*"
+         local args = parser:parse{"--exclude", "--", "foo"}
+         assert.same({input = "foo", exclude = {}}, args)
+      end)
+
       describe("Special chars set", function()
          it("handles windows-style options", function()
             local parser = Parser()
@@ -106,8 +135,8 @@ describe("tests related to options", function()
                :count "*"
             parser:command "deep"
                :add_help(false)
-               :option "\\s"
-            local args = parser:parse{"-v", "deep", "\\s", "foo", "-vv"}
+               :option "/s"
+            local args = parser:parse{"-v", "deep", "/s", "foo", "-vv"}
             assert.same({verbose = 3, deep = true, s = "foo"}, args)
          end)
       end)

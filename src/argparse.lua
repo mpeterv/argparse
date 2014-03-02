@@ -790,6 +790,10 @@ function Parser:_parse(args, errhandler)
                   plain = false
                   if data:sub(2, 2) == first then
                      if #data == 2 then
+                        if cur_option then
+                           close(cur_option)
+                        end
+
                         handle_options = false
                      else
                         local equal = data:find "="

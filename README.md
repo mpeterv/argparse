@@ -11,8 +11,6 @@ Almost everything is implemented, and a WIP version will be available soon.
 TODO till first release: 
 
 * Add `Content` section to this README. 
-* Add information about the parsing algorithm to the tutorial. 
-* Add information about the way arguments are stored in the result table to the tutorial. 
 * Add a small example to the beginning of this README. 
 * Check the grammar in this README. 
 * Generate .html file from the tutorial part of this README and put it into `doc` directory. 
@@ -785,7 +783,20 @@ Error: option '-o' must be used at most 1 time
 
 #### Generating usage and help messages
 
-`get_help` and `get_usage` methods of Parser and Command classes can be used to generate their help and usage messages. 
+`:get_help()` and `get_usage:()` methods of Parser and Command classes can be used to generate their help and usage messages. 
+
+#### Parsing algorithm
+
+argparse interprets command-line arguments in the following way: 
+
+Argument | Interpretation
+--- | ---
+`foo` | An argument of an option or a positional argument. 
+`--foo` | An option. 
+`--foo=bar` | An option and its argument. The option must be able to take arguments. 
+`-f` | An option. 
+`-abcdef` | Letters are interpreted as options. If one of them can take an argument, the rest of the string is passed to it. 
+`--` | The rest of the command-line arguments will be interpreted as positional arguments. 
 
 ## Documentation
 
