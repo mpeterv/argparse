@@ -5,7 +5,7 @@ source = {
 }
 description = {
    summary = "A feature-rich command-line argument parser",
-   detailed = "argparse allows you to define positional arguments, options, flags and default values. Provides automatically generated usage, error and help messages. Supports subcommands and generates a hint when a command or an option is mistyped. ",
+   detailed = "argparse supports positional arguments, options, flags, optional arguments, subcommands and more. argparse automatically generates usage, help and error messages. ",
    homepage = "https://github.com/mpeterv/argparse",
    license = "MIT/X11"
 }
@@ -17,5 +17,6 @@ build = {
    type = "builtin",
    modules = {
       argparse = "src/argparse.lua"
-   }
+   },
+   copy_directories = {"doc", "spec"}
 }

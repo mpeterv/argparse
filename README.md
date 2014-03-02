@@ -4,33 +4,94 @@
 
 argparse is a feature-rich command line parser for Lua inspired by argparse for Python. 
 
+argparse supports positional arguments, options, flags, optional arguments, subcommands and more. argparse automatically generates usage, help and error messages. 
+
+Quick glance: 
+
+```lua
+-- script.lua
+local argparse = require "argparse"
+local parser = argparse()
+   :description "An example."
+parser:argument "input"
+   :description "Input file."
+parser:option "-o" "--output"
+   :default "a.out"
+   :description "Output file."
+parser:option "-I" "--include"
+   :count "*"
+   :description "Include locations."
+local args = parser:parse()
+prettyprint(args)
+```
+
+```bash
+$ lua script.lua foo
+```
+
+```
+input: foo
+output: a.out
+include: {}
+```
+
+```bash
+$ lua script.lua foo -I/usr/local/include -I/src -o bar
+```
+
+```
+input: foo
+output: bar
+include: {/usr/local/include, /src}
+```
+
+```bash
+$ lua script.lua foo bar
+```
+
+```
+Usage: script.lua [-o <output>] [-I <include>] [-h] <input>
+
+Error: too many arguments
+```
+
+```bash
+$ lua script.lua --help
+```
+
+```
+Usage: script.lua [-o <output>] [-I <include>] [-h] <input>
+
+An example. 
+
+Arguments: 
+   input                 Input file.
+
+Options: 
+   -o <output>, --output <output>
+                         Output file. (default: a.out)
+   -I <include>, --include <include>
+                         Include locations.
+   -h, --help            Show this help message and exit.
+```
+
+```bash
+$ lua script.lua foo --outptu=bar
+```
+
+```
+Usage: script.lua [-o <output>] [-I <include>] [-h] <input>
+
+Error: unknown option '--outptu'
+Did you mean '--output'?
+```
+
 ## Contents
 
-* [Status](#status)
 * [Installation](#installation)
 * [Tutorial](#tutorial)
 * [Testing](#testing)
 * [License](#license)
-
-## Status
-
-Almost everything is implemented, and a WIP version will be available soon. 
-
-TODO till first release: 
-
-* Add `Content` section to this README. 
-* Add a small example to the beginning of this README. 
-* Check the grammar in this README. 
-* Generate .html file from the tutorial part of this README and put it into `doc` directory. 
-* Write a rockspec for `v0.1` and push it to moonrocks. 
-
-TODO till first 'stable' release: 
-
-* Write a formal reference. 
-* Write more tests. Some cases are still poorly covered. 
-* Add mutually exclusive groups(`:mutex{option1, option2, ...}`). 
-* Optionally(?): Add comments to the source. 
-* Optionally: get rid of `30log` dependency. It's great but can cause problems with old luarocks versions. 
 
 ## Installation
 
