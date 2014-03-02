@@ -687,7 +687,7 @@ Error: malformed argument 'baz'
 <p>If the field <code>add_help</code> of a parser is set to false, no help option will be added to it. Otherwise, the value of the field will be used to configure it. </p>
 
 <div class="highlight highlight-lua"><pre><span class="kd">local</span> <span class="n">parser</span> <span class="o">=</span> <span class="n">argparse</span><span class="p">()</span>
-   <span class="p">:</span><span class="n">add_help</span> <span class="p">{</span><span class="n">name</span> <span class="o">=</span> <span class="s2">"</span><span class="s">/?"</span><span class="p">}</span>
+   <span class="p">:</span><span class="n">add_help</span> <span class="s2">"</span><span class="s">/?"</span>
 </pre></div>
 
 <div class="highlight highlight-bash"><pre><span class="nv">$ </span>lua script.lua /?
