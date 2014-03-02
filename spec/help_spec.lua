@@ -23,7 +23,7 @@ describe("tests related to help message generation", function()
 
    it("uses custom help option", function()
       local parser = Parser "foo"
-         :add_help {name = "/?"}
+         :add_help "/?"
       assert.equal(table.concat({
          "Usage: foo [/?]",
          "",

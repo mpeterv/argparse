@@ -6,10 +6,7 @@ do -- Create classes with setters
    local function add_setters(cl, fields)
       for field, setter in pairs(fields) do
          cl[field] = function(self, value)
-            if setter then
-               setter(self, value)
-            end
-
+            setter(self, value)
             self["_"..field] = value
             return self
          end
@@ -125,6 +122,28 @@ do -- Create classes with setters
       end
    end
 
+   local function add_help(self, param)
+      if self._has_help then
+         table.remove(self._options)
+         self._has_help = false
+      end
+
+      if param then
+         local help = self:flag()
+            :description "Show this help message and exit. "
+            :action(function()
+               io.stdout:write(self:get_help() .. "\r\n")
+               os.exit(0)
+            end)(param)
+
+         if not help._name then
+            help "-h" "--help"
+         end
+
+         self._has_help = true
+      end
+   end
+
    Parser = add_setters(class {
       __name = "Parser",
       _arguments = {},
@@ -137,7 +156,8 @@ do -- Create classes with setters
       epilog = typecheck.string "epilog",
       require_command = typecheck.boolean "require_command",
       usage = typecheck.string "usage",
-      help = typecheck.string "help"
+      help = typecheck.string "help",
+      add_help = add_help
    })
 
    Command = add_setters(Parser:extends {
@@ -152,7 +172,8 @@ do -- Create classes with setters
       require_command = typecheck.boolean "require_command",
       action = typecheck["function"] "action",
       usage = typecheck.string "usage",
-      help = typecheck.string "help"
+      help = typecheck.string "help",
+      add_help = add_help
    })
 
    Argument = add_setters(class {
@@ -339,30 +360,6 @@ function Parser:command(...)
    command._parent = self
    table.insert(self._commands, command)
    return command
-end
-
-function Parser:add_help(param)
-   if self._has_help then
-      table.remove(self._options)
-      self._has_help = false
-   end
-   
-   if param then
-      local help = self:flag()
-         :description "Show this help message and exit. "
-         :action(function()
-            io.stdout:write(self:get_help() .. "\r\n")
-            os.exit(0)
-         end)(param)
-
-      if not help._name then
-         help "-h" "--help"
-      end
-
-      self._has_help = true
-   end
-
-   return self
 end
 
 local max_usage_width = 70
