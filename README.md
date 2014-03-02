@@ -97,7 +97,7 @@ Did you mean '--output'?
 
 ### Using luarocks
 
-Installing argparse using luarocks ~~is~~ will be easy. 
+Installing argparse using luarocks is simple. 
 
 ```bash
 $ luarocks install argparse
