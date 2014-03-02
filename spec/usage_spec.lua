@@ -131,18 +131,6 @@ describe("tests related to usage message generation", function()
          )
       end)
 
-      it("uses per-option message provided by user", function()
-         local parser = Parser "foo"
-            :add_help(false)
-         parser:flag "-q" "--quiet"
-            :usage "[-q | --quiet]"
-
-         assert.equal(
-            [=[Usage: foo [-q | --quiet]]=],
-            parser:get_usage()
-         )
-      end)
-
       it("uses argnames provided by user", function()
          local parser = Parser "foo"
             :add_help(false)

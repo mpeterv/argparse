@@ -170,7 +170,6 @@ do -- Create classes with setters
       default = typecheck.string "default",
       defmode = typecheck.string "defmode",
       convert = convert,
-      usage = typecheck.string "usage",
       argname = typecheck.string "argname"
    })
 
@@ -191,7 +190,6 @@ do -- Create classes with setters
       convert = convert,
       overwrite = typecheck.boolean "overwrite",
       action = typecheck["function"] "action",
-      usage = typecheck.string "usage",
       argname = typecheck.string "argname"
    })
 end
@@ -229,10 +227,6 @@ function Argument:_get_arg_usage(argname)
 end
 
 function Argument:_get_usage()
-   if self._usage then
-      return self._usage
-   end
-
    local usage = table.concat(self:_get_arg_usage("<" .. self._name .. ">"), " ")
 
    if self._default and self._defmode:find "u" then
@@ -265,10 +259,6 @@ function Argument:_get_type()
 end
 
 function Option:_get_usage()
-   if self._usage then
-      return self._usage
-   end
-
    local usage = self:_get_arg_usage("<" .. self:_get_target() .. ">")
    table.insert(usage, 1, self._name)
    usage = table.concat(usage, " ")
