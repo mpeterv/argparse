@@ -27,7 +27,7 @@ do -- Create classes with setters
                   table.insert(self._aliases, name_or_options)
                end
 
-               if not self._name then
+               if not self._aliases or not self._name then
                   self._name = name_or_options
                end
             elseif type(name_or_options) == "table" then
@@ -576,13 +576,6 @@ end
 
 function Parser:_parse(args, errhandler)
    args = args or arg
-   local noname
-
-   if not self._name then
-      noname = true
-      self._name = args[0]
-   end
-
    local parser
    local charset
    local options = {}
@@ -889,10 +882,6 @@ function Parser:_parse(args, errhandler)
       end
    end
 
-   if noname then
-      self._name = nil
-   end
-
    return result
 end
 
@@ -927,5 +916,5 @@ function Parser:pparse(args)
 end
 
 return function(...)
-   return Parser():add_help(true)(...)
+   return Parser(arg[0]):add_help(true)(...)
 end

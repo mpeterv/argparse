@@ -1,7 +1,7 @@
 #!/usr/bin/env lua
 local Parser = require "argparse"
 
-local parser = Parser "test"
+local parser = Parser()
    :description "A testing program. "
    :require_command(false)
 
@@ -26,6 +26,8 @@ install:option "-f" "--from"
    :description "Fetch the rock from this server. "
    :target "server"
 
+local usage = parser:get_usage()
+local help = parser:get_help()
 local args = parser:parse()
 
 print(args.input)

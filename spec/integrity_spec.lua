@@ -5,7 +5,7 @@ describe("tests related to CLI behaviour #unsafe", function()
       it("generates correct error message without arguments", function()
          local handler = io.popen("./spec/script 2>&1", "r")
          assert.equal(table.concat({
-            "Usage: test [-v] [-h] <input> [<command>] ...",
+            "Usage: ./spec/script [-v] [-h] <input> [<command>] ...",
             "",
             "Error: too few arguments",
             ""
@@ -16,7 +16,7 @@ describe("tests related to CLI behaviour #unsafe", function()
       it("generates correct error message with too many arguments", function()
          local handler = io.popen("./spec/script foo bar 2>&1", "r")
          assert.equal(table.concat({
-            "Usage: test [-v] [-h] <input> [<command>] ...",
+            "Usage: ./spec/script [-v] [-h] <input> [<command>] ...",
             "",
             "Error: unknown command 'bar'",
             ""
@@ -27,7 +27,7 @@ describe("tests related to CLI behaviour #unsafe", function()
       it("generates correct error message with unexpected argument", function()
          local handler = io.popen("./spec/script --verbose=true 2>&1", "r")
          assert.equal(table.concat({
-            "Usage: test [-v] [-h] <input> [<command>] ...",
+            "Usage: ./spec/script [-v] [-h] <input> [<command>] ...",
             "",
             "Error: option '--verbose' does not take arguments",
             ""
@@ -38,7 +38,7 @@ describe("tests related to CLI behaviour #unsafe", function()
       it("generates correct error message with unexpected option", function()
          local handler = io.popen("./spec/script -vq 2>&1", "r")
          assert.equal(table.concat({
-            "Usage: test [-v] [-h] <input> [<command>] ...",
+            "Usage: ./spec/script [-v] [-h] <input> [<command>] ...",
             "",
             "Error: unknown option '-q'",
             "Did you mean one of these: '-h' '-v'?",
@@ -50,7 +50,7 @@ describe("tests related to CLI behaviour #unsafe", function()
       it("generates correct error message and tip with unexpected command", function()
          local handler = io.popen("./spec/script foo nstall 2>&1", "r")
          assert.equal(table.concat({
-            "Usage: test [-v] [-h] <input> [<command>] ...",
+            "Usage: ./spec/script [-v] [-h] <input> [<command>] ...",
             "",
             "Error: unknown command 'nstall'",
             "Did you mean 'install'?",
@@ -62,7 +62,7 @@ describe("tests related to CLI behaviour #unsafe", function()
       it("generates correct error message without arguments in command", function()
          local handler = io.popen("./spec/script foo install 2>&1", "r")
          assert.equal(table.concat({
-            "Usage: test install [-f <server>] [-h] <rock> [<version>]",
+            "Usage: ./spec/script install [-f <server>] [-h] <rock> [<version>]",
             "",
             "Error: too few arguments",
             ""
@@ -73,7 +73,7 @@ describe("tests related to CLI behaviour #unsafe", function()
       it("generates correct error message and tip in command", function()
          local handler = io.popen("./spec/script foo install bar --form=there 2>&1", "r")
          assert.equal(table.concat({
-            "Usage: test install [-f <server>] [-h] <rock> [<version>]",
+            "Usage: ./spec/script install [-f <server>] [-h] <rock> [<version>]",
             "",
             "Error: unknown option '--form'",
             "Did you mean '--from'?",
@@ -87,7 +87,7 @@ describe("tests related to CLI behaviour #unsafe", function()
       it("generates correct help message", function()
          local handler = io.popen("./spec/script --help 2>&1", "r")
          assert.equal(table.concat({
-            "Usage: test [-v] [-h] <input> [<command>] ...",
+            "Usage: ./spec/script [-v] [-h] <input> [<command>] ...",
             "",
             "A testing program. ",
             "",
@@ -108,7 +108,7 @@ describe("tests related to CLI behaviour #unsafe", function()
       it("generates correct help message for command", function()
          local handler = io.popen("./spec/script foo install --help 2>&1", "r")
          assert.equal(table.concat({
-            "Usage: test install [-f <server>] [-h] <rock> [<version>]",
+            "Usage: ./spec/script install [-f <server>] [-h] <rock> [<version>]",
             "",
             "Install a rock. ",
             "",
