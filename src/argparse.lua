@@ -215,8 +215,8 @@ do -- Create classes with setters
    })
 end
 
-function Argument:_get_arg_usage(argname)
-   argname = self._argname or argname
+function Argument:_get_argument_list()
+   local argname = self:_get_argname()
    local buf = {}
    local required_argname = argname
 
@@ -248,7 +248,7 @@ function Argument:_get_arg_usage(argname)
 end
 
 function Argument:_get_usage()
-   local usage = table.concat(self:_get_arg_usage("<" .. self._name .. ">"), " ")
+   local usage = table.concat(self:_get_argument_list(), " ")
 
    if self._default and self._defmode:find "u" then
       if self._maxargs > 1 or (self._minargs == 1 and not self._defmode:find "a") then
@@ -279,8 +279,53 @@ function Argument:_get_type()
    end
 end
 
+function Argument:_get_argname()
+   return self._argname or ("<"..self._name..">")
+end
+
+function Option:_get_argname()
+   return self._argname or ("<"..self:_get_target()..">")
+end
+
+function Argument:_get_label()
+   return self._name
+end
+
+function Option:_get_label()
+   local variants = {}
+   local argument_list = self:_get_argument_list()
+   table.insert(argument_list, 1, nil)
+
+   for _, alias in ipairs(self._aliases) do
+      argument_list[1] = alias
+      table.insert(variants, table.concat(argument_list, " "))
+   end
+
+   return table.concat(variants, ", ")
+end
+
+function Command:_get_label()
+   return table.concat(self._aliases, ", ")
+end
+
+function Argument:_get_description()
+   if self._default then
+      if self._description then
+         return ("%s (default: %s)"):format(self._description, self._default)
+      else
+         return ("default: %s"):format(self._default)
+      end
+   else
+      return self._description or ""
+   end
+end
+
+function Command:_get_description()
+   return self._description or ""
+end
+
 function Option:_get_usage()
-   local usage = self:_get_arg_usage("<" .. self:_get_target() .. ">")
+   local usage = self:_get_argument_list()
    table.insert(usage, 1, self._name)
    usage = table.concat(usage, " ")
 
@@ -424,32 +469,6 @@ local function make_two_columns(s1, s2)
    end
 end
 
-local function make_description(element)
-   if element._default then
-      if element._description then
-         return ("%s (default: %s)"):format(element._description, element._default)
-      else
-         return ("default: %s"):format(element._default)
-      end
-   else
-      return element._description or ""
-   end
-end
-
-local function make_name(option)
-   local variants = {}
-   local variant
-
-   for _, alias in ipairs(option._aliases) do
-      variant = option:_get_arg_usage("<" .. option:_get_target() .. ">")
-      table.insert(variant, 1, alias)
-      variant = table.concat(variant, " ")
-      table.insert(variants, variant)
-   end
-
-   return table.concat(variants, ", ")
-end
-
 function Parser:get_help()
    if self._help then
       return self._help
@@ -461,34 +480,18 @@ function Parser:get_help()
       table.insert(blocks, self._description)
    end
 
-   if #self._arguments > 0 then
-      local buf = {"Arguments: "}
+   local labels = {"Arguments: ", "Options: ", "Commands: "}
 
-      for _, argument in ipairs(self._arguments) do
-         table.insert(buf, make_two_columns(argument._name, make_description(argument)))
+   for i, elements in ipairs{self._arguments, self._options, self._commands} do
+      if #elements > 0 then
+         local buf = {labels[i]}
+
+         for _, element in ipairs(elements) do
+            table.insert(buf, make_two_columns(element:_get_label(), element:_get_description()))
+         end
+
+         table.insert(blocks, table.concat(buf, "\r\n"))
       end
-
-      table.insert(blocks, table.concat(buf, "\r\n"))
-   end
-
-   if #self._options > 0 then
-      local buf = {"Options: "}
-
-      for _, option in ipairs(self._options) do
-         table.insert(buf, make_two_columns(make_name(option), make_description(option)))
-      end
-
-      table.insert(blocks, table.concat(buf, "\r\n"))
-   end
-
-   if #self._commands > 0 then
-      local buf = {"Commands: "}
-
-      for _, command in ipairs(self._commands) do
-         table.insert(buf, make_two_columns(table.concat(command._aliases, ", "), command._description or ""))
-      end
-
-      table.insert(blocks, table.concat(buf, "\r\n"))
    end
 
    if self._epilog then
