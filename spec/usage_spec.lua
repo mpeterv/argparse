@@ -143,5 +143,19 @@ describe("tests related to usage message generation", function()
             parser:get_usage()
          )
       end)
+
+      it("uses array of argnames provided by user", function()
+         local parser = Parser "foo"
+            :add_help(false)
+         parser:option "--pair"
+            :args(2)
+            :count "*"
+            :argname{"<key>", "<value>"}
+
+         assert.equal(
+            [=[Usage: foo [--pair <key> <value>]]=],
+            parser:get_usage()
+         )
+      end)
    end)
 end)

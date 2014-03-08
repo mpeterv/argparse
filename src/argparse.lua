@@ -122,6 +122,14 @@ do -- Create classes with setters
       end
    end
 
+   local function argname(self, value)
+      if type(value) ~= "string" then
+         if type(value) ~= "table" then
+            error(("bad field 'argname' (string or table expected, got %s)"):format(type(value)))
+         end
+      end
+   end
+
    local function add_help(self, param)
       if self._has_help then
          table.remove(self._options)
@@ -191,7 +199,7 @@ do -- Create classes with setters
       default = typecheck.string "default",
       defmode = typecheck.string "defmode",
       convert = convert,
-      argname = typecheck.string "argname"
+      argname = argname
    })
 
    Option = add_setters(Argument:extends {
@@ -211,28 +219,27 @@ do -- Create classes with setters
       convert = convert,
       overwrite = typecheck.boolean "overwrite",
       action = typecheck["function"] "action",
-      argname = typecheck.string "argname"
+      argname = argname
    })
 end
 
 function Argument:_get_argument_list()
-   local argname = self:_get_argname()
    local buf = {}
-   local required_argname = argname
-
-   if self._default and self._defmode:find "a" then
-      required_argname = "[" .. argname .. "]"
-   end
-
    local i = 1
 
    while i <= math.min(self._minargs, 3) do
-      table.insert(buf, required_argname)
+      local argname = self:_get_argname_i(i)
+
+      if self._default and self._defmode:find "a" then
+         argname = "[" .. argname .. "]"
+      end
+
+      table.insert(buf, argname)
       i = i+1
    end
 
    while i <= math.min(self._maxargs, 3) do
-      table.insert(buf, "[" .. argname .. "]")
+      table.insert(buf, "[" .. self:_get_argname_i(i) .. "]")
       i = i+1
 
       if self._maxargs == math.huge then
@@ -276,6 +283,16 @@ function Argument:_get_type()
       else
          return "twodimensional"
       end
+   end
+end
+
+function Argument:_get_argname_i(i)
+   local argname = self:_get_argname()
+
+   if type(argname) == "table" then
+      return argname[i]
+   else
+      return argname
    end
 end
 
