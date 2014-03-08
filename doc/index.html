@@ -746,6 +746,23 @@ Options:
    -h, --help            Show this help message and exit. 
 </code></pre>
 
+<p><code>argname</code> can be an array of placeholders. </p>
+
+<div class="highlight highlight-lua"><pre><span class="n">parser</span><span class="p">:</span><span class="n">option</span> <span class="s2">"</span><span class="s">--pair"</span>
+   <span class="p">:</span><span class="n">args</span><span class="p">(</span><span class="mi">2</span><span class="p">)</span>
+   <span class="p">:</span><span class="n">argname</span><span class="p">{</span><span class="s2">"</span><span class="s">&lt;key&gt;"</span><span class="p">,</span> <span class="s2">"</span><span class="s">&lt;value&gt;"</span><span class="p">}</span>
+</pre></div>
+
+<div class="highlight highlight-bash"><pre><span class="nv">$ </span>lua script.lua --help
+</pre></div>
+
+<pre><code>Usage: script.lua [--pair &lt;key&gt; &lt;value&gt;] [-h]
+
+Options: 
+   --pair &lt;key&gt; &lt;value&gt;
+   -h, --help            Show this help message and exit. 
+</code></pre>
+
 <h3>
 <a name="prohibiting-overuse-of-options" class="anchor" href="#prohibiting-overuse-of-options"><span class="octicon octicon-link"></span></a>Prohibiting overuse of options</h3>
 
