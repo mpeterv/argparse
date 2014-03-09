@@ -574,8 +574,10 @@ local function plural(x)
    return "s"
 end
 
+local default_cmdline = arg or {}
+
 function Parser:_parse(args, errhandler)
-   args = args or arg
+   args = args or default_cmdline
    local parser
    local charset
    local options = {}
@@ -916,5 +918,5 @@ function Parser:pparse(args)
 end
 
 return function(...)
-   return Parser(arg and arg[0]):add_help(true)(...)
+   return Parser(default_cmdline[0]):add_help(true)(...)
 end
