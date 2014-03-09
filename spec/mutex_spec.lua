@@ -18,6 +18,18 @@ describe("tests related to mutexes", function()
       assert.same({}, args)
    end)
 
+   it("handles mutex with default value", function()
+      local parser = Parser()
+      parser:mutex(
+         parser:flag "-q" "--quiet",
+         parser:option "-o" "--output"
+            :default "a.out"
+      )
+
+      local args = parser:parse{"-q"}
+      assert.same({quiet = true, output = "a.out"}, args)
+   end)
+
    it("raises an error if mutex is broken", function()
       local parser = Parser()
       parser:mutex(
