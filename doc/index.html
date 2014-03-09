@@ -55,6 +55,8 @@
 <li><a href="#setting-number-of-invocations">Setting number of invocations</a></li>
 </ul>
 </li>
+<li><a href="#mutually-exclusive-groups">Mutually exclusive groups</a></li>
+
 <li>
 <a href="#commands">Commands</a>
 
@@ -406,6 +408,27 @@ optional    {}
 </pre></div>
 
 <pre><code>verbosity   2
+</code></pre>
+
+<h2>
+<a name="mutually-exclusive-groups" class="anchor" href="#mutually-exclusive-groups"><span class="octicon octicon-link"></span></a>Mutually exclusive groups</h2>
+
+<p>A group of options can be marked as mutually exclusive using <code>:mutex()</code> method of the Parser class. </p>
+
+<div class="highlight highlight-lua"><pre><span class="n">parser</span><span class="p">:</span><span class="n">mutex</span><span class="p">(</span>
+   <span class="n">parser</span><span class="p">:</span><span class="n">flag</span> <span class="s2">"</span><span class="s">-q"</span> <span class="s2">"</span><span class="s">--quiet"</span><span class="p">,</span>
+   <span class="n">parser</span><span class="p">:</span><span class="n">flag</span> <span class="s2">"</span><span class="s">-v"</span> <span class="s2">"</span><span class="s">--verbose"</span>
+<span class="p">)</span>
+</pre></div>
+
+<p>If more than one element of a mutually exclusive group is used, an error is raised. </p>
+
+<div class="highlight highlight-bash"><pre><span class="nv">$ </span>lua script.lua -qv
+</pre></div>
+
+<pre><code>Usage: script.lua ([-q] | [-v]) [-h]
+
+Error: option '-v' can not be used together with option '-q'
 </code></pre>
 
 <h2>

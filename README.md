@@ -105,7 +105,7 @@ $ luarocks install argparse
 
 #### Problems with old luarocks versions
 
-You may get an error like `Parse error processing dependency '30log >= 0.8'` if you use luarocks 2.1 or older. In this case, either upgrade to at least luarocks 2.1.1 or install [30log](http://yonaba.github.io/30log/) manually, then download the rockspec for argparse, remove the line `"30log >= 0.8"` and run
+You may get an error like `Parse error processing dependency '30log >= 0.9.1'` if you use luarocks 2.1 or older. In this case, either upgrade to at least luarocks 2.1.1 or install [30log](http://yonaba.github.io/30log/) manually, then download the rockspec for argparse, remove the line `"30log >= 0.9.1"` and run
 
 ```bash
 $ luarocks install /path/to/argparse/rockspec
