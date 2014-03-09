@@ -158,4 +158,25 @@ describe("tests related to usage message generation", function()
          )
       end)
    end)
+
+   it("creates correct usage message for mutexes", function()
+      local parser = Parser "foo"
+         :add_help(false)
+      parser:mutex(
+         parser:flag "-q" "--quiet",
+         parser:flag "-v" "--verbose",
+         parser:flag "-i" "--interactive"
+      )
+      parser:mutex(
+         parser:flag "-l" "--local",
+         parser:option "-f" "--from"
+      )
+      parser:option "--yet-another-option"
+
+      assert.equal(table.concat({
+         "Usage: foo ([-q] | [-v] | [-i]) ([-l] | [-f <from>])",
+         "       [--yet-another-option <yet-another-option>]"
+         }, "\r\n"), parser:get_usage()
+      )
+   end)
 end)

@@ -1,0 +1,67 @@
+local Parser = require "argparse"
+
+describe("tests related to mutexes", function()
+   it("handles mutex correctly", function()
+      local parser = Parser()
+      parser:mutex(
+         parser:flag "-q" "--quiet"
+            :description "Supress logging. ",
+         parser:flag "-v" "--verbose"
+            :description "Print additional debug information. "
+      )
+
+      local args = parser:parse{"-q"}
+      assert.same({quiet = true}, args)
+      args = parser:parse{"-v"}
+      assert.same({verbose = true}, args)
+      args = parser:parse{}
+      assert.same({}, args)
+   end)
+
+   it("raises an error if mutex is broken", function()
+      local parser = Parser()
+      parser:mutex(
+         parser:flag "-q" "--quiet"
+            :description "Supress logging. ",
+         parser:flag "-v" "--verbose"
+            :description "Print additional debug information. "
+      )
+
+      assert.has_error(function() parser:parse{"-qv"} end, "option '-v' can not be used together with option '-q'")
+      assert.has_error(function() parser:parse{"-v", "--quiet"} end, "option '--quiet' can not be used together with option '-v'")
+   end)
+
+   it("handles multiple mutexes", function()
+      local parser = Parser()
+      parser:mutex(
+         parser:flag "-q" "--quiet",
+         parser:flag "-v" "--verbose"
+      )
+      parser:mutex(
+         parser:flag "-l" "--local",
+         parser:option "-f" "--from"
+      )
+
+      local args = parser:parse{"-qq", "-fTHERE"}
+      assert.same({quiet = true, from = "THERE"}, args)
+      args = parser:parse{"-vl"}
+      assert.same({verbose = true, ["local"] = true}, args)
+   end)
+
+   it("handles mutexes in commands", function()
+      local parser = Parser()
+      parser:mutex(
+         parser:flag "-q" "--quiet",
+         parser:flag "-v" "--verbose"
+      )
+      local install = parser:command "install"
+      install:mutex(
+         install:flag "-l" "--local",
+         install:option "-f" "--from"
+      )
+
+      local args = parser:parse{"install", "-l"}
+      assert.same({install = true, ["local"] = true}, args)
+      assert.has_error(function() parser:parse{"install", "-qlv"} end, "option '-v' can not be used together with option '-q'")
+   end)
+end)

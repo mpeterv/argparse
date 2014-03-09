@@ -157,6 +157,7 @@ do -- Create classes with setters
       _arguments = {},
       _options = {},
       _commands = {},
+      _mutexes = {},
       _require_command = true
    }, {
       name = typecheck.string "name",
@@ -424,6 +425,17 @@ function Parser:command(...)
    return command
 end
 
+function Parser:mutex(...)
+   local options = {...}
+
+   for i, option in ipairs(options) do
+      assert(getmetatable(option) == Option, ("bad argument #%d to 'mutex' (Option expected)"):format(i))
+   end
+
+   table.insert(self._mutexes, options)
+   return self
+end
+
 local max_usage_width = 70
 local usage_welcome = "Usage: "
 
@@ -442,9 +454,25 @@ function Parser:get_usage()
       end
    end
 
+   -- set of mentioned elements
+   local used = {}
+
+   for _, mutex in ipairs(self._mutexes) do
+      local buf = {}
+
+      for _, option in ipairs(mutex) do
+         table.insert(buf, option:_get_usage())
+         used[option] = true
+      end
+
+      add("(" .. table.concat(buf, " | ") .. ")")
+   end
+
    for _, elements in ipairs{self._options, self._arguments} do
       for _, element in ipairs(elements) do
-         add(element:_get_usage())
+         if not used[element] then
+            add(element:_get_usage())
+         end
       end
    end
 
@@ -583,6 +611,8 @@ function Parser:_parse(args, errhandler)
    local options = {}
    local arguments = {}
    local commands
+   local option_mutexes = {}
+   local used_mutexes = {}
    local opt_context = {}
    local com_context
    local result = {}
@@ -726,6 +756,16 @@ function Parser:_parse(args, errhandler)
          invocations[option] = 0
       end
 
+      for _, mutex in ipairs(parser._mutexes) do
+         for _, option in ipairs(mutex) do
+            if not option_mutexes[option] then
+               option_mutexes[option] = {mutex}
+            else
+               table.insert(option_mutexes[option], mutex)
+            end
+         end
+      end
+
       for _, argument in ipairs(parser._arguments) do
          table.insert(arguments, argument)
          invocations[argument] = 0
@@ -784,6 +824,17 @@ function Parser:_parse(args, errhandler)
       end
 
       cur_option = opt_context[data]
+
+      if option_mutexes[cur_option] then
+         for _, mutex in ipairs(option_mutexes[cur_option]) do
+            if used_mutexes[mutex] and used_mutexes[mutex] ~= cur_option then
+               error_("option '%s' can not be used together with option '%s'", data, used_mutexes[mutex]._name)
+            else
+               used_mutexes[mutex] = cur_option
+            end
+         end
+      end
+
       do_action(cur_option)
       invoke(cur_option)
    end
