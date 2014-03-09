@@ -916,5 +916,5 @@ function Parser:pparse(args)
 end
 
 return function(...)
-   return Parser(arg[0]):add_help(true)(...)
+   return Parser(arg and arg[0]):add_help(true)(...)
 end
