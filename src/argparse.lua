@@ -31,7 +31,7 @@ do -- Create classes with setters
                   self._name = name_or_options
                end
             elseif type(name_or_options) == "table" then
-               for field, setter in pairs(fields) do
+               for field in pairs(fields) do
                   if name_or_options[field] ~= nil then
                      self[field](self, name_or_options[field])
                   end
@@ -229,7 +229,7 @@ function Argument:_get_argument_list()
    local i = 1
 
    while i <= math.min(self._minargs, 3) do
-      local argname = self:_get_argname_i(i)
+      local argname = self:_get_argname(i)
 
       if self._default and self._defmode:find "a" then
          argname = "[" .. argname .. "]"
@@ -240,7 +240,7 @@ function Argument:_get_argument_list()
    end
 
    while i <= math.min(self._maxargs, 3) do
-      table.insert(buf, "[" .. self:_get_argname_i(i) .. "]")
+      table.insert(buf, "[" .. self:_get_argname(i) .. "]")
       i = i+1
 
       if self._maxargs == math.huge then
@@ -287,24 +287,26 @@ function Argument:_get_type()
    end
 end
 
-function Argument:_get_argname_i(i)
-   local argname = self:_get_argname()
+-- Returns placeholder for `narg`-th argument. 
+function Argument:_get_argname(narg)
+   local argname = self._argname or self:_get_default_argname()
 
    if type(argname) == "table" then
-      return argname[i]
+      return "<" .. argname[narg] .. ">"
    else
-      return argname
+      return "<" .. argname .. ">"
    end
 end
 
-function Argument:_get_argname()
-   return self._argname or ("<"..self._name..">")
+function Argument:_get_default_argname()
+   return self._name
 end
 
-function Option:_get_argname()
-   return self._argname or ("<"..self:_get_target()..">")
+function Option:_get_default_argname()
+   return self:_get_target()
 end
 
+-- Returns label to be shown in the help message. 
 function Argument:_get_label()
    return self._name
 end
@@ -954,7 +956,7 @@ end
 function Parser:pparse(args)
    local errmsg
    local ok, result = pcall(function()
-      return self:_parse(args, function(parser, err)
+      return self:_parse(args, function(_, err)
          errmsg = err
          return error()
       end)

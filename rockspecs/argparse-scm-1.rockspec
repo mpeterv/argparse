@@ -1,5 +1,5 @@
 package = "argparse"
-version = "git-1"
+version = "scm-1"
 source = {
    url = "git://github.com/mpeterv/argparse.git"
 }
