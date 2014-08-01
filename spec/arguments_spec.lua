@@ -1,4 +1,5 @@
 local Parser = require "argparse"
+getmetatable(Parser()).error = function(_, msg) error(msg) end
 
 describe("tests related to positional arguments", function()
    describe("passing correct arguments", function()

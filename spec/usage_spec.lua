@@ -1,4 +1,5 @@
 local Parser = require "argparse"
+getmetatable(Parser()).error = function(_, msg) error(msg) end
 
 describe("tests related to usage message generation", function()
    it("creates correct usage message for empty parser", function()

@@ -1,5 +1,3 @@
-local Parser = require "argparse"
-
 describe("tests related to CLI behaviour #unsafe", function()
    describe("error messages", function()
       it("generates correct error message without arguments", function()

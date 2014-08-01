@@ -941,12 +941,8 @@ function Parser:_parse(args, errhandler)
 end
 
 function Parser:error(msg)
-   if _TEST then
-      error(msg)
-   else
-      io.stderr:write(("%s\r\n\r\nError: %s\r\n"):format(self:get_usage(), msg))
-      os.exit(1)
-   end
+   io.stderr:write(("%s\r\n\r\nError: %s\r\n"):format(self:get_usage(), msg))
+   os.exit(1)
 end
 
 function Parser:parse(args)
