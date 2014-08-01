@@ -604,7 +604,8 @@ local function plural(x)
    return "s"
 end
 
-local default_cmdline = arg or {}
+-- Compatibility with strict.lua and other checkers:
+local default_cmdline = rawget(_G, "arg") or {}
 
 function Parser:_parse(args, errhandler)
    args = args or default_cmdline
