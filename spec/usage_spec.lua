@@ -137,7 +137,7 @@ describe("tests related to usage message generation", function()
             :add_help(false)
          parser:argument "inputs"
             :args "1-2"
-            :argname "input"
+            :argname "<input>"
 
          assert.equal(
             [=[Usage: foo <input> [<input>]]=],
@@ -151,7 +151,7 @@ describe("tests related to usage message generation", function()
          parser:option "--pair"
             :args(2)
             :count "*"
-            :argname{"key", "value"}
+            :argname{"<key>", "<value>"}
 
          assert.equal(
             [=[Usage: foo [--pair <key> <value>]]=],

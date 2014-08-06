@@ -295,18 +295,18 @@ function Argument:_get_argname(narg)
    local argname = self._argname or self:_get_default_argname()
 
    if type(argname) == "table" then
-      return "<" .. argname[narg] .. ">"
+      return argname[narg]
    else
-      return "<" .. argname .. ">"
+      return argname
    end
 end
 
 function Argument:_get_default_argname()
-   return self._name
+   return "<" .. self._name .. ">"
 end
 
 function Option:_get_default_argname()
-   return self:_get_target()
+   return "<" .. self:_get_target() .. ">"
 end
 
 -- Returns label to be shown in the help message. 
