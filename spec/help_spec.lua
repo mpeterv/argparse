@@ -116,6 +116,44 @@ Sets verbosity level.
       }, "\r\n"), parser:get_help())
    end)
 
+   it("shows default values", function()
+      local parser = Parser "foo"
+      parser:option "-o"
+         :default "a.out"
+      parser:option "-p"
+         :default "8080"
+         :description "Port."
+
+      assert.equal(table.concat({
+         "Usage: foo [-o <o>] [-p <p>] [-h]",
+         "",
+         "Options: ",
+         "   -o <o>                default: a.out",
+         "   -p <p>                Port. (default: 8080)",
+         "   -h, --help            Show this help message and exit. "
+      }, "\r\n"), parser:get_help())
+   end)
+
+   it("does not show default value when show_default == false", function()
+      local parser = Parser "foo"
+      parser:option "-o"
+         :default "a.out"
+         :show_default(false)
+      parser:option "-p"
+         :default "8080"
+         :show_default(false)
+         :description "Port. "
+
+      assert.equal(table.concat({
+         "Usage: foo [-o <o>] [-p <p>] [-h]",
+         "",
+         "Options: ",
+         "   -o <o>",
+         "   -p <p>                Port. ",
+         "   -h, --help            Show this help message and exit. "
+      }, "\r\n"), parser:get_help())
+   end)
+
    it("creates correct help message for commands", function()
       local parser = Parser "foo"
       parser:flag "-q" "--quiet"

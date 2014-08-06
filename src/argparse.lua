@@ -191,7 +191,8 @@ do -- Create classes with setters
       _maxargs = 1,
       _mincount = 1,
       _maxcount = 1,
-      _defmode = "unused"
+      _defmode = "unused",
+      _show_default = true
    }, {
       name = typecheck.string "name",
       description = typecheck.string "description",
@@ -200,7 +201,8 @@ do -- Create classes with setters
       default = typecheck.string "default",
       defmode = typecheck.string "defmode",
       convert = convert,
-      argname = argname
+      argname = argname,
+      show_default = typecheck.boolean "show_default"
    })
 
    Option = add_setters(Argument:extends {
@@ -220,7 +222,8 @@ do -- Create classes with setters
       convert = convert,
       overwrite = typecheck.boolean "overwrite",
       action = typecheck["function"] "action",
-      argname = argname
+      argname = argname,
+      show_default = typecheck.boolean "show_default"
    })
 end
 
@@ -329,7 +332,7 @@ function Command:_get_label()
 end
 
 function Argument:_get_description()
-   if self._default then
+   if self._default and self._show_default then
       if self._description then
          return ("%s (default: %s)"):format(self._description, self._default)
       else
