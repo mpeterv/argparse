@@ -373,6 +373,10 @@ function Option:_get_target()
    return self._name:sub(2)
 end
 
+function Option:_is_vararg()
+   return self._maxargs ~= self._minargs
+end
+
 function Parser:_get_fullname()
    local parent = self._parent
    local buf = {self._name}
@@ -459,25 +463,53 @@ function Parser:get_usage()
       end
    end
 
-   -- set of mentioned elements
-   local used = {}
+   -- This can definitely be refactored into something cleaner
+   local mutex_options = {}
+   local vararg_mutexes = {}
 
+   -- First, put mutexes which do not contain vararg options and remember those which do
    for _, mutex in ipairs(self._mutexes) do
       local buf = {}
+      local is_vararg = false
 
       for _, option in ipairs(mutex) do
+         if option:_is_vararg() then
+            is_vararg = true
+         end
+
          table.insert(buf, option:_get_usage())
-         used[option] = true
+         mutex_options[option] = true
       end
 
-      add("(" .. table.concat(buf, " | ") .. ")")
+      local repr = "(" .. table.concat(buf, " | ") .. ")"
+
+      if is_vararg then
+         table.insert(vararg_mutexes, repr)
+      else
+         add(repr)
+      end
    end
 
-   for _, elements in ipairs{self._options, self._arguments} do
-      for _, element in ipairs(elements) do
-         if not used[element] then
-            add(element:_get_usage())
-         end
+   -- Second, put regular options
+   for _, option in ipairs(self._options) do
+      if not mutex_options[option] and not option:_is_vararg() then
+         add(option:_get_usage())
+      end
+   end
+
+   -- Put positional arguments
+   for _, argument in ipairs(self._arguments) do
+      add(argument:_get_usage())
+   end
+
+   -- Put mutexes containing vararg options
+   for _, mutex_repr in ipairs(vararg_mutexes) do
+      add(mutex_repr)
+   end
+
+   for _, option in ipairs(self._options) do
+      if not mutex_options[option] and option:_is_vararg() then
+         add(option:_get_usage())
       end
    end
 

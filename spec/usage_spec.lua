@@ -41,6 +41,21 @@ describe("tests related to usage message generation", function()
       )
    end)
 
+   it("creates correct usage message for options with variable argument count", function()
+      local parser = Parser "foo"
+         :add_help(false)
+      parser:argument "files"
+         :args "+"
+      parser:flag "-q" "--quiet"
+      parser:option "--globals"
+         :args "*"
+
+      assert.equal(
+         [=[Usage: foo [-q] <files> [<files>] ... [--globals [<globals>] ...]]=],
+         parser:get_usage()
+      )
+   end)
+
    it("creates correct usage message for arguments with default value", function()
       local parser = Parser "foo"
          :add_help(false)
