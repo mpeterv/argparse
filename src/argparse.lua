@@ -783,7 +783,7 @@ function Parser:_parse(args, errhandler)
          end
 
          local type_ = option:_get_type()
-         targets[option] = option:_get_target()
+         targets[option] = option:_get_target():gsub("-", "_")
 
          if type_ == "counter" then
             result[targets[option]] = 0

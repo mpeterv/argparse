@@ -17,6 +17,13 @@ describe("tests related to options", function()
          assert.same({server = "foo"}, args)
       end)
 
+      it("normalizes default target", function()
+         local parser = Parser()
+         parser:option("--from-server")
+         local args = parser:parse({"--from-server", "foo"})
+         assert.same({from_server = "foo"}, args)
+      end)
+
       it("handles non-standard charset", function()
          local parser = Parser()
          parser:option "/s"
