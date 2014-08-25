@@ -306,7 +306,7 @@ function Argument:_get_default_argname()
 end
 
 function Option:_get_default_argname()
-   return "<" .. (self._target or self:_get_default_target()) .. ">"
+   return "<" .. self:_get_default_target() .. ">"
 end
 
 -- Returns label to be shown in the help message. 

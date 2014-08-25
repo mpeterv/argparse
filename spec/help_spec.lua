@@ -85,11 +85,11 @@ describe("tests related to help message generation", function()
       parser:option "--config"
 
       assert.equal(table.concat({
-         "Usage: foo [-q] --from <server> [--config <config>] [-h]",
+         "Usage: foo [-q] --from <from> [--config <config>] [-h]",
          "",
          "Options: ",
          "   -q, --quiet",
-         "   --from <server>",
+         "   --from <from>",
          "   --config <config>",
          "   -h, --help            Show this help message and exit. "
       }, "\r\n"), parser:get_help())

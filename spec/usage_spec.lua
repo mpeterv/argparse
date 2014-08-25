@@ -36,7 +36,7 @@ describe("tests related to usage message generation", function()
       parser:option "--config"
 
       assert.equal(
-         [=[Usage: foo [-q] --from <server> [--config <config>]]=],
+         [=[Usage: foo [-q] --from <from> [--config <config>]]=],
          parser:get_usage()
       )
    end)
