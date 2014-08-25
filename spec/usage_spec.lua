@@ -191,7 +191,7 @@ describe("tests related to usage message generation", function()
 
       assert.equal(table.concat({
          "Usage: foo ([-q] | [-v] | [-i]) ([-l] | [-f <from>])",
-         "       [--yet-another-option <yet-another-option>]"
+         "       [--yet-another-option <yet_another_option>]"
          }, "\r\n"), parser:get_usage()
       )
    end)

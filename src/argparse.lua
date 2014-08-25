@@ -306,7 +306,7 @@ function Argument:_get_default_argname()
 end
 
 function Option:_get_default_argname()
-   return "<" .. self:_get_target() .. ">"
+   return "<" .. (self._target or self:_get_default_target()) .. ">"
 end
 
 -- Returns label to be shown in the help message. 
@@ -359,18 +359,18 @@ function Option:_get_usage()
    return usage
 end
 
-function Option:_get_target()
-   if self._target then
-      return self._target
-   end
+function Option:_get_default_target()
+   local res
 
    for _, alias in ipairs(self._aliases) do
       if alias:sub(1, 1) == alias:sub(2, 2) then
-         return alias:sub(3)
+         res = alias:sub(3)
+         break
       end
    end
 
-   return self._name:sub(2)
+   res = res or self._name:sub(2)
+   return (res:gsub("-", "_"))
 end
 
 function Option:_is_vararg()
@@ -783,7 +783,7 @@ function Parser:_parse(args, errhandler)
          end
 
          local type_ = option:_get_type()
-         targets[option] = option:_get_target():gsub("-", "_")
+         targets[option] = option._target or option:_get_default_target()
 
          if type_ == "counter" then
             result[targets[option]] = 0
