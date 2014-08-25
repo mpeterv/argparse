@@ -89,8 +89,9 @@
 <a href="#configuring-usage-and-help-messages">Configuring usage and help messages</a>
 
 <ul>
-<li><a href="#description-and-epilog">Description and epilog</a></li>
-<li><a href="#argument-placeholder">Argument placeholder</a></li>
+<li><a href="#setting-description-and-epilog">Setting description and epilog</a></li>
+<li><a href="#setting-argument-placeholder">Setting argument placeholder</a></li>
+<li><a href="#hiding-default-value">Hiding default value</a></li>
 </ul>
 </li>
 <li><a href="#prohibiting-overuse-of-options">Prohibiting overuse of options</a></li>
@@ -302,29 +303,30 @@ optional    baz
 <pre><code>from    there
 </code></pre>
 
-<p>For an option, default index used to store data is the first 'long' alias (an alias starting with two control characters) or just the first alias, without control characters. </p>
+<p>For an option, default index used to store arguments passed to it is the first 'long' alias (an alias starting with two control characters) or just the first alias, without control characters. Hyphens in the default index are replaced with underscores. In the following table it is assumed that <code>local args = parser:parse()</code> have been executed. </p>
 
-<p>Sometimes it is useful to explicitly set the index using <code>target</code> field to improve readability of help messages. </p>
+<table>
+<thead><tr>
+<th>Option's aliases</th>
+<th>Location of option's arguments</th>
+</tr></thead>
+<tbody>
+<tr>
+<td><code>-o</code></td>
+<td><code>args.o</code></td>
+</tr>
+<tr>
+<td><code>-o</code> <code>--output</code></td>
+<td><code>args.output</code></td>
+</tr>
+<tr>
+<td><code>-s</code> <code>--from-server</code></td>
+<td><code>args.from_server</code></td>
+</tr>
+</tbody>
+</table>
 
-<div class="highlight highlight-lua"><pre><span class="n">parser</span><span class="p">:</span><span class="n">option</span> <span class="s2">"</span><span class="s">-f"</span> <span class="s2">"</span><span class="s">--from"</span>
-   <span class="p">:</span><span class="n">target</span> <span class="s2">"</span><span class="s">server"</span>
-</pre></div>
-
-<div class="highlight highlight-bash"><pre><span class="nv">$ </span>lua script.lua --help
-</pre></div>
-
-<pre><code>Usage: script.lua [-f &lt;server&gt;] [-h]
-
-Options: 
-   -f &lt;server&gt;, --from &lt;server&gt;
-   -h, --help            Show this help message and exit. 
-</code></pre>
-
-<div class="highlight highlight-bash"><pre><span class="nv">$ </span>lua script.lua --from there
-</pre></div>
-
-<pre><code>server  there
-</code></pre>
+<p>As with arguments, the index can be explicitly set using <code>target</code> field. </p>
 
 <h3>
 <a name="flags" class="anchor" href="#flags"><span class="octicon octicon-link"></span></a>Flags</h3>
@@ -726,7 +728,7 @@ Options:
 <a name="configuring-usage-and-help-messages" class="anchor" href="#configuring-usage-and-help-messages"><span class="octicon octicon-link"></span></a>Configuring usage and help messages</h3>
 
 <h4>
-<a name="description-and-epilog" class="anchor" href="#description-and-epilog"><span class="octicon octicon-link"></span></a>Description and epilog</h4>
+<a name="setting-description-and-epilog" class="anchor" href="#setting-description-and-epilog"><span class="octicon octicon-link"></span></a>Setting description and epilog</h4>
 
 <p>The value of <code>description</code> field of a parser is placed between the usage message and the argument list in the help message. </p>
 
@@ -751,7 +753,7 @@ An epilog.
 </code></pre>
 
 <h4>
-<a name="argument-placeholder" class="anchor" href="#argument-placeholder"><span class="octicon octicon-link"></span></a>Argument placeholder</h4>
+<a name="setting-argument-placeholder" class="anchor" href="#setting-argument-placeholder"><span class="octicon octicon-link"></span></a>Setting argument placeholder</h4>
 
 <p>For options and arguments, <code>argname</code> field controls the placeholder for the argument in the usage message. </p>
 
@@ -783,6 +785,26 @@ Options:
 
 Options: 
    --pair &lt;key&gt; &lt;value&gt;
+   -h, --help            Show this help message and exit. 
+</code></pre>
+
+<h4>
+<a name="hiding-default-value" class="anchor" href="#hiding-default-value"><span class="octicon octicon-link"></span></a>Hiding default value</h4>
+
+If an option has a default value, argparse will automatically append <code>(default: &lt;value>&gt;)</code> to its usage message. This can be disabled using <code>show_default</code> field: 
+
+<div class="highlight highlight-lua"><pre><span class="n">parser</span><span class="p">:</span><span class="n">option</span> <span class="s2">"</span><span class="s">-o"</span> <span class="s2">"</span><span class="s">--output"</span>
+   <span class="p">:</span><span class="n">default</span> <span class="s2">"</span><span class="s">a.out"</span>
+   <span class="p">:</span><span class="n">show_default</span><span class="p">(</span><span class="kc">false</span><span class="p">)</span>
+</pre></div>
+
+<div class="highlight highlight-bash"><pre><span class="nv">$ </span>lua script.lua --help
+</pre></div>
+
+<pre><code>Usage: script [-o &lt;output&gt;] [-h]
+
+Options: 
+   -o &lt;output&gt;, --output &lt;output&gt;
    -h, --help            Show this help message and exit. 
 </code></pre>
 
