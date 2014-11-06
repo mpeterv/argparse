@@ -103,18 +103,9 @@ Installing argparse using luarocks is simple.
 $ luarocks install argparse
 ```
 
-#### Problems with old luarocks versions
-
-You may get an error like `Parse error processing dependency '30log >= 0.9.1'` if you use luarocks 2.1 or older. In this case, either upgrade to at least luarocks 2.1.1 or install [30log](http://yonaba.github.io/30log/) manually, then download the rockspec for argparse, remove the line `"30log >= 0.9.1"` and run
-
-```bash
-$ luarocks install /path/to/argparse/rockspec
-```
-
 ### Without luarocks
 
-Download `/src/argparse.lua` file and put it into the directory for libraries or your working directory. Install 30log using luarocks or manually download `30log.lua` file from [30log repo](https://github.com/Yonaba/30log). 
-
+Download `src/argparse.lua` file and put it into the directory for Lua libraries or your working directory. 
 
 ## Tutorial
 
