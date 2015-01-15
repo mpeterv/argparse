@@ -221,7 +221,7 @@ do -- Create classes with setters
       end
    end
 
-   local function convert(self, value)
+   local function convert(_, value)
       if type(value) ~= "function" then
          if type(value) ~= "table" then
             error(("bad field 'convert' (function or table expected, got %s)"):format(type(value)))
@@ -229,7 +229,7 @@ do -- Create classes with setters
       end
    end
 
-   local function argname(self, value)
+   local function argname(_, value)
       if type(value) ~= "string" then
          if type(value) ~= "table" then
             error(("bad field 'argname' (string or table expected, got %s)"):format(type(value)))
@@ -783,7 +783,7 @@ function Parser:_parse(args, errhandler)
          if type(element._convert) == "function" then
             ok, err = element._convert(data)
          else
-            ok, err = element._convert[data]
+            ok = element._convert[data]
          end
 
          assert_(ok ~= nil, "%s", err or "malformed argument '" .. data .. "'")
