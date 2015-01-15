@@ -1,114 +1,40 @@
 local Parser, Command, Argument, Option
 
-local function require_30log()
--------------------------------------------------------------------------------
-local assert       = assert
-local pairs        = pairs
-local type         = type
-local tostring     = tostring
-local setmetatable = setmetatable
+-- Create classes with setters
+do
+   local function deep_update(t1, t2)
+      for k, v in pairs(t2) do
+         if type(v) == "table" then
+            v = deep_update({}, v)
+         end
 
-local baseMt     = {}
-local _instances = setmetatable({},{__mode='k'})
-local _classes   = setmetatable({},{__mode='k'})
-local class
-
-local function deep_copy(t, dest, aType)
-  local t = t or {}
-  local r = dest or {}
-  
-  for k,v in pairs(t) do
-    if aType and type(v)==aType then 
-      r[k] = v 
-    elseif not aType then
-      if type(v) == 'table' and k ~= "__index" then 
-        r[k] = deep_copy(v) 
-      else
-        r[k] = v
+         t1[k] = v
       end
-    end
-  end
-  
-  return r
-end
 
-local function instantiate(self,...)
-  assert(_classes[self], 'new() should be called from a class.')
-  local instance = deep_copy(self)
-  _instances[instance] = tostring(instance)
-  setmetatable(instance,self)
-  
-  if self.__init then
-    if type(self.__init) == 'table' then
-      deep_copy(self.__init, instance)
-    else
-      self.__init(instance, ...)
-    end
-  end
-  
-  return instance
-end
+      return t1
+   end
 
-local function extends(self,extra_params)
-  local heir = {}
-  _classes[heir] = tostring(heir)
-  deep_copy(extra_params, deep_copy(self, heir))
-  heir.__index = heir
-  heir.super = self
-  return setmetatable(heir,self)
-end
+   local class_metatable = {}
 
-baseMt = {
-  __call = function (self,...)
-    return self:new(...)
-  end,
-  
-  __tostring = function(self,...)
-    if _instances[self] then
-      return 
-        ('object(of %s):<%s>')
-          :format((rawget(getmetatable(self),'__name') or '?'), _instances[self])
-    end
-    
-    return
-      _classes[self] and 
-      ('class(%s):<%s>')
-        :format((rawget(self,'__name') or '?'),_classes[self]) or 
-      self      
-  end
-}
+   function class_metatable.__call(cls, ...)
+      return setmetatable(deep_update({}, cls.__proto), cls)(...)
+   end
 
-class = function(attr)
-  local c = deep_copy(attr)
-  _classes[c] = tostring(c)
-  c.include = function(self,include)
-    assert(_classes[self], 'Mixins can only be used on classes.')
-    return deep_copy(include, self, 'function')
-  end
-  
-  c.new = instantiate
-  c.extends = extends
-  c.__index = c
-  c.__call = baseMt.__call
-  c.__tostring = baseMt.__tostring
-  
-  c.is = function(self, kind)
-    local super
-    while true do 
-      super = getmetatable(super or self)
-      if super == kind or super == nil then break end
-    end
-    return kind and (super == kind)
-  end
-  return setmetatable(c, baseMt)
-end
+   function class_metatable.__index(cls, key)
+      return cls.__parent and cls.__parent[key]
+   end
 
-return class
--------------------------------------------------------------------------------
-end
+   local function class(proto)
+      local cls = setmetatable({__proto = proto, __parent = {}}, class_metatable)
+      cls.__index = cls
+      return cls
+   end
 
-do -- Create classes with setters
-   local class = require_30log()
+   local function extend(cls, proto)
+      local new_cls = class(deep_update(deep_update({}, cls.__proto), proto))
+      new_cls.__parent = cls
+      return new_cls
+   end
 
    local function add_setters(cl, fields)
       for field, setter in pairs(fields) do
@@ -117,10 +43,6 @@ do -- Create classes with setters
             self["_"..field] = value
             return self
          end
-      end
-
-      cl.__init = function(self, ...)
-         return self(...)
       end
 
       cl.__call = function(self, ...)
@@ -260,7 +182,6 @@ do -- Create classes with setters
    end
 
    Parser = add_setters(class {
-      __name = "Parser",
       _arguments = {},
       _options = {},
       _commands = {},
@@ -276,10 +197,9 @@ do -- Create classes with setters
       add_help = add_help
    })
 
-   Command = add_setters(Parser:extends {
-      __name = "Command",
+   Command = add_setters(extend(Parser, {
       _aliases = {}
-   }, {
+   }), {
       name = aliased_name,
       aliases = aliased_aliases,
       description = typecheck.string "description",
@@ -293,7 +213,6 @@ do -- Create classes with setters
    })
 
    Argument = add_setters(class {
-      __name = "Argument",
       _minargs = 1,
       _maxargs = 1,
       _mincount = 1,
@@ -312,12 +231,11 @@ do -- Create classes with setters
       show_default = typecheck.boolean "show_default"
    })
 
-   Option = add_setters(Argument:extends {
-      __name = "Option",
+   Option = add_setters(extend(Argument, {
       _aliases = {},
       _mincount = 0,
       _overwrite = true
-   }, {
+   }), {
       name = aliased_name,
       aliases = aliased_aliases,
       description = typecheck.string "description",
@@ -513,13 +431,13 @@ function Parser:_update_charset(charset)
 end
 
 function Parser:argument(...)
-   local argument = Argument:new(...)
+   local argument = Argument(...)
    table.insert(self._arguments, argument)
    return argument
 end
 
 function Parser:option(...)
-   local option = Option:new(...)
+   local option = Option(...)
 
    if self._has_help then
       table.insert(self._options, #self._options, option)
@@ -535,7 +453,7 @@ function Parser:flag(...)
 end
 
 function Parser:command(...)
-   local command = Command:new():add_help(true)(...)
+   local command = Command():add_help(true)(...)
    command._parent = self
    table.insert(self._commands, command)
    return command
