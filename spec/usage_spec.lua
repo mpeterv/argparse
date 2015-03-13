@@ -19,10 +19,9 @@ describe("tests related to usage message generation", function()
       parser:argument "others"
          :args "*"
 
-      assert.equal(table.concat({
-         "Usage: foo <first> <second-and-third> <second-and-third>",
-         "       [<maybe-fourth>] [<others>] ..."
-         }, "\r\n"), parser:get_usage()
+      assert.equal([[
+Usage: foo <first> <second-and-third> <second-and-third>
+       [<maybe-fourth>] [<others>] ...]], parser:get_usage()
       )
    end)
 
@@ -189,10 +188,9 @@ describe("tests related to usage message generation", function()
       )
       parser:option "--yet-another-option"
 
-      assert.equal(table.concat({
-         "Usage: foo ([-q] | [-v] | [-i]) ([-l] | [-f <from>])",
-         "       [--yet-another-option <yet_another_option>]"
-         }, "\r\n"), parser:get_usage()
+      assert.equal([=[
+Usage: foo ([-q] | [-v] | [-i]) ([-l] | [-f <from>])
+       [--yet-another-option <yet_another_option>]]=], parser:get_usage()
       )
    end)
 end)

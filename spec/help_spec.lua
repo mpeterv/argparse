@@ -4,33 +4,30 @@ getmetatable(Parser()).error = function(_, msg) error(msg) end
 describe("tests related to help message generation", function()
    it("creates correct help message for empty parser", function()
       local parser = Parser "foo"
-      assert.equal(table.concat({
-         "Usage: foo [-h]",
-         "",
-         "Options: ",
-         "   -h, --help            Show this help message and exit. "
-      }, "\r\n"), parser:get_help())
+      assert.equal([[
+Usage: foo [-h]
+
+Options: 
+   -h, --help            Show this help message and exit. ]], parser:get_help())
    end)
 
    it("does not create extra help options when :prepare is called several times", function()
       local parser = Parser "foo"
-      assert.equal(table.concat({
-         "Usage: foo [-h]",
-         "",
-         "Options: ",
-         "   -h, --help            Show this help message and exit. "
-      }, "\r\n"), parser:get_help())
+      assert.equal([[
+Usage: foo [-h]
+
+Options: 
+   -h, --help            Show this help message and exit. ]], parser:get_help())
    end)
 
-   it("uses custom help option", function()
+   it("uses custom help option ", function()
       local parser = Parser "foo"
          :add_help "/?"
-      assert.equal(table.concat({
-         "Usage: foo [/?]",
-         "",
-         "Options: ",
-         "   /?                    Show this help message and exit. "
-      }, "\r\n"), parser:get_help())
+      assert.equal([[
+Usage: foo [/?]
+
+Options: 
+   /?                    Show this help message and exit. ]], parser:get_help())
    end)
 
    it("uses description and epilog", function()
@@ -38,16 +35,15 @@ describe("tests related to help message generation", function()
          :description "A description. "
          :epilog "An epilog. "
 
-      assert.equal(table.concat({
-         "Usage: foo [-h]",
-         "",
-         "A description. ",
-         "",
-         "Options: ",
-         "   -h, --help            Show this help message and exit. ",
-         "",
-         "An epilog. "
-      }, "\r\n"), parser:get_help())
+      assert.equal([[
+Usage: foo [-h]
+
+A description. 
+
+Options: 
+   -h, --help            Show this help message and exit. 
+
+An epilog. ]], parser:get_help())
    end)
 
    it("creates correct help message for arguments", function()
@@ -61,19 +57,18 @@ describe("tests related to help message generation", function()
          :description "Optional. "
          :args "*"
 
-      assert.equal(table.concat({
-         "Usage: foo [-h] <first> <second-and-third> <second-and-third>",
-         "       [<maybe-fourth>] [<others>] ...",
-         "",
-         "Arguments: ",
-         "   first",
-         "   second-and-third",
-         "   maybe-fourth",
-         "   others                Optional. ",
-         "",
-         "Options: ",
-         "   -h, --help            Show this help message and exit. "
-      }, "\r\n"), parser:get_help())
+      assert.equal([[
+Usage: foo [-h] <first> <second-and-third> <second-and-third>
+       [<maybe-fourth>] [<others>] ...
+
+Arguments: 
+   first
+   second-and-third
+   maybe-fourth
+   others                Optional. 
+
+Options: 
+   -h, --help            Show this help message and exit. ]], parser:get_help())
    end)
 
    it("creates correct help message for options", function()
@@ -84,15 +79,14 @@ describe("tests related to help message generation", function()
          :target "server"
       parser:option "--config"
 
-      assert.equal(table.concat({
-         "Usage: foo [-q] --from <from> [--config <config>] [-h]",
-         "",
-         "Options: ",
-         "   -q, --quiet",
-         "   --from <from>",
-         "   --config <config>",
-         "   -h, --help            Show this help message and exit. "
-      }, "\r\n"), parser:get_help())
+      assert.equal([[
+Usage: foo [-q] --from <from> [--config <config>] [-h]
+
+Options: 
+   -q, --quiet
+   --from <from>
+   --config <config>
+   -h, --help            Show this help message and exit. ]], parser:get_help())
    end)
 
    it("adds margin for multiline descriptions", function()
@@ -105,15 +99,14 @@ Sets verbosity level.
 -v: Report all warnings. 
 -vv: Report all debugging information. ]]
 
-      assert.equal(table.concat({
-         "Usage: foo [-v] [-h]",
-         "",
-         "Options: ",
-         "   -v                    Sets verbosity level. ",
-         "                         -v: Report all warnings. ",
-         "                         -vv: Report all debugging information. ",
-         "   -h, --help            Show this help message and exit. "
-      }, "\r\n"), parser:get_help())
+      assert.equal([[
+Usage: foo [-v] [-h]
+
+Options: 
+   -v                    Sets verbosity level. 
+                         -v: Report all warnings. 
+                         -vv: Report all debugging information. 
+   -h, --help            Show this help message and exit. ]], parser:get_help())
    end)
 
    it("shows default values", function()
@@ -124,14 +117,13 @@ Sets verbosity level.
          :default "8080"
          :description "Port."
 
-      assert.equal(table.concat({
-         "Usage: foo [-o <o>] [-p <p>] [-h]",
-         "",
-         "Options: ",
-         "   -o <o>                default: a.out",
-         "   -p <p>                Port. (default: 8080)",
-         "   -h, --help            Show this help message and exit. "
-      }, "\r\n"), parser:get_help())
+      assert.equal([[
+Usage: foo [-o <o>] [-p <p>] [-h]
+
+Options: 
+   -o <o>                default: a.out
+   -p <p>                Port. (default: 8080)
+   -h, --help            Show this help message and exit. ]], parser:get_help())
    end)
 
    it("does not show default value when show_default == false", function()
@@ -144,14 +136,13 @@ Sets verbosity level.
          :show_default(false)
          :description "Port. "
 
-      assert.equal(table.concat({
-         "Usage: foo [-o <o>] [-p <p>] [-h]",
-         "",
-         "Options: ",
-         "   -o <o>",
-         "   -p <p>                Port. ",
-         "   -h, --help            Show this help message and exit. "
-      }, "\r\n"), parser:get_help())
+      assert.equal([[
+Usage: foo [-o <o>] [-p <p>] [-h]
+
+Options: 
+   -o <o>
+   -p <p>                Port. 
+   -h, --help            Show this help message and exit. ]], parser:get_help())
    end)
 
    it("creates correct help message for commands", function()
@@ -161,16 +152,15 @@ Sets verbosity level.
          :description "Run! "
       run:option "--where"
 
-      assert.equal(table.concat({
-         "Usage: foo [-q] [-h] <command> ...",
-         "",
-         "Options: ",
-         "   -q, --quiet",
-         "   -h, --help            Show this help message and exit. ",
-         "",
-         "Commands: ",
-         "   run                   Run! "
-      }, "\r\n"), parser:get_help())
+      assert.equal([[
+Usage: foo [-q] [-h] <command> ...
+
+Options: 
+   -q, --quiet
+   -h, --help            Show this help message and exit. 
+
+Commands: 
+   run                   Run! ]], parser:get_help())
    end)
 
    it("creates correct help message for subcommands", function()
@@ -179,13 +169,12 @@ Sets verbosity level.
       local run = parser:command "run"
       run:option "--where"
 
-      assert.equal(table.concat({
-         "Usage: foo run [--where <where>] [-h]",
-         "",
-         "Options: ",
-         "   --where <where>",
-         "   -h, --help            Show this help message and exit. ",
-      }, "\r\n"), run:get_help())
+      assert.equal([[
+Usage: foo run [--where <where>] [-h]
+
+Options: 
+   --where <where>
+   -h, --help            Show this help message and exit. ]], run:get_help())
    end)
 
    it("uses message provided by user", function()
@@ -193,9 +182,7 @@ Sets verbosity level.
          :help "I don't like your format of help messages"
       parser:flag "-q" "--quiet"
 
-      assert.equal(
-         [=[I don't like your format of help messages]=],
-         parser:get_help()
-      )
+      assert.equal([[
+I don't like your format of help messages]], parser:get_help())
    end)
 end)

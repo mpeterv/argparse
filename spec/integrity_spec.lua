@@ -1,126 +1,106 @@
+local function get_output(args)
+   local handler = io.popen("./spec/script " .. args .. " 2>&1", "r")
+   local output = handler:read("*a")
+   handler:close()
+   return output
+end
+
 describe("tests related to CLI behaviour #unsafe", function()
    describe("error messages", function()
       it("generates correct error message without arguments", function()
-         local handler = io.popen("./spec/script 2>&1", "r")
-         assert.equal(table.concat({
-            "Usage: ./spec/script [-v] [-h] <input> [<command>] ...",
-            "",
-            "Error: too few arguments",
-            ""
-         }, "\r\n"), handler:read "*a")
-         handler:close()
+         assert.equal([[
+Usage: ./spec/script [-v] [-h] <input> [<command>] ...
+
+Error: too few arguments
+]], get_output(""))
       end)
 
       it("generates correct error message with too many arguments", function()
-         local handler = io.popen("./spec/script foo bar 2>&1", "r")
-         assert.equal(table.concat({
-            "Usage: ./spec/script [-v] [-h] <input> [<command>] ...",
-            "",
-            "Error: unknown command 'bar'",
-            ""
-         }, "\r\n"), handler:read "*a")
-         handler:close()
+         assert.equal([[
+Usage: ./spec/script [-v] [-h] <input> [<command>] ...
+
+Error: unknown command 'bar'
+]], get_output("foo bar"))
       end)
 
       it("generates correct error message with unexpected argument", function()
-         local handler = io.popen("./spec/script --verbose=true 2>&1", "r")
-         assert.equal(table.concat({
-            "Usage: ./spec/script [-v] [-h] <input> [<command>] ...",
-            "",
-            "Error: option '--verbose' does not take arguments",
-            ""
-         }, "\r\n"), handler:read "*a")
-         handler:close()
+         assert.equal([[
+Usage: ./spec/script [-v] [-h] <input> [<command>] ...
+
+Error: option '--verbose' does not take arguments
+]], get_output("--verbose=true"))
       end)
 
       it("generates correct error message with unexpected option", function()
-         local handler = io.popen("./spec/script -vq 2>&1", "r")
-         assert.equal(table.concat({
-            "Usage: ./spec/script [-v] [-h] <input> [<command>] ...",
-            "",
-            "Error: unknown option '-q'",
-            "Did you mean one of these: '-h' '-v'?",
-            ""
-         }, "\r\n"), handler:read "*a")
-         handler:close()
+         assert.equal([[
+Usage: ./spec/script [-v] [-h] <input> [<command>] ...
+
+Error: unknown option '-q'
+Did you mean one of these: '-h' '-v'?
+]], get_output("-vq"))
       end)
 
       it("generates correct error message and tip with unexpected command", function()
-         local handler = io.popen("./spec/script foo nstall 2>&1", "r")
-         assert.equal(table.concat({
-            "Usage: ./spec/script [-v] [-h] <input> [<command>] ...",
-            "",
-            "Error: unknown command 'nstall'",
-            "Did you mean 'install'?",
-            ""
-         }, "\r\n"), handler:read "*a")
-         handler:close()
+         assert.equal([[
+Usage: ./spec/script [-v] [-h] <input> [<command>] ...
+
+Error: unknown command 'nstall'
+Did you mean 'install'?
+]], get_output("foo nstall"))
       end)
 
       it("generates correct error message without arguments in command", function()
-         local handler = io.popen("./spec/script foo install 2>&1", "r")
-         assert.equal(table.concat({
-            "Usage: ./spec/script install [-f <from>] [-h] <rock> [<version>]",
-            "",
-            "Error: too few arguments",
-            ""
-         }, "\r\n"), handler:read "*a")
-         handler:close()
+         assert.equal([[
+Usage: ./spec/script install [-f <from>] [-h] <rock> [<version>]
+
+Error: too few arguments
+]], get_output("foo install"))
       end)
 
       it("generates correct error message and tip in command", function()
-         local handler = io.popen("./spec/script foo install bar --form=there 2>&1", "r")
-         assert.equal(table.concat({
-            "Usage: ./spec/script install [-f <from>] [-h] <rock> [<version>]",
-            "",
-            "Error: unknown option '--form'",
-            "Did you mean '--from'?",
-            ""
-         }, "\r\n"), handler:read "*a")
-         handler:close()
+         assert.equal([[
+Usage: ./spec/script install [-f <from>] [-h] <rock> [<version>]
+
+Error: unknown option '--form'
+Did you mean '--from'?
+]], get_output("foo install bar --form=there"))
       end)
    end)
 
    describe("help messages", function()
       it("generates correct help message", function()
-         local handler = io.popen("./spec/script --help 2>&1", "r")
-         assert.equal(table.concat({
-            "Usage: ./spec/script [-v] [-h] <input> [<command>] ...",
-            "",
-            "A testing program. ",
-            "",
-            "Arguments: ",
-            "   input",
-            "",
-            "Options: ",
-            "   -v, --verbose         Sets verbosity level. ",
-            "   -h, --help            Show this help message and exit. ",
-            "",
-            "Commands: ",
-            "   install               Install a rock. ",
-            ""
-         }, "\r\n"), handler:read "*a")
-         handler:close()
+         assert.equal([[
+Usage: ./spec/script [-v] [-h] <input> [<command>] ...
+
+A testing program. 
+
+Arguments: 
+   input
+
+Options: 
+   -v, --verbose         Sets verbosity level. 
+   -h, --help            Show this help message and exit. 
+
+Commands: 
+   install               Install a rock. 
+]], get_output("--help"))
       end)
 
       it("generates correct help message for command", function()
-         local handler = io.popen("./spec/script foo install --help 2>&1", "r")
-         assert.equal(table.concat({
-            "Usage: ./spec/script install [-f <from>] [-h] <rock> [<version>]",
-            "",
-            "Install a rock. ",
-            "",
-            "Arguments: ",
-            "   rock                  Name of the rock. ",
-            "   version               Version of the rock. ",
-            "",
-            "Options: ",
-            "   -f <from>, --from <from>",
-            "                         Fetch the rock from this server. ",
-            "   -h, --help            Show this help message and exit. ",
-            "",
-         }, "\r\n"), handler:read "*a")
-         handler:close()
+         assert.equal([[
+Usage: ./spec/script install [-f <from>] [-h] <rock> [<version>]
+
+Install a rock. 
+
+Arguments: 
+   rock                  Name of the rock. 
+   version               Version of the rock. 
+
+Options: 
+   -f <from>, --from <from>
+                         Fetch the rock from this server. 
+   -h, --help            Show this help message and exit. 
+]], get_output("foo install --help"))
       end)
    end)
 
