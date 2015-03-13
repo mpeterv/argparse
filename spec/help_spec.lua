@@ -7,8 +7,8 @@ describe("tests related to help message generation", function()
       assert.equal([[
 Usage: foo [-h]
 
-Options: 
-   -h, --help            Show this help message and exit. ]], parser:get_help())
+Options:
+   -h, --help            Show this help message and exit.]], parser:get_help())
    end)
 
    it("does not create extra help options when :prepare is called several times", function()
@@ -16,8 +16,8 @@ Options:
       assert.equal([[
 Usage: foo [-h]
 
-Options: 
-   -h, --help            Show this help message and exit. ]], parser:get_help())
+Options:
+   -h, --help            Show this help message and exit.]], parser:get_help())
    end)
 
    it("uses custom help option ", function()
@@ -26,8 +26,8 @@ Options:
       assert.equal([[
 Usage: foo [/?]
 
-Options: 
-   /?                    Show this help message and exit. ]], parser:get_help())
+Options:
+   /?                    Show this help message and exit.]], parser:get_help())
    end)
 
    it("uses description and epilog", function()
@@ -40,8 +40,8 @@ Usage: foo [-h]
 
 A description. 
 
-Options: 
-   -h, --help            Show this help message and exit. 
+Options:
+   -h, --help            Show this help message and exit.
 
 An epilog. ]], parser:get_help())
    end)
@@ -61,14 +61,14 @@ An epilog. ]], parser:get_help())
 Usage: foo [-h] <first> <second-and-third> <second-and-third>
        [<maybe-fourth>] [<others>] ...
 
-Arguments: 
+Arguments:
    first
    second-and-third
    maybe-fourth
    others                Optional. 
 
-Options: 
-   -h, --help            Show this help message and exit. ]], parser:get_help())
+Options:
+   -h, --help            Show this help message and exit.]], parser:get_help())
    end)
 
    it("creates correct help message for options", function()
@@ -82,11 +82,11 @@ Options:
       assert.equal([[
 Usage: foo [-q] --from <from> [--config <config>] [-h]
 
-Options: 
+Options:
    -q, --quiet
    --from <from>
    --config <config>
-   -h, --help            Show this help message and exit. ]], parser:get_help())
+   -h, --help            Show this help message and exit.]], parser:get_help())
    end)
 
    it("adds margin for multiline descriptions", function()
@@ -102,11 +102,11 @@ Sets verbosity level.
       assert.equal([[
 Usage: foo [-v] [-h]
 
-Options: 
+Options:
    -v                    Sets verbosity level. 
                          -v: Report all warnings. 
                          -vv: Report all debugging information. 
-   -h, --help            Show this help message and exit. ]], parser:get_help())
+   -h, --help            Show this help message and exit.]], parser:get_help())
    end)
 
    it("shows default values", function()
@@ -120,10 +120,10 @@ Options:
       assert.equal([[
 Usage: foo [-o <o>] [-p <p>] [-h]
 
-Options: 
+Options:
    -o <o>                default: a.out
    -p <p>                Port. (default: 8080)
-   -h, --help            Show this help message and exit. ]], parser:get_help())
+   -h, --help            Show this help message and exit.]], parser:get_help())
    end)
 
    it("does not show default value when show_default == false", function()
@@ -139,10 +139,10 @@ Options:
       assert.equal([[
 Usage: foo [-o <o>] [-p <p>] [-h]
 
-Options: 
+Options:
    -o <o>
    -p <p>                Port. 
-   -h, --help            Show this help message and exit. ]], parser:get_help())
+   -h, --help            Show this help message and exit.]], parser:get_help())
    end)
 
    it("creates correct help message for commands", function()
@@ -155,11 +155,11 @@ Options:
       assert.equal([[
 Usage: foo [-q] [-h] <command> ...
 
-Options: 
+Options:
    -q, --quiet
-   -h, --help            Show this help message and exit. 
+   -h, --help            Show this help message and exit.
 
-Commands: 
+Commands:
    run                   Run! ]], parser:get_help())
    end)
 
@@ -172,9 +172,9 @@ Commands:
       assert.equal([[
 Usage: foo run [--where <where>] [-h]
 
-Options: 
+Options:
    --where <where>
-   -h, --help            Show this help message and exit. ]], run:get_help())
+   -h, --help            Show this help message and exit.]], run:get_help())
    end)
 
    it("uses message provided by user", function()

@@ -167,7 +167,7 @@ do
 
       if param then
          local help = self:flag()
-            :description "Show this help message and exit. "
+            :description "Show this help message and exit."
             :action(function()
                io.stdout:write(self:get_help() .. "\n")
                os.exit(0)
@@ -581,7 +581,7 @@ function Parser:get_help()
       table.insert(blocks, self._description)
    end
 
-   local labels = {"Arguments: ", "Options: ", "Commands: "}
+   local labels = {"Arguments:", "Options:", "Commands:"}
 
    for i, elements in ipairs{self._arguments, self._options, self._commands} do
       if #elements > 0 then

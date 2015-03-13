@@ -74,14 +74,14 @@ Usage: ./spec/script [-v] [-h] <input> [<command>] ...
 
 A testing program. 
 
-Arguments: 
+Arguments:
    input
 
-Options: 
+Options:
    -v, --verbose         Sets verbosity level. 
-   -h, --help            Show this help message and exit. 
+   -h, --help            Show this help message and exit.
 
-Commands: 
+Commands:
    install               Install a rock. 
 ]], get_output("--help"))
       end)
@@ -92,14 +92,14 @@ Usage: ./spec/script install [-f <from>] [-h] <rock> [<version>]
 
 Install a rock. 
 
-Arguments: 
+Arguments:
    rock                  Name of the rock. 
    version               Version of the rock. 
 
-Options: 
+Options:
    -f <from>, --from <from>
                          Fetch the rock from this server. 
-   -h, --help            Show this help message and exit. 
+   -h, --help            Show this help message and exit.
 ]], get_output("foo install --help"))
       end)
    end)
