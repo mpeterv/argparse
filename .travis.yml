@@ -3,14 +3,15 @@ language: c
 env:
   - LUA="Lua 5.1"
   - LUA="Lua 5.2"
+  - LUA="Lua 5.3"
   - LUA="LuaJIT 2.0"
 
 before_install:
   - bash .travis_setup.sh
+  - bash .travis_setup_rocks.sh
 
 install:
-  - sudo luarocks make rockspecs/argparse-scm-1.rockspec
-  - sudo luarocks install busted
+  - sudo luarocks make
 
 script:
   - busted spec
