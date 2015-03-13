@@ -9,7 +9,7 @@ describe("tests related to default values", function()
             :default "bar"
          local args = parser:parse{}
          assert.same({foo = "bar"}, args)
-         local args = parser:parse{"baz"}
+         args = parser:parse{"baz"}
          assert.same({foo = "baz"}, args)
       end)
 

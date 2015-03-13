@@ -37,8 +37,8 @@ describe("tests related to commands", function()
    it("handles nested commands", function()
       local parser = Parser "name"
       local foo = parser:command "foo"
-      local bar = foo:command "bar"
-      local baz = foo:command "baz"
+      foo:command "bar"
+      foo:command "baz"
 
       local args = parser:parse{"foo", "bar"}
       assert.same({foo = true, bar = true}, args)
@@ -57,7 +57,7 @@ describe("tests related to commands", function()
 
    it("Detects wrong commands", function()
       local parser = Parser "name"
-      local install = parser:command "install"
+      parser:command "install"
 
       assert.has_error(function() parser:parse{"run"} end, "unknown command 'run'")
    end)

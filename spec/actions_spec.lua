@@ -3,8 +3,8 @@ getmetatable(Parser()).error = function(_, msg) error(msg) end
 
 describe("tests related to actions", function()
    it("calls actions for options", function()
-      local action1 = spy.new(function(x) end)
-      local action2 = spy.new(function(x) end)
+      local action1 = spy.new(function() end)
+      local action2 = spy.new(function() end)
 
       local parser = Parser()
       parser:option "-f" "--from" {
@@ -23,9 +23,9 @@ describe("tests related to actions", function()
    end)
 
    it("properly calls actions for flags", function()
-      local action1 = spy.new(function(x) end)
-      local action2 = spy.new(function(x) end)
-      local action3 = spy.new(function(x) end)
+      local action1 = spy.new(function() end)
+      local action2 = spy.new(function() end)
+      local action3 = spy.new(function() end)
 
       local parser = Parser()
       parser:flag "-v" "--verbose" {
@@ -47,7 +47,7 @@ describe("tests related to actions", function()
    end)
 
    it("calls actions for commands", function()
-      local action = spy.new(function(x) end)
+      local action = spy.new(function() end)
 
       local parser = Parser "name"
       parser:flag "-v" "--verbose" {

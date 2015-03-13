@@ -69,7 +69,7 @@ describe("tests related to options", function()
          parser:flag("-q", "--quiet")
          local args = parser:parse({"--quiet"})
          assert.same({quiet = true}, args)
-         local args = parser:parse({})
+         args = parser:parse({})
          assert.same({}, args)
       end)
 
