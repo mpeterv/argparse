@@ -15,31 +15,31 @@ describe("tests related to default values", function()
 
       it("handles default argument for multi-argument correctly", function()
          local parser = Parser()
-         parser:argument("foo", {
+         parser:argument "foo" {
             args = 3,
             default = "bar",
             defmode = "arg"
-         })
+         }
          local args = parser:parse{"baz"}
          assert.same({foo = {"baz", "bar", "bar"}}, args)
       end)
 
       it("handles default value for multi-argument correctly", function()
          local parser = Parser()
-         parser:argument("foo", {
+         parser:argument "foo" {
             args = 3,
             default = "bar"
-         })
+         }
          local args = parser:parse{}
          assert.same({foo = {"bar", "bar", "bar"}}, args)
       end)
 
       it("does not use default values if not needed", function()
          local parser = Parser()
-         parser:argument("foo", {
+         parser:argument "foo" {
             args = "1-2",
             default = "bar"
-         })
+         }
          local args = parser:parse({"baz"})
          assert.same({foo = {"baz"}}, args)
       end)
@@ -60,20 +60,20 @@ describe("tests related to default values", function()
 
       it("handles option with default value for multi-argument option correctly", function()
          local parser = Parser()
-         parser:option("-s", "--several", {
+         parser:option "-s" "--several" {
             default = "foo",
             args = "2-3"
-         })
+         }
          local args = parser:parse{}
          assert.same({several = {"foo", "foo"}}, args)
       end)
 
       it("handles option with default value and argument", function()
          local parser = Parser()
-         parser:option("-o", "--output", {
+         parser:option "-o" "--output" {
             default = "a.out",
             defmode = "arg+count"
-         })
+         }
          local args = parser:parse{}
          assert.same({output = "a.out"}, args)
          args = parser:parse{"-o"}
@@ -94,43 +94,43 @@ describe("tests related to default values", function()
 
       it("doesn't use default argument if option is not invoked", function()
          local parser = Parser()
-         parser:option("-f", "--foo", {
+         parser:option "-f" "--foo" {
             default = "bar",
             defmode = "arg"
-         })
+         }
          local args = parser:parse{}
          assert.same({}, args)
       end)
 
       it("handles default multi-argument correctly", function()
          local parser = Parser()
-         parser:option("-f", "--foo", {
+         parser:option "-f" "--foo" {
             args = 3,
             default = "bar",
             defmode = "arg"
-         })
+         }
          local args = parser:parse({"--foo=baz"})
          assert.same({foo = {"baz", "bar", "bar"}}, args)
       end)
 
       it("does not use default values if not needed", function()
          local parser = Parser()
-          parser:option("-f", "--foo", {
+          parser:option "-f" "--foo" {
             args = "1-2",
             default = "bar",
             defmode = "arg"
-         })
+         }
          local args = parser:parse({"-f", "baz"})
          assert.same({foo = {"baz"}}, args)
       end)
 
       it("handles multi-count options with default value correctly", function()
          local parser = Parser()
-          parser:option("-f", "--foo", {
+          parser:option "-f" "--foo" {
             count = "*",
             default = "bar",
             defmode = "arg + count"
-         })
+         }
          local args = parser:parse({"-f", "--foo=baz", "--foo"})
          assert.same({foo = {"bar", "baz", "bar"}}, args)
       end)

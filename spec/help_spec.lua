@@ -53,8 +53,7 @@ An epilog. ]], parser:get_help())
          :args "2"
       parser:argument "maybe-fourth"
          :args "?"
-      parser:argument "others"
-         :description "Optional. "
+      parser:argument("others", "Optional. ")
          :args "*"
 
       assert.equal([[

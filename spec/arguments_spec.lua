@@ -34,30 +34,30 @@ describe("tests related to positional arguments", function()
 
       it("handles multi-argument correctly", function()
          local parser = Parser()
-         parser:argument("foo", {
+         parser:argument "foo" {
             args = "*"
-         })
+         }
          local args = parser:parse({"bar", "baz", "qu"})
          assert.same({foo = {"bar", "baz", "qu"}}, args)
       end)
 
       it("handles restrained multi-argument correctly", function()
          local parser = Parser()
-         parser:argument("foo", {
+         parser:argument "foo" {
             args = "2-4"
-         })
+         }
          local args = parser:parse({"bar", "baz"})
          assert.same({foo = {"bar", "baz"}}, args)
       end)
 
       it("handles several multi-arguments correctly", function()
          local parser = Parser()
-         parser:argument("foo1", {
+         parser:argument "foo1" {
             args = "1-2"
-         })
-         parser:argument("foo2", {
+         }
+         parser:argument "foo2" {
             args = "*"
-         })
+         }
          local args = parser:parse({"bar"})
          assert.same({foo1 = {"bar"}, foo2 = {}}, args)
          args = parser:parse({"bar", "baz", "qu"})
@@ -134,31 +134,31 @@ describe("tests related to positional arguments", function()
 
       it("handles too few arguments with multi-argument correctly", function()
          local parser = Parser()
-         parser:argument("foo", {
+         parser:argument "foo" {
             args = "2-4"
-         })
+         }
          assert.has_error(function() parser:parse{"foo"} end, "too few arguments")
       end)
 
       it("handles too many arguments with several multi-arguments correctly", function()
          local parser = Parser()
-         parser:argument("foo1", {
+         parser:argument "foo1" {
             args = "1-2"
-         })
-         parser:argument("foo2", {
+         }
+         parser:argument "foo2" {
             args = "0-1"
-         })
+         }
          assert.has_error(function() parser:parse{"foo", "bar", "baz", "qu"} end, "too many arguments")
       end)
 
       it("handles too few arguments with several multi-arguments correctly", function()
          local parser = Parser()
-         parser:argument("foo1", {
+         parser:argument "foo1" {
             args = "1-2"
-         })
-         parser:argument("foo2", {
+         }
+         parser:argument "foo2" {
             args = "*"
-         })
+         }
          assert.has_error(function() parser:parse{} end, "too few arguments")
       end)
    end)
