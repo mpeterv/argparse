@@ -146,7 +146,7 @@ Options:
 
    it("creates correct help message for commands", function()
       local parser = Parser "foo"
-      parser:flag "-q" "--quiet"
+      parser:flag "-q --quiet"
       local run = parser:command "run"
          :description "Run! "
       run:option "--where"

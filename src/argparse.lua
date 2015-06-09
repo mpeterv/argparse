@@ -98,19 +98,16 @@ local function typechecked(name, ...)
    return {name, function(_, value) typecheck(name, types, value) end}
 end
 
-local aliased_name = {"name", function(self, value)
+local multiname = {"name", function(self, value)
    typecheck("name", {"string"}, value)
-   table.insert(self._aliases, value)
-   -- Do not set _name to value if there is a name already.
-   return self._name
-end}
 
-local aliased_aliases = {"aliases", function(self, value)
-   typecheck("aliases", {"table"}, value)
-
-   if not self._name then
-      self._name = value[1]
+   for alias in value:gmatch("%S+") do
+      self._name = self._name or alias
+      table.insert(self._aliases, alias)
    end
+
+   -- Do not set _name as with other properties.
+   return true
 end}
 
 local function parse_boundaries(str)
@@ -200,8 +197,7 @@ local Parser = new_class({
 local Command = new_class({
    _aliases = {}
 }, {
-   aliased_name,
-   aliased_aliases,
+   multiname,
    typechecked("description", "string"),
    typechecked("epilog", "string"),
    typechecked("target", "string"),
@@ -236,8 +232,7 @@ local Option = new_class({
    _mincount = 0,
    _overwrite = true
 }, {
-   aliased_name,
-   aliased_aliases,
+   multiname,
    typechecked("description", "string"),
    typechecked("target", "string"),
    boundaries("args"),
