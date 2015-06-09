@@ -14,4 +14,5 @@ install:
   - sudo luarocks make
 
 script:
-  - busted spec
+  - busted
+  - luacheck src spec
