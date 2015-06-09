@@ -218,13 +218,13 @@ local Argument = new_class({
 }, {
    typechecked("name", "string"),
    typechecked("description", "string"),
-   typechecked("target", "string"),
-   boundaries("args"),
    typechecked("default", "string"),
+   typechecked("convert", "function", "table"),
+   boundaries("args"),
+   typechecked("target", "string"),
    typechecked("defmode", "string"),
    typechecked("show_default", "boolean"),
-   typechecked("argname", "string", "table"),
-   typechecked("convert", "function", "table")
+   typechecked("argname", "string", "table")
 })
 
 local Option = new_class({
@@ -234,15 +234,15 @@ local Option = new_class({
 }, {
    multiname,
    typechecked("description", "string"),
-   typechecked("target", "string"),
+   typechecked("default", "string"),
+   typechecked("convert", "function", "table"),
    boundaries("args"),
    boundaries("count"),
-   typechecked("default", "string"),
+   typechecked("target", "string"),
    typechecked("defmode", "string"),
    typechecked("show_default", "boolean"),
    typechecked("overwrite", "boolean"),
    typechecked("argname", "string", "table"),
-   typechecked("convert", "function", "table"),
    typechecked("action", "function")
 }, Argument)
 

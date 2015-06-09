@@ -60,10 +60,7 @@ describe("tests related to default values", function()
 
       it("handles option with default value for multi-argument option correctly", function()
          local parser = Parser()
-         parser:option "-s" "--several" {
-            default = "foo",
-            args = "2-3"
-         }
+         parser:option("-s --several", "Two or three things", "foo", nil, "2-3")
          local args = parser:parse{}
          assert.same({several = {"foo", "foo"}}, args)
       end)

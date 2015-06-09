@@ -31,19 +31,17 @@ Options:
    end)
 
    it("uses description and epilog", function()
-      local parser = Parser "foo"
-         :description "A description. "
-         :epilog "An epilog. "
+      local parser = Parser("foo", "A description.", "An epilog.")
 
       assert.equal([[
 Usage: foo [-h]
 
-A description. 
+A description.
 
 Options:
    -h, --help            Show this help message and exit.
 
-An epilog. ]], parser:get_help())
+An epilog.]], parser:get_help())
    end)
 
    it("creates correct help message for arguments", function()

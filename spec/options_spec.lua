@@ -152,9 +152,7 @@ describe("tests related to options", function()
       describe("Options with optional argument", function()
          it("handles emptiness correctly", function()
             local parser = Parser()
-            parser:option "-p" "--password" {
-               args = "?"
-            }
+            parser:option("-p --password", "Secure password for special security", nil, nil, "?")
             local args = parser:parse({})
             assert.same({}, args)
          end)
