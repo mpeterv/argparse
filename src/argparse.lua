@@ -183,7 +183,8 @@ local Parser = new_class({
    _options = {},
    _commands = {},
    _mutexes = {},
-   _require_command = true
+   _require_command = true,
+   _handle_options = true
 }, {
    typechecked("name", "string"),
    typechecked("description", "string"),
@@ -191,6 +192,7 @@ local Parser = new_class({
    typechecked("usage", "string"),
    typechecked("help", "string"),
    typechecked("require_command", "boolean"),
+   typechecked("handle_options", "boolean"),
    add_help
 })
 
@@ -204,6 +206,7 @@ local Command = new_class({
    typechecked("usage", "string"),
    typechecked("help", "string"),
    typechecked("require_command", "boolean"),
+   typechecked("handle_options", "boolean"),
    typechecked("action", "function"),
    add_help
 }, Parser)
@@ -673,6 +676,7 @@ function Parser:_parse(args, errhandler)
    local cur_arg_i = 1
    local cur_arg
    local targets = {}
+   local handle_options = true
 
    local function error_(fmt, ...)
       return errhandler(parser, fmt:format(...))
@@ -824,6 +828,7 @@ function Parser:_parse(args, errhandler)
          invoke(argument)
       end
 
+      handle_options = parser._handle_options
       cur_arg = arguments[cur_arg_i]
       commands = parser._commands
       com_context = {}
@@ -891,7 +896,6 @@ function Parser:_parse(args, errhandler)
    end
 
    local function mainloop()
-      local handle_options = true
 
       for _, data in ipairs(args) do
          local plain = true

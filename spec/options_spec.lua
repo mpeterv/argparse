@@ -125,6 +125,17 @@ describe("tests related to options", function()
          assert.same({input = "foo", exclude = {}}, args)
       end)
 
+      it("does not interpret options if disabled", function()
+         local parser = Parser()
+         parser:handle_options(false)
+         parser:argument "input"
+            :args "*"
+         parser:option "-f" "--foo"
+            :args "*"
+         local args = parser:parse{"bar", "-f", "--foo" , "bar"}
+         assert.same({input = {"bar", "-f", "--foo" , "bar"}}, args)
+      end)
+
       describe("Special chars set", function()
          it("handles windows-style options", function()
             local parser = Parser()
