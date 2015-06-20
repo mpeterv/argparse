@@ -153,6 +153,8 @@ local function boundaries(name)
 end
 
 local add_help = {"add_help", function(self, value)
+   typecheck("add_help", {"boolean", "string", "table"}, value)
+
    if self._has_help then
       table.remove(self._options)
       self._has_help = false
