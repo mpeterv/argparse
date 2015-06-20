@@ -2,47 +2,47 @@
 
 [![Build Status](https://travis-ci.org/mpeterv/argparse.png?branch=master)](https://travis-ci.org/mpeterv/argparse)
 
-argparse is a feature-rich command line parser for Lua inspired by argparse for Python. 
+Argparse is a feature-rich command line parser for Lua inspired by argparse for Python.
 
-argparse supports positional arguments, options, flags, optional arguments, subcommands and more. argparse automatically generates usage, help and error messages. 
+Argparse supports positional arguments, options, flags, optional arguments, subcommands and more. Argparse automatically generates usage, help and error messages.
 
-Quick glance: 
+Simple example: 
 
 ```lua
 -- script.lua
 local argparse = require "argparse"
-local parser = argparse()
-   :description "An example."
-parser:argument "input"
-   :description "Input file."
-parser:option "-o" "--output"
-   :default "a.out"
-   :description "Output file."
-parser:option "-I" "--include"
-   :count "*"
-   :description "Include locations."
+
+local parser = argparse("script", "An example.")
+parser:argument("input", "Input file.")
+parser:option("-o --output", "Output file.", "a.out")
+parser:option("-I --include", "Include locations."):count("*")
+
 local args = parser:parse()
-prettyprint(args)
+print(args)  -- Assuming print is patched to handle tables nicely.
 ```
 
 ```bash
 $ lua script.lua foo
 ```
 
-```
-input: foo
-output: a.out
-include: {}
+```lua
+{
+   input = "foo",
+   output = "a.out",
+   include = {}
+}
 ```
 
 ```bash
-$ lua script.lua foo -I/usr/local/include -I/src -o bar
+$ lua script.lua foo -I/usr/local/include -Isrc -o bar
 ```
 
-```
-input: foo
-output: bar
-include: {/usr/local/include, /src}
+```lua
+{
+   input = "foo",
+   output = "bar",
+   include = {"/usr/local/include", "src"}
+}
 ```
 
 ```bash
@@ -50,7 +50,7 @@ $ lua script.lua foo bar
 ```
 
 ```
-Usage: script.lua [-o <output>] [-I <include>] [-h] <input>
+Usage: script [-o <output>] [-I <include>] [-h] <input>
 
 Error: too many arguments
 ```
@@ -60,7 +60,7 @@ $ lua script.lua --help
 ```
 
 ```
-Usage: script.lua [-o <output>] [-I <include>] [-h] <input>
+Usage: script [-o <output>] [-I <include>] [-h] <input>
 
 An example. 
 
@@ -80,7 +80,7 @@ $ lua script.lua foo --outptu=bar
 ```
 
 ```
-Usage: script.lua [-o <output>] [-I <include>] [-h] <input>
+Usage: script [-o <output>] [-I <include>] [-h] <input>
 
 Error: unknown option '--outptu'
 Did you mean '--output'?
@@ -95,26 +95,26 @@ Did you mean '--output'?
 
 ## Installation
 
-### Using luarocks
+### Using LuaRocks
 
-Installing argparse using luarocks is simple. 
+Installing argparse using [LuaRocks](http://luarocks.org) is simple:
 
 ```bash
 $ luarocks install argparse
 ```
 
-### Without luarocks
+### Without LuaRocks
 
-Download `src/argparse.lua` file and put it into the directory for Lua libraries or your working directory. 
+Download `src/argparse.lua` file and put it into the directory for Lua libraries or your working directory.
 
 ## Tutorial
 
-The tutorial is available [online](http://mpeterv.github.io/argparse/) and in the `doc` directory. If argparse was installed using luarocks 2.1.2 or later, it can be viewed using `luarocks doc argparse` command. 
+The tutorial is available [online](http://argparse.readthedocs.org) and in the `doc` directory. If argparse has been installed using LuaRocks 2.1.2 or later, it can be viewed using `luarocks doc argparse` command.
 
 ## Testing
 
-argparse comes with a testing suite located in `spec` directory. [busted](http://olivinelabs.com/busted/) is required for testing, it can be installed using luarocks. Run the tests using `busted spec` command from the argparse folder. 
+argparse comes with a testing suite located in `spec` directory. [busted](http://olivinelabs.com/busted/) is required for testing, it can be installed using LuaRocks. Run the tests using `busted spec` command from the argparse folder.
 
 ## License
 
-argparse is licensed under the same terms as Lua itself(MIT license). 
+argparse is licensed under the same terms as Lua itself (MIT license).
