@@ -11,6 +11,8 @@ local function deep_update(t1, t2)
 end
 
 -- A property is a tuple {name, callback}.
+-- properties.args is number of properties that can be set as arguments
+-- when calling an object.
 local function new_class(prototype, properties, parent)
    -- Class is the metatable of its instances.
    local class = {}
@@ -53,7 +55,7 @@ local function new_class(prototype, properties, parent)
          local nargs = select("#", ...)
 
          for i, property in ipairs(properties) do
-            if i > nargs then
+            if i > nargs or i > properties.args then
                break
             end
 
@@ -188,6 +190,7 @@ local Parser = new_class({
    _require_command = true,
    _handle_options = true
 }, {
+   args = 3,
    typechecked("name", "string"),
    typechecked("description", "string"),
    typechecked("epilog", "string"),
@@ -201,6 +204,7 @@ local Parser = new_class({
 local Command = new_class({
    _aliases = {}
 }, {
+   args = 3,
    multiname,
    typechecked("description", "string"),
    typechecked("epilog", "string"),
@@ -221,6 +225,7 @@ local Argument = new_class({
    _defmode = "unused",
    _show_default = true
 }, {
+   args = 5,
    typechecked("name", "string"),
    typechecked("description", "string"),
    typechecked("default", "string"),
@@ -237,6 +242,7 @@ local Option = new_class({
    _mincount = 0,
    _overwrite = true
 }, {
+   args = 6,
    multiname,
    typechecked("description", "string"),
    typechecked("default", "string"),
