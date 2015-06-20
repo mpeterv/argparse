@@ -11,6 +11,7 @@ before_install:
   - bash .travis_setup_rocks.sh
 
 install:
+  - mkdir doc
   - sudo luarocks make
 
 script:
