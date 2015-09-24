@@ -14,10 +14,14 @@ before_install:
   - luarocks install luacheck
   - luarocks install dkjson --deps-mode=none
   - luarocks install busted
+  - luarocks install luacov-coveralls
 
 install:
   - luarocks make
 
 script:
-  - busted
   - luacheck src spec
+  - busted -c
+
+after_success:
+  - luacov-coveralls

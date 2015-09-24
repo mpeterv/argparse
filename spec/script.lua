@@ -26,8 +26,8 @@ install:option "-f" "--from"
    :description "Fetch the rock from this server. "
    :target "server"
 
-local usage = parser:get_usage()
-local help = parser:get_help()
+parser:get_usage()
+parser:get_help()
 local args = parser:parse()
 
 print(args.input)
