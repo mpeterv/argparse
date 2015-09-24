@@ -9,8 +9,8 @@ env:
 
 before_install:
   - pip install hererocks
-  - hererocks lua -r^ --$LUA
-  - export PATH=$PATH:$PWD/lua/bin
+  - hererocks l -r^ --$LUA
+  - export PATH=$PATH:$PWD/l/bin
   - luarocks install luacheck
   - luarocks install dkjson --deps-mode=none
   - luarocks install busted
