@@ -110,7 +110,9 @@ Download `src/argparse.lua` file and put it into the directory for Lua libraries
 
 ## Tutorial
 
-The tutorial is available [online](http://argparse.readthedocs.org) and in the `doc` directory. If argparse has been installed using LuaRocks 2.1.2 or later, it can be viewed using `luarocks doc argparse` command.
+The tutorial is available [online](http://argparse.readthedocs.org). If argparse has been installed using LuaRocks 2.1.2 or later, it can be viewed using `luarocks doc argparse` command.
+
+Tutorial HTML files can be built using [Sphinx](http://sphinx-doc.org/): `sphinx-build docsrc doc`, the files will be found inside `doc/`.
 
 ## Testing
 

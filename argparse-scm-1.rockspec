@@ -17,5 +17,5 @@ build = {
    modules = {
       argparse = "src/argparse.lua"
    },
-   copy_directories = {"doc", "spec"}
+   copy_directories = {"spec"}
 }
