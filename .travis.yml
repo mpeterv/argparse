@@ -1,17 +1,22 @@
-language: c
+language: python
+sudo: false
 
 env:
-  - LUA="Lua 5.1"
-  - LUA="Lua 5.2"
-  - LUA="Lua 5.3"
-  - LUA="LuaJIT 2.0"
+  - LUA="lua 5.1"
+  - LUA="lua 5.2"
+  - LUA="lua 5.3"
+  - LUA="luajit 2.0"
 
 before_install:
-  - bash .travis_setup.sh
-  - bash .travis_setup_rocks.sh
+  - pip install hererocks
+  - hererocks lua -r^ --$LUA
+  - export PATH=$PATH:$PWD/lua/bin
+  - luarocks install luacheck
+  - luarocks install dkjson --deps-mode=none
+  - luarocks install busted
 
 install:
-  - sudo luarocks make
+  - luarocks make
 
 script:
   - busted
