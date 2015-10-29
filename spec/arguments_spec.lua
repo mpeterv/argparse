@@ -97,7 +97,7 @@ describe("tests related to positional arguments", function()
          local parser = Parser()
          parser:argument "foo"
 
-         assert.has_error(function() parser:parse{} end, "too few arguments")
+         assert.has_error(function() parser:parse{} end, "argument 'foo' is required")
       end)
 
       it("handles extra arguments with several arguments correctly", function()
@@ -113,7 +113,7 @@ describe("tests related to positional arguments", function()
          parser:argument "foo1"
          parser:argument "foo2"
 
-         assert.has_error(function() parser:parse{"bar"} end, "too few arguments")
+         assert.has_error(function() parser:parse{"bar"} end, "argument 'foo2' is required")
       end)
 
       it("handles too few arguments with multi-argument correctly", function()
@@ -121,7 +121,7 @@ describe("tests related to positional arguments", function()
          parser:argument "foo" {
             args = "+"
          }
-         assert.has_error(function() parser:parse{} end, "too few arguments")
+         assert.has_error(function() parser:parse{} end, "argument 'foo' is required")
       end)
 
       it("handles too many arguments with multi-argument correctly", function()
@@ -137,7 +137,7 @@ describe("tests related to positional arguments", function()
          parser:argument "foo" {
             args = "2-4"
          }
-         assert.has_error(function() parser:parse{"foo"} end, "too few arguments")
+         assert.has_error(function() parser:parse{"foo"} end, "argument 'foo' requires at least 2 arguments")
       end)
 
       it("handles too many arguments with several multi-arguments correctly", function()
@@ -159,7 +159,7 @@ describe("tests related to positional arguments", function()
          parser:argument "foo2" {
             args = "*"
          }
-         assert.has_error(function() parser:parse{} end, "too few arguments")
+         assert.has_error(function() parser:parse{} end, "argument 'foo1' is required")
       end)
    end)
 end)

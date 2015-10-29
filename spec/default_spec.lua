@@ -55,7 +55,7 @@ describe("tests related to default values", function()
          assert.same({output = "a.out"}, args)
          args = parser:parse{"--output", "foo.txt"}
          assert.same({output = "foo.txt"}, args)
-         assert.has_error(function() parser:parse{"-o"} end, "too few arguments")
+         assert.has_error(function() parser:parse{"-o"} end, "option '-o' requires an argument")
       end)
 
       it("handles option with default value for multi-argument option correctly", function()

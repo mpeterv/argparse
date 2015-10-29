@@ -258,7 +258,8 @@ describe("tests related to options", function()
       it("handles lack of required argument correctly", function()
          local parser = Parser()
          parser:option "-s" "--server"
-         assert.has_error(function() parser:parse{"--server"} end, "too few arguments")
+         assert.has_error(function() parser:parse{"--server"} end, "option '--server' requires an argument")
+         assert.has_error(function() parser:parse{"-s"} end, "option '-s' requires an argument")
       end)
 
       it("handles unknown options correctly", function()
@@ -289,7 +290,7 @@ describe("tests related to options", function()
             count = 1,
             overwrite = false
          }
-         assert.has_error(function() parser:parse{"-qq"} end, "option '-q' must be used at most 1 time")
+         assert.has_error(function() parser:parse{"-qq"} end, "option '-q' must be used 1 time")
       end)
 
       it("handles too few invocations correctly", function()

@@ -15,13 +15,13 @@ describe("tests related to :pparse()", function()
       parser:argument "foo"
       local ok, errmsg = parser:pparse{}
       assert.is_false(ok)
-      assert.equal("too few arguments", errmsg)
+      assert.equal("argument 'foo' is required", errmsg)
    end)
 
-   it("still raises an error if it is caused by misconfiguration", function()
+   it("rethrows errors from callbacks", function()
       local parser = Parser()
       parser:flag "--foo"
-         :action(error)
-      assert.has_error(function() parser:pparse{"--foo"} end)
+         :action(function() error("some error message") end)
+      assert.error_matches(function() parser:pparse{"--foo"} end, "some error message")
    end)
 end)
