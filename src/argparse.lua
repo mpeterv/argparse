@@ -809,7 +809,7 @@ function ElementState:close()
          else
             if #self.args == 0 then
                if getmetatable(self.element) == Argument then
-                  self:error("%s is required", self.name)
+                  self:error("missing %s", self.name)
                elseif self.element._maxargs == 1 then
                   self:error("%s requires an argument", self.name)
                end
@@ -996,6 +996,8 @@ function ParseState:finalize()
                option:invoke(name)
                option:close()
             end
+         elseif option.invocations == 0 then
+            self:error("missing %s", name)
          else
             self:error("%s must be used %s", name, bound("time", mincount, option.element._maxcount))
          end

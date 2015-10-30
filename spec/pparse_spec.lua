@@ -15,7 +15,7 @@ describe("tests related to :pparse()", function()
       parser:argument "foo"
       local ok, errmsg = parser:pparse{}
       assert.is_false(ok)
-      assert.equal("argument 'foo' is required", errmsg)
+      assert.equal("missing argument 'foo'", errmsg)
    end)
 
    it("rethrows errors from callbacks", function()

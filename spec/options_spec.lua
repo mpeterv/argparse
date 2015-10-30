@@ -298,7 +298,8 @@ describe("tests related to options", function()
          parser:option "-f" "--foo" {
             count = "3-4"
          }
-         assert.has_error(function() parser:parse{"-fFOO", "-fBAR"} end, "option '-f' must be used at least 3 times")
+         assert.has_error(function() parser:parse{"-fFOO", "--foo=BAR"} end, "option '--foo' must be used at least 3 times")
+         assert.has_error(function() parser:parse{} end, "missing option '-f'")
       end)
    end)
 end)

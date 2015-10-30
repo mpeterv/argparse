@@ -20,7 +20,7 @@ describe("tests related to CLI behaviour #unsafe", function()
          assert.equal([[
 Usage: ]]..script..[[ [-v] [-h] <input> [<command>] ...
 
-Error: argument 'input' is required
+Error: missing argument 'input'
 ]], get_output(""))
       end)
 
@@ -62,7 +62,7 @@ Did you mean 'install'?
          assert.equal([[
 Usage: ]]..script..[[ install [-f <from>] [-h] <rock> [<version>]
 
-Error: argument 'rock' is required
+Error: missing argument 'rock'
 ]], get_output("foo install"))
       end)
 
