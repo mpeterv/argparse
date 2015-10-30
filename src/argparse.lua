@@ -256,7 +256,8 @@ local Argument = class({
    typechecked("target", "string"),
    typechecked("defmode", "string"),
    typechecked("show_default", "boolean"),
-   typechecked("argname", "string", "table")
+   typechecked("argname", "string", "table"),
+   typechecked("action", "function")
 })
 
 local Option = class({

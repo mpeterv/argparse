@@ -2,6 +2,30 @@ local Parser = require "argparse"
 getmetatable(Parser()).error = function(_, msg) error(msg) end
 
 describe("actions", function()
+   it("for arguments are called", function()
+      local parser = Parser()
+      local foo
+      parser:argument("foo"):action(function(_, _, passed_foo)
+         foo = passed_foo
+      end)
+      local baz
+      parser:argument("baz"):args("*"):action(function(_, _, passed_baz)
+         baz = passed_baz
+      end)
+
+      parser:parse{"a"}
+      assert.equals("a", foo)
+      assert.same({}, baz)
+
+      parser:parse{"b", "c"}
+      assert.equals("b", foo)
+      assert.same({"c"}, baz)
+
+      parser:parse{"d", "e", "f"}
+      assert.equals("d", foo)
+      assert.same({"e", "f"}, baz)
+   end)
+
    it("for options are called", function()
       local action1 = spy.new(function(_, _, arg)
          assert.equal("nowhere", arg)
