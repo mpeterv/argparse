@@ -375,6 +375,16 @@ function actions.append(result, target, argument, overwrite)
    end
 end
 
+function actions.concat(result, target, arguments, overwrite)
+   if overwrite then
+      error("'concat' action can't handle too many invocations")
+   end
+
+   for _, argument in ipairs(arguments) do
+      table.insert(result[target], argument)
+   end
+end
+
 function Argument:_get_action()
    local action, init
 

@@ -100,9 +100,10 @@ describe("actions", function()
       local parser = Parser()
       parser:flag("--no-foo"):target("foo"):action("store_false")
       parser:flag("--no-bar"):target("bar"):action("store_false")
+      parser:option("--things"):args("+"):count("*"):action("concat")
 
-      local args = parser:parse{"--no-foo"}
-      assert.same({foo = false}, args)
+      local args = parser:parse{"--things", "a", "b", "--no-foo", "--things", "c", "d"}
+      assert.same({foo = false, things = {"a", "b", "c", "d"}}, args)
    end)
 
    it("for options allow setting initial stored value", function()
