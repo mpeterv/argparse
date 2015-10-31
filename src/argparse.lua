@@ -221,6 +221,7 @@ local Parser = class({
    typechecked("help", "string"),
    typechecked("require_command", "boolean"),
    typechecked("handle_options", "boolean"),
+   typechecked("action", "function"),
    add_help
 })
 
@@ -236,6 +237,7 @@ local Command = class({
    typechecked("help", "string"),
    typechecked("require_command", "boolean"),
    typechecked("handle_options", "boolean"),
+   typechecked("action", "function"),
    add_help
 }, Parser)
 
@@ -840,7 +842,8 @@ local ParseState = class({
    arguments = {},
    argument_i = 1,
    element_to_mutexes = {},
-   mutex_to_used_option = {}
+   mutex_to_used_option = {},
+   command_actions = {}
 })
 
 function ParseState:__call(parser, error_handler)
@@ -857,6 +860,10 @@ end
 
 function ParseState:switch(parser)
    self.parser = parser
+
+   if parser._action then
+      table.insert(self.command_actions, parser._action)
+   end
 
    for _, option in ipairs(parser._options) do
       option = ElementState(self, option)
@@ -1003,6 +1010,10 @@ function ParseState:finalize()
             self:error("%s must be used %s", name, bound("time", mincount, option.element._maxcount))
          end
       end
+   end
+
+   for i = #self.command_actions, 1, -1 do
+      self.command_actions[i](self.result)
    end
 end
 

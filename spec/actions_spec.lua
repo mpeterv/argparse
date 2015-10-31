@@ -128,4 +128,34 @@ describe("actions", function()
       parser:parse{"-n", "-n1", "-n", "-n", "2"}
       assert.same({0, 1, 0, 2}, numbers)
    end)
+
+   it("for parser are called", function()
+      local parser = Parser()
+      parser:flag("-f"):count("0-3")
+      local args
+      parser:action(function(passed_args) args = passed_args end)
+      parser:parse{"-ff"}
+      assert.same({f = 2}, args)
+   end)
+
+   it("for commands are called in reverse order", function()
+      local args = {}
+      
+      local parser = Parser():action(function(passed_args)
+         args[1] = passed_args
+         args.last = 1
+      end)
+      parser:flag("-f"):count("0-3")
+      local foo = parser:command("foo"):action(function(passed_args)
+         args[2] = passed_args
+         args.last = 2
+      end)
+      foo:flag("-g")
+      parser:parse{"foo", "-f", "-g", "-f"}
+      assert.same({
+         last = 1,
+         {foo = true, f = 2, g = true},
+         {foo = true, f = 2, g = true}
+      }, args)
+   end)
 end)
