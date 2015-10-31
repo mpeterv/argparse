@@ -105,6 +105,24 @@ describe("actions", function()
       assert.same({foo = false}, args)
    end)
 
+   it("for options allow setting initial stored value", function()
+      local parser = Parser()
+      parser:flag("--no-foo"):target("foo"):action("store_false"):init(true)
+      parser:flag("--no-bar"):target("bar"):action("store_false"):init(true)
+
+      local args = parser:parse{"--no-foo"}
+      assert.same({foo = false, bar = true}, args)
+   end)
+
+   it("for options allow setting initial stored value as non-string argument to default", function()
+      local parser = Parser()
+      parser:flag("--no-foo", "Foo the bar.", true):target("foo"):action("store_false")
+      parser:flag("--no-bar", "Bar the foo.", true):target("bar"):action("store_false")
+
+      local args = parser:parse{"--no-foo"}
+      assert.same({foo = false, bar = true}, args)
+   end)
+
    it("pass overwrite flag as the fourth argument", function()
       local parser = Parser()
       local overwrites = {}

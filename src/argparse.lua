@@ -187,6 +187,18 @@ local option_action = {"action", function(_, value)
    end
 end}
 
+local option_init = {"init", function(self)
+   self._has_init = true
+end}
+
+local option_default = {"default", function(self, value)
+   if type(value) ~= "string" then
+      self._init = value
+      self._has_init = true
+      return true
+   end
+end}
+
 local add_help = {"add_help", function(self, value)
    typecheck("add_help", {"boolean", "string", "table"}, value)
 
@@ -262,14 +274,15 @@ local Argument = class({
    args = 5,
    typechecked("name", "string"),
    typechecked("description", "string"),
-   typechecked("default", "string"),
+   option_default,
    typechecked("convert", "function", "table"),
    boundaries("args"),
    typechecked("target", "string"),
    typechecked("defmode", "string"),
    typechecked("show_default", "boolean"),
    typechecked("argname", "string", "table"),
-   option_action
+   option_action,
+   option_init
 })
 
 local Option = class({
@@ -280,7 +293,7 @@ local Option = class({
    args = 6,
    multiname,
    typechecked("description", "string"),
-   typechecked("default", "string"),
+   option_default,
    typechecked("convert", "function", "table"),
    boundaries("args"),
    boundaries("count"),
@@ -289,7 +302,8 @@ local Option = class({
    typechecked("show_default", "boolean"),
    typechecked("overwrite", "boolean"),
    typechecked("argname", "string", "table"),
-   option_action
+   option_action,
+   option_init
 }, Argument)
 
 function Argument:_get_argument_list()
@@ -362,21 +376,28 @@ function actions.append(result, target, argument, overwrite)
 end
 
 function Argument:_get_action()
-   local action = self._action
-   local init
+   local action, init
 
    if self._maxcount == 1 then
       if self._maxargs == 0 then
-         action, init = action or "store_true", nil
+         action, init = "store_true", nil
       else
-         action, init = action or "store", nil
+         action, init = "store", nil
       end
    else
       if self._maxargs == 0 then
-         action, init = action or "count", 0
+         action, init = "count", 0
       else
-         action, init = action or "append", {}
+         action, init = "append", {}
       end
+   end
+
+   if self._action then
+      action = self._action
+   end
+
+   if self._has_init then
+      init = self._init
    end
 
    if type(action) == "string" then
