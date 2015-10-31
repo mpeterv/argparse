@@ -1107,7 +1107,7 @@ function ParseState:parse(args)
                      local option = self:get_option(name)
                      self:invoke(option, name)
 
-                     if i ~= #arg and option.element._minargs > 0 and option.element._maxargs > 0 then
+                     if i ~= #arg and option.element._maxargs > 0 then
                         self:pass(arg:sub(i + 1))
                         break
                      end
