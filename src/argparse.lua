@@ -177,6 +177,16 @@ local function boundaries(name)
    end}
 end
 
+local actions = {}
+
+local option_action = {"action", function(_, value)
+   typecheck("action", {"function", "string"}, value)
+
+   if type(value) == "string" and not actions[value] then
+      error(("unknown action '%s'"):format(value))
+   end
+end}
+
 local add_help = {"add_help", function(self, value)
    typecheck("add_help", {"boolean", "string", "table"}, value)
 
@@ -259,7 +269,7 @@ local Argument = class({
    typechecked("defmode", "string"),
    typechecked("show_default", "boolean"),
    typechecked("argname", "string", "table"),
-   typechecked("action", "function")
+   option_action
 })
 
 local Option = class({
@@ -279,7 +289,7 @@ local Option = class({
    typechecked("show_default", "boolean"),
    typechecked("overwrite", "boolean"),
    typechecked("argname", "string", "table"),
-   typechecked("action", "function")
+   option_action
 }, Argument)
 
 function Argument:_get_argument_list()
@@ -325,10 +335,12 @@ function Argument:_get_usage()
    return usage
 end
 
-local actions = {}
-
 function actions.store_true(result, target)
    result[target] = true
+end
+
+function actions.store_false(result, target)
+   result[target] = false
 end
 
 function actions.store(result, target, argument)
@@ -350,19 +362,28 @@ function actions.append(result, target, argument, overwrite)
 end
 
 function Argument:_get_action()
+   local action = self._action
+   local init
+
    if self._maxcount == 1 then
       if self._maxargs == 0 then
-         return self._action or actions.store_true, nil
+         action, init = action or "store_true", nil
       else
-         return self._action or actions.store, nil
+         action, init = action or "store", nil
       end
    else
       if self._maxargs == 0 then
-         return self._action or actions.count, 0
+         action, init = action or "count", 0
       else
-         return self._action or actions.append, {}
+         action, init = action or "append", {}
       end
    end
+
+   if type(action) == "string" then
+      action = actions[action]
+   end
+
+   return action, init
 end
 
 -- Returns placeholder for `narg`-th argument. 

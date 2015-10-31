@@ -96,6 +96,15 @@ describe("actions", function()
       assert.same({path = "./first/second/third"}, args)
    end)
 
+   it("for options allow using strings as actions", function()
+      local parser = Parser()
+      parser:flag("--no-foo"):target("foo"):action("store_false")
+      parser:flag("--no-bar"):target("bar"):action("store_false")
+
+      local args = parser:parse{"--no-foo"}
+      assert.same({foo = false}, args)
+   end)
+
    it("pass overwrite flag as the fourth argument", function()
       local parser = Parser()
       local overwrites = {}
