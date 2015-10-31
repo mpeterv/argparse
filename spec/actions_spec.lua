@@ -115,6 +115,21 @@ describe("actions", function()
       assert.same({foo = false, bar = true}, args)
    end)
 
+   it("'append' and 'concat' respect initial value", function()
+      local parser = Parser()
+      parser:option("-f"):count("*"):init(nil)
+      parser:option("-g"):args("*"):count("*"):action("concat"):init(nil)
+
+      local args = parser:parse{}
+      assert.same({}, args)
+
+      args = parser:parse{"-fabc", "-fdef", "-g"}
+      assert.same({f = {"abc", "def"}, g = {}}, args)
+
+      args = parser:parse{"-g", "abc", "def", "-g123", "-f123"}
+      assert.same({f = {"123"}, g = {"abc", "def", "123"}}, args)
+   end)
+
    it("for options allow setting initial stored value as non-string argument to default", function()
       local parser = Parser()
       parser:flag("--no-foo", "Foo the bar.", true):target("foo"):action("store_false")

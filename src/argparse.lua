@@ -368,6 +368,7 @@ function actions.count(result, target, _, overwrite)
 end
 
 function actions.append(result, target, argument, overwrite)
+   result[target] = result[target] or {}
    table.insert(result[target], argument)
 
    if overwrite then
@@ -379,6 +380,8 @@ function actions.concat(result, target, arguments, overwrite)
    if overwrite then
       error("'concat' action can't handle too many invocations")
    end
+
+   result[target] = result[target] or {}
 
    for _, argument in ipairs(arguments) do
       table.insert(result[target], argument)
