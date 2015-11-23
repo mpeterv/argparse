@@ -23,6 +23,17 @@ describe("tests related to commands", function()
       assert.has_error(function() parser:parse{"-q", "install"} end, "unknown option '-q'")
    end)
 
+   it("uses command_target property to save command name", function()
+      local parser = Parser "name"
+         :add_help(false)
+         :command_target("command")
+      local install = parser:command "install"
+      install:flag "-q" "--quiet"
+
+      local args = parser:parse{"install", "-q"}
+      assert.same({install = true, quiet = true, command = "install"}, args)
+   end)
+
    it("allows to continue passing old options", function()
       local parser = Parser "name"
       parser:flag "-v" "--verbose" {

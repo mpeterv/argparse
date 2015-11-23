@@ -244,6 +244,7 @@ local Parser = class({
    typechecked("require_command", "boolean"),
    typechecked("handle_options", "boolean"),
    typechecked("action", "function"),
+   typechecked("command_target", "string"),
    add_help
 })
 
@@ -260,6 +261,7 @@ local Command = class({
    typechecked("require_command", "boolean"),
    typechecked("handle_options", "boolean"),
    typechecked("action", "function"),
+   typechecked("command_target", "string"),
    add_help
 }, Parser)
 
@@ -1013,6 +1015,11 @@ function ParseState:pass(arg)
    else
       local command = self:get_command(arg)
       self.result[command._target or command._name] = true
+
+      if self.parser._command_target then
+         self.result[self.parser._command_target] = command._name
+      end
+
       self:switch(command)
    end
 end
