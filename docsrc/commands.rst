@@ -35,6 +35,29 @@ A typo will result in an appropriate error message.
    Error: unknown command 'instal'
    Did you mean 'install'?
 
+Getting name of selected command
+--------------------------------
+
+Use ``command_target`` property of the parser to store the name of used command in a field of the result table.
+
+.. code-block:: lua
+   :linenos:
+
+   parser:command_target("command")
+   parser:command("install")
+   parser:command("remove")
+
+::
+
+   $ lua script.lua install
+
+.. code-block:: lua
+
+   {
+      install = true,
+      command = "install"
+   }
+
 Adding elements to commands
 ---------------------------
 

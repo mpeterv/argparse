@@ -176,6 +176,7 @@ Property            Type
 ``require_command`` Boolean
 ``handle_options``  Boolean
 ``add_help``        Boolean or string or table
+``command_target``  String
 =================== ==========================
 
 Command properties
@@ -203,6 +204,7 @@ Property            Type
 ``handle_options``  Boolean
 ``action``          Function
 ``add_help``        Boolean or string or table
+``command_target``  String
 =================== ==========================
 
 Argument properties
