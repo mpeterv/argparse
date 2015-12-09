@@ -232,13 +232,13 @@ Examples using ``store_false`` and ``concat`` actions:
 Command actions
 ^^^^^^^^^^^^^^^
 
-Actions for parsers and commands are simply callbacks invoked after parsing, with the argument table as the only argument. Actions for nested commands are called first.
+Actions for parsers and commands are simply callbacks invoked after parsing, with result table and command name as the arguments. Actions for nested commands are called first.
 
 .. code-block:: lua
    :linenos:
 
-   local install = parser:command("install"):action(function(args)
-      print("Running install...")
+   local install = parser:command("install"):action(function(args, name)
+      print("Running " .. name)
       -- Use args here
    )
 
@@ -252,5 +252,5 @@ Actions for parsers and commands are simply callbacks invoked after parsing, wit
 
 ::
 
-   Running install...
+   Running install
    Callbacks are fun!
