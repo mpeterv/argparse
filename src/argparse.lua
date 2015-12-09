@@ -919,7 +919,7 @@ function ParseState:switch(parser)
    self.parser = parser
 
    if parser._action then
-      table.insert(self.command_actions, parser._action)
+      table.insert(self.command_actions, {action = parser._action, name = parser._name})
    end
 
    for _, option in ipairs(parser._options) do
@@ -1075,7 +1075,7 @@ function ParseState:finalize()
    end
 
    for i = #self.command_actions, 1, -1 do
-      self.command_actions[i](self.result)
+      self.command_actions[i].action(self.result, self.command_actions[i].name)
    end
 end
 

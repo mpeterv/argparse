@@ -189,7 +189,8 @@ describe("actions", function()
          args.last = 1
       end)
       parser:flag("-f"):count("0-3")
-      local foo = parser:command("foo"):action(function(passed_args)
+      local foo = parser:command("foo"):action(function(passed_args, name)
+         assert.equals("foo", name)
          args[2] = passed_args
          args.last = 2
       end)
