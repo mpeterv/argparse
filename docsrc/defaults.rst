@@ -1,7 +1,7 @@
 Default values
 ==============
 
-For elements such as arguments and options, if ``default`` property is set, its value is stored in case the element was not used.
+For elements such as arguments and options, if ``default`` property is set to a string, its value is stored in case the element was not used (if it's not a string, it'll be used as ``init`` property instead, see :ref:`actions`).
 
 .. code-block:: lua
    :linenos:

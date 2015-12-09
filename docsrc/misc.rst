@@ -217,7 +217,7 @@ Property        Type
 =============== =================
 ``name``        String
 ``description`` String
-``default``     String
+``default``     Any
 ``convert``     Function or table
 ``args``        Number or string
 =============== =================
@@ -231,6 +231,8 @@ Property            Type
 ``defmode``         String
 ``show_default``    Boolean
 ``argname``         String or table
+``action``          Function or string
+``init``            Any
 =================== ===============
 
 Option and flag properties
@@ -243,7 +245,7 @@ Property        Type
 =============== =================
 ``name``        String
 ``description`` String
-``default``     String
+``default``     Any
 ``convert``     Function or table
 ``args``        Number or string
 ``count``       Number or string
@@ -251,13 +253,14 @@ Property        Type
 
 Other properties:
 
-=================== ===============
+=================== ==================
 Property            Type
-=================== ===============
+=================== ==================
 ``target``          String
 ``defmode``         String
 ``show_default``    Boolean
 ``overwrite``       Booleans
 ``argname``         String or table
-``action``          Function
-=================== ===============
+``action``          Function or string
+``init``            Any
+=================== ==================
