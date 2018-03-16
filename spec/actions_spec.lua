@@ -183,7 +183,7 @@ describe("actions", function()
 
    it("for commands are called in reverse order", function()
       local args = {}
-      
+
       local parser = Parser():action(function(passed_args)
          args[1] = passed_args
          args.last = 1

@@ -51,7 +51,7 @@ An epilog.]], parser:get_help())
          :args "2"
       parser:argument "maybe-fourth"
          :args "?"
-      parser:argument("others", "Optional. ")
+      parser:argument("others", "Optional.")
          :args "*"
 
       assert.equal([[
@@ -62,7 +62,7 @@ Arguments:
    first
    second-and-third
    maybe-fourth
-   others                Optional. 
+   others                Optional.
 
 Options:
    -h, --help            Show this help message and exit.]], parser:get_help())
@@ -92,17 +92,17 @@ Options:
          :count "0-2"
          :target "verbosity"
          :description [[
-Sets verbosity level. 
--v: Report all warnings. 
--vv: Report all debugging information. ]]
+Sets verbosity level.
+-v: Report all warnings.
+-vv: Report all debugging information.]]
 
       assert.equal([[
 Usage: foo [-v] [-h]
 
 Options:
-   -v                    Sets verbosity level. 
-                         -v: Report all warnings. 
-                         -vv: Report all debugging information. 
+   -v                    Sets verbosity level.
+                         -v: Report all warnings.
+                         -vv: Report all debugging information.
    -h, --help            Show this help message and exit.]], parser:get_help())
    end)
 
@@ -131,14 +131,14 @@ Options:
       parser:option "-p"
          :default "8080"
          :show_default(false)
-         :description "Port. "
+         :description "Port."
 
       assert.equal([[
 Usage: foo [-o <o>] [-p <p>] [-h]
 
 Options:
    -o <o>
-   -p <p>                Port. 
+   -p <p>                Port.
    -h, --help            Show this help message and exit.]], parser:get_help())
    end)
 

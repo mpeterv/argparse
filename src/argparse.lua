@@ -48,7 +48,7 @@ local function class(prototype, properties, parent)
    if properties then
       local names = {}
 
-      -- Create setter methods and fill set of property names. 
+      -- Create setter methods and fill set of property names.
       for _, property in ipairs(properties) do
          local name, callback = property[1], property[2]
 
@@ -422,7 +422,7 @@ function Argument:_get_action()
    return action, init
 end
 
--- Returns placeholder for `narg`-th argument. 
+-- Returns placeholder for `narg`-th argument.
 function Argument:_get_argname(narg)
    local argname = self._argname or self:_get_default_argname()
 
@@ -441,7 +441,7 @@ function Option:_get_default_argname()
    return "<" .. self:_get_default_target() .. ">"
 end
 
--- Returns label to be shown in the help message. 
+-- Returns label to be shown in the help message.
 function Argument:_get_label()
    return self._name
 end
@@ -687,7 +687,7 @@ function Parser:get_help()
    end
 
    local blocks = {self:get_usage()}
-   
+
    if self._description then
       table.insert(blocks, self._description)
    end

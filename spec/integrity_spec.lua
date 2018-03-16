@@ -81,17 +81,17 @@ Did you mean '--from'?
          assert.equal([[
 Usage: ]]..script..[[ [-v] [-h] <input> [<command>] ...
 
-A testing program. 
+A testing program.
 
 Arguments:
    input
 
 Options:
-   -v, --verbose         Sets verbosity level. 
+   -v, --verbose         Sets verbosity level.
    -h, --help            Show this help message and exit.
 
 Commands:
-   install               Install a rock. 
+   install               Install a rock.
 ]], get_output("--help"))
       end)
 
@@ -99,15 +99,15 @@ Commands:
          assert.equal([[
 Usage: ]]..script..[[ install [-f <from>] [-h] <rock> [<version>]
 
-Install a rock. 
+Install a rock.
 
 Arguments:
-   rock                  Name of the rock. 
-   version               Version of the rock. 
+   rock                  Name of the rock.
+   version               Version of the rock.
 
 Options:
    -f <from>, --from <from>
-                         Fetch the rock from this server. 
+                         Fetch the rock from this server.
    -h, --help            Show this help message and exit.
 ]], get_output("foo install --help"))
       end)
