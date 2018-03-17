@@ -130,6 +130,15 @@ describe("actions", function()
       assert.same({f = {"123"}, g = {"abc", "def", "123"}}, args)
    end)
 
+   it("'concat' action can't handle too many invocations", function()
+      local parser = Parser()
+      parser:option("-x"):args("*"):count("0-2"):action("concat")
+
+      assert.has_error(function()
+         parser:parse{"-x", "foo", "-x", "bar", "baz", "-x", "thing"}
+      end, "'concat' action can't handle too many invocations")
+   end)
+
    it("for options allow setting initial stored value as non-string argument to default", function()
       local parser = Parser()
       parser:flag("--no-foo", "Foo the bar.", true):target("foo"):action("store_false")
