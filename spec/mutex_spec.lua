@@ -40,8 +40,12 @@ describe("tests related to mutexes", function()
             :description "Print additional debug information. "
       )
 
-      assert.has_error(function() parser:parse{"-qv"} end, "option '-v' can not be used together with option '-q'")
-      assert.has_error(function() parser:parse{"-v", "--quiet"} end, "option '--quiet' can not be used together with option '-v'")
+      assert.has_error(function()
+         parser:parse{"-qv"}
+      end, "option '-v' can not be used together with option '-q'")
+      assert.has_error(function()
+         parser:parse{"-v", "--quiet"}
+      end, "option '--quiet' can not be used together with option '-v'")
    end)
 
    it("handles multiple mutexes", function()
@@ -75,6 +79,8 @@ describe("tests related to mutexes", function()
 
       local args = parser:parse{"install", "-l"}
       assert.same({install = true, ["local"] = true}, args)
-      assert.has_error(function() parser:parse{"install", "-qlv"} end, "option '-v' can not be used together with option '-q'")
+      assert.has_error(function()
+         parser:parse{"install", "-qlv"}
+      end, "option '-v' can not be used together with option '-q'")
    end)
 end)

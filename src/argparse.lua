@@ -827,7 +827,8 @@ function ElementState:invoke(alias)
       if self.element._overwrite then
          self.overwrite = true
       else
-         self:error("%s must be used %s", self.name, bound("time", self.element._mincount, self.element._maxcount, true))
+         local num_times_repr = bound("time", self.element._mincount, self.element._maxcount, true)
+         self:error("%s must be used %s", self.name, num_times_repr)
       end
    else
       self.invocations = self.invocations + 1
