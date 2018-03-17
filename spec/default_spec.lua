@@ -131,5 +131,16 @@ describe("tests related to default values", function()
          local args = parser:parse({"-f", "--foo=baz", "--foo"})
          assert.same({foo = {"bar", "baz", "bar"}}, args)
       end)
+
+      it("completes missing invocations for multi-count options with default argument", function()
+         local parser = Parser()
+          parser:option "-f" "--foo" {
+            count = "2",
+            default = "bar",
+            defmode = "arg"
+         }
+         local args = parser:parse({"-ffff"})
+         assert.same({foo = {"fff", "bar"}}, args)
+      end)
    end)
 end)
