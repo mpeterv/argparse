@@ -193,4 +193,28 @@ Usage: foo ([-q] | [-v] | [-i]) ([-l] | [-f <from>])
        [--yet-another-option <yet_another_option>]]=], parser:get_usage()
       )
    end)
+
+    it("puts vararg option and mutex usages after positional arguments", function()
+      local parser = Parser "foo"
+         :add_help(false)
+      parser:argument("argument")
+      parser:mutex(
+         parser:flag "-q" "--quiet",
+         parser:flag "-v" "--verbose",
+         parser:flag "-i" "--interactive"
+      )
+      parser:mutex(
+         parser:flag "-a -all",
+         parser:option "-i --ignore":args("*")
+      )
+      parser:option "--yet-another-option"
+      parser:option "--vararg-option":args("1-2")
+
+      assert.equal([=[
+Usage: foo ([-q] | [-v] | [-i])
+       [--yet-another-option <yet_another_option>] <argument>
+       ([-a] | [-i [<ignore>] ...])
+       [--vararg-option <vararg_option> [<vararg_option>]]]=], parser:get_usage()
+      )
+   end)
 end)
