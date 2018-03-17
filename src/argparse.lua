@@ -880,13 +880,17 @@ function ElementState:close()
          end
       end
 
-      local args = self.args
+      local args
 
-      if self.element._maxargs <= 1 then
-         args = args[1]
-      end
-
-      if self.element._maxargs == 1 and self.element._minargs == 0 and self.element._mincount ~= self.element._maxcount then
+      if self.element._maxargs == 0 then
+         args = self.args[1]
+      elseif self.element._maxargs == 1 then
+         if self.element._minargs == 0 and self.element._mincount ~= self.element._maxcount then
+            args = self.args
+         else
+            args = self.args[1]
+         end
+      else
          args = self.args
       end
 
