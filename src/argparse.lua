@@ -781,7 +781,7 @@ function ElementState:error(fmt, ...)
    self.state:error(fmt, ...)
 end
 
-function ElementState:convert(argument)
+function ElementState:convert(argument, index)
    local converter = self.element._convert
 
    if converter then
@@ -789,6 +789,8 @@ function ElementState:convert(argument)
 
       if type(converter) == "function" then
          ok, err = converter(argument)
+      elseif type(converter[index]) == "function" then
+         ok, err = converter[index](argument)
       else
          ok = converter[argument]
       end
@@ -844,7 +846,7 @@ function ElementState:invoke(alias)
 end
 
 function ElementState:pass(argument)
-   argument = self:convert(argument)
+   argument = self:convert(argument, #self.args + 1)
    table.insert(self.args, argument)
 
    if #self.args >= self.element._maxargs then

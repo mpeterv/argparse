@@ -13,6 +13,24 @@ describe("tests related to converters", function()
       assert.same({numbers = {1, 2, 500}}, args)
    end)
 
+   it("accepts an array of converters", function()
+      local function tocoords(str)
+         local x, y = str:match("^([^,]*),([^,]*)$")
+         x = tonumber(x)
+         y = tonumber(y)
+         return x and y and {x, y}
+      end
+
+      local parser = Parser()
+      parser:option "-c --circle" {
+         convert = {tonumber, tocoords},
+         args = 2
+      }
+
+      local args = parser:parse{"-c", "123", "456,567"}
+      assert.same({circle = {123, {456, 567}}}, args)
+   end)
+
    it("converts arguments using mapping", function()
       local choice = {
          foo = 1,
