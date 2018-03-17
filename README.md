@@ -1,7 +1,7 @@
 # argparse
 
 [![Build Status](https://travis-ci.org/mpeterv/argparse.png?branch=master)](https://travis-ci.org/mpeterv/argparse)
-[![Coverage Status](https://coveralls.io/repos/mpeterv/argparse/badge.svg?branch=master&service=github)](https://coveralls.io/github/mpeterv/argparse?branch=master)
+[![Coverage Status](https://coveralls.io/repos/mpeterv/argparse/badge.svg?branch=master)](https://coveralls.io/r/mpeterv/argparse?branch=master)
 
 Argparse is a feature-rich command line parser for Lua inspired by argparse for Python.
 
