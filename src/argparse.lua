@@ -571,13 +571,14 @@ function Parser:command(...)
 end
 
 function Parser:mutex(...)
-   local options = {...}
+   local elements = {...}
 
-   for i, option in ipairs(options) do
-      assert(getmetatable(option) == Option, ("bad argument #%d to 'mutex' (Option expected)"):format(i))
+   for i, element in ipairs(elements) do
+      local mt = getmetatable(element)
+      assert(mt == Option or mt == Argument, ("bad argument #%d to 'mutex' (Option or Argument expected)"):format(i))
    end
 
-   table.insert(self._mutexes, options)
+   table.insert(self._mutexes, elements)
    return self
 end
 
@@ -599,54 +600,108 @@ function Parser:get_usage()
       end
    end
 
-   -- This can definitely be refactored into something cleaner
-   local mutex_options = {}
-   local vararg_mutexes = {}
+   -- Normally options are before positional arguments in usage messages.
+   -- However, vararg options should be after, because they can't be reliable used
+   -- before a positional argument.
+   -- Mutexes come into play, too, and are shown as soon as possible.
+   -- Overall, output usages in the following order:
+   -- 1. Mutexes that don't have positional arguments or vararg options.
+   -- 2. Options that are not in any mutexes and are not vararg.
+   -- 3. Positional arguments - on their own or as a part of a mutex.
+   -- 4. Remaining mutexes.
+   -- 5. Remaining options.
 
-   -- First, put mutexes which do not contain vararg options and remember those which do
-   for _, mutex in ipairs(self._mutexes) do
+   local elements_in_mutexes = {}
+   local added_elements = {}
+   local added_mutexes = {}
+   local argument_to_mutexes = {}
+
+   local function add_mutex(mutex, main_argument)
+      if added_mutexes[mutex] then
+         return
+      end
+
+      added_mutexes[mutex] = true
       local buf = {}
-      local is_vararg = false
 
-      for _, option in ipairs(mutex) do
-         if option:_is_vararg() then
-            is_vararg = true
+      for _, element in ipairs(mutex) do
+         if not added_elements[element] then
+            if getmetatable(element) == Option or element == main_argument then
+               table.insert(buf, element:_get_usage())
+               added_elements[element] = true
+            end
+         end
+      end
+
+      if #buf == 1 then
+         add(buf[1])
+      elseif #buf > 1 then
+         add("(" .. table.concat(buf, " | ") .. ")")
+      end
+   end
+
+   local function add_element(element)
+      if not added_elements[element] then
+         add(element:_get_usage())
+         added_elements[element] = true
+      end
+   end
+
+   for _, mutex in ipairs(self._mutexes) do
+      local is_vararg = false
+      local has_argument = false
+
+      for _, element in ipairs(mutex) do
+         if getmetatable(element) == Option then
+            if element:_is_vararg() then
+               is_vararg = true
+            end
+         else
+            has_argument = true
+            argument_to_mutexes[element] = argument_to_mutexes[element] or {}
+            table.insert(argument_to_mutexes[element], mutex)
          end
 
-         table.insert(buf, option:_get_usage())
-         mutex_options[option] = true
+         elements_in_mutexes[element] = true
       end
 
-      local repr = "(" .. table.concat(buf, " | ") .. ")"
-
-      if is_vararg then
-         table.insert(vararg_mutexes, repr)
-      else
-         add(repr)
+      if not is_vararg and not has_argument then
+         add_mutex(mutex)
       end
    end
 
-   -- Second, put regular options
    for _, option in ipairs(self._options) do
-      if not mutex_options[option] and not option:_is_vararg() then
-         add(option:_get_usage())
+      if not elements_in_mutexes[option] and not option:_is_vararg() then
+         add_element(option)
       end
    end
 
-   -- Put positional arguments
+   -- Add usages for positional arguments, together with one mutex containing them, if they are in a mutex.
    for _, argument in ipairs(self._arguments) do
-      add(argument:_get_usage())
+      -- Pick a mutex as a part of which to show this argument, take the first one that's still available.
+      local mutex
+
+      if elements_in_mutexes[argument] then
+         for _, argument_mutex in ipairs(argument_to_mutexes[argument]) do
+            if not added_mutexes[argument_mutex] then
+               mutex = argument_mutex
+            end
+         end
+      end
+
+      if mutex then
+         add_mutex(mutex, argument)
+      else
+         add_element(argument)
+      end
    end
 
-   -- Put mutexes containing vararg options
-   for _, mutex_repr in ipairs(vararg_mutexes) do
-      add(mutex_repr)
+   for _, mutex in ipairs(self._mutexes) do
+      add_mutex(mutex)
    end
 
    for _, option in ipairs(self._options) do
-      if not mutex_options[option] and option:_is_vararg() then
-         add(option:_get_usage())
-      end
+      add_element(option)
    end
 
    if #self._commands > 0 then
@@ -820,9 +875,12 @@ local function bound(noun, min, max, is_max)
    return res .. tostring(number) .. " " .. noun ..  (number == 1 and "" or "s")
 end
 
-function ElementState:invoke(alias)
-   self.open = true
+function ElementState:set_name(alias)
    self.name = ("%s '%s'"):format(alias and "option" or "argument", alias or self.element._name)
+end
+
+function ElementState:invoke()
+   self.open = true
    self.overwrite = false
 
    if self.invocations >= self.element._maxcount then
@@ -906,7 +964,7 @@ local ParseState = class({
    arguments = {},
    argument_i = 1,
    element_to_mutexes = {},
-   mutex_to_used_option = {},
+   mutex_to_element_state = {},
    command_actions = {}
 })
 
@@ -939,18 +997,19 @@ function ParseState:switch(parser)
    end
 
    for _, mutex in ipairs(parser._mutexes) do
-      for _, option in ipairs(mutex) do
-         if not self.element_to_mutexes[option] then
-            self.element_to_mutexes[option] = {}
+      for _, element in ipairs(mutex) do
+         if not self.element_to_mutexes[element] then
+            self.element_to_mutexes[element] = {}
          end
 
-         table.insert(self.element_to_mutexes[option], mutex)
+         table.insert(self.element_to_mutexes[element], mutex)
       end
    end
 
    for _, argument in ipairs(parser._arguments) do
       argument = ElementState(self, argument)
       table.insert(self.arguments, argument)
+      argument:set_name()
       argument:invoke()
    end
 
@@ -989,22 +1048,26 @@ function ParseState:get_command(name)
    end
 end
 
-function ParseState:invoke(option, name)
-   self:close()
+function ParseState:check_mutexes(element_state)
+   if self.element_to_mutexes[element_state.element] then
+      for _, mutex in ipairs(self.element_to_mutexes[element_state.element]) do
+         local used_element_state = self.mutex_to_element_state[mutex]
 
-   if self.element_to_mutexes[option.element] then
-      for _, mutex in ipairs(self.element_to_mutexes[option.element]) do
-         local used_option = self.mutex_to_used_option[mutex]
-
-         if used_option and used_option ~= option then
-            self:error("option '%s' can not be used together with %s", name, used_option.name)
+         if used_element_state and used_element_state ~= element_state then
+            self:error("%s can not be used together with %s", element_state.name, used_element_state.name)
          else
-            self.mutex_to_used_option[mutex] = option
+            self.mutex_to_element_state[mutex] = element_state
          end
       end
    end
+end
 
-   if option:invoke(name) then
+function ParseState:invoke(option, name)
+   self:close()
+   option:set_name(name)
+   self:check_mutexes(option, name)
+
+   if option:invoke() then
       self.option = option
    end
 end
@@ -1015,6 +1078,8 @@ function ParseState:pass(arg)
          self.option = nil
       end
    elseif self.argument then
+      self:check_mutexes(self.argument)
+
       if not self.argument:pass(arg) then
          self.argument_i = self.argument_i + 1
          self.argument = self.arguments[self.argument_i]
@@ -1055,11 +1120,11 @@ function ParseState:finalize()
    end
 
    for _, option in ipairs(self.options) do
-      local name = option.name or ("option '%s'"):format(option.element._name)
+      option.name = option.name or ("option '%s'"):format(option.element._name)
 
       if option.invocations == 0 then
          if option:default("u") then
-            option:invoke(name)
+            option:invoke()
             option:complete_invocation()
             option:close()
          end
@@ -1070,13 +1135,13 @@ function ParseState:finalize()
       if option.invocations < mincount then
          if option:default("a") then
             while option.invocations < mincount do
-               option:invoke(name)
+               option:invoke()
                option:close()
             end
          elseif option.invocations == 0 then
-            self:error("missing %s", name)
+            self:error("missing %s", option.name)
          else
-            self:error("%s must be used %s", name, bound("time", mincount, option.element._maxcount))
+            self:error("%s must be used %s", option.name, bound("time", mincount, option.element._maxcount))
          end
       end
    end

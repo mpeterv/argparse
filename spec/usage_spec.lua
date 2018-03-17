@@ -194,7 +194,31 @@ Usage: foo ([-q] | [-v] | [-i]) ([-l] | [-f <from>])
       )
    end)
 
-    it("puts vararg option and mutex usages after positional arguments", function()
+   it("creates correct usage message for mutexes with arguments", function()
+      local parser = Parser "foo"
+         :add_help(false)
+
+      parser:argument "first"
+      parser:mutex(
+         parser:flag "-q" "--quiet",
+         parser:flag "-v" "--verbose",
+         parser:argument "second":args "?"
+      )
+      parser:argument "third"
+      parser:mutex(
+         parser:flag "-l" "--local",
+         parser:option "-f" "--from"
+      )
+      parser:option "--yet-another-option"
+
+      assert.equal([=[
+Usage: foo ([-l] | [-f <from>])
+       [--yet-another-option <yet_another_option>] <first>
+       ([-q] | [-v] | [<second>]) <third>]=], parser:get_usage()
+      )
+   end)
+
+   it("puts vararg option and mutex usages after positional arguments", function()
       local parser = Parser "foo"
          :add_help(false)
       parser:argument("argument")
@@ -215,6 +239,36 @@ Usage: foo ([-q] | [-v] | [-i])
        [--yet-another-option <yet_another_option>] <argument>
        ([-a] | [-i [<ignore>] ...])
        [--vararg-option <vararg_option> [<vararg_option>]]]=], parser:get_usage()
+      )
+   end)
+
+   it("doesn't repeat usage of elements within several mutexes", function()
+      local parser = Parser "foo"
+         :add_help(false)
+
+      parser:argument("arg1")
+      local arg2 = parser:argument("arg2"):args "?"
+      parser:argument("arg3"):args "?"
+      local arg4 = parser:argument("arg4"):args "?"
+
+      local opt1 = parser:option("--opt1")
+      local opt2 = parser:option("--opt2")
+      local opt3 = parser:option("--opt3")
+      local opt4 = parser:option("--opt4")
+      local opt5 = parser:option("--opt5")
+      local opt6 = parser:option("--opt6")
+      parser:option("--opt7")
+
+      parser:mutex(arg2, opt1, opt2)
+      parser:mutex(arg4, opt2, opt3, opt4)
+      parser:mutex(opt1, opt3, opt5)
+      parser:mutex(opt1, opt3, opt6)
+
+      assert.equal([=[
+Usage: foo ([--opt1 <opt1>] | [--opt3 <opt3>] | [--opt5 <opt5>])
+       [--opt6 <opt6>] [--opt7 <opt7>] <arg1>
+       ([<arg2>] | [--opt2 <opt2>]) [<arg3>]
+       ([<arg4>] | [--opt4 <opt4>])]=], parser:get_usage()
       )
    end)
 end)

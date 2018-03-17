@@ -19,6 +19,24 @@ describe("tests related to mutexes", function()
       assert.same({}, args)
    end)
 
+   it("handles mutex with an argument", function()
+      local parser = Parser()
+      parser:mutex(
+         parser:flag "-q" "--quiet"
+            :description "Supress output.",
+         parser:argument "log"
+            :args "?"
+            :description "Log file"
+      )
+
+      local args = parser:parse{"-q"}
+      assert.same({quiet = true}, args)
+      args = parser:parse{"log.txt"}
+      assert.same({log = "log.txt"}, args)
+      args = parser:parse{}
+      assert.same({}, args)
+   end)
+
    it("handles mutex with default value", function()
       local parser = Parser()
       parser:mutex(
@@ -46,6 +64,24 @@ describe("tests related to mutexes", function()
       assert.has_error(function()
          parser:parse{"-v", "--quiet"}
       end, "option '--quiet' can not be used together with option '-v'")
+   end)
+
+   it("raises an error if mutex with an argument is broken", function()
+      local parser = Parser()
+      parser:mutex(
+         parser:flag "-q" "--quiet"
+            :description "Supress output.",
+         parser:argument "log"
+            :args "?"
+            :description "Log file"
+      )
+
+      assert.has_error(function()
+         parser:parse{"-q", "log.txt"}
+      end, "argument 'log' can not be used together with option '-q'")
+      assert.has_error(function()
+         parser:parse{"log.txt", "--quiet"}
+      end, "option '--quiet' can not be used together with argument 'log'")
    end)
 
    it("handles multiple mutexes", function()
