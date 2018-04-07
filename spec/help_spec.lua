@@ -182,4 +182,46 @@ Options:
       assert.equal([[
 I don't like your format of help messages]], parser:get_help())
    end)
+
+   it("does not mention hidden arguments, options, and commands", function()
+      local parser = Parser "foo"
+      parser:argument "normal"
+      parser:argument "deprecated"
+         :args "?"
+         :hidden(true)
+      parser:flag "--feature"
+      parser:flag "--misfeature"
+         :hidden(true)
+      parser:command "good"
+      parser:command "okay"
+      parser:command "never-use-this-one"
+         :hidden(true)
+
+      assert.equal([[
+Usage: foo [--feature] [-h] <normal> <command> ...
+
+Arguments:
+   normal
+
+Options:
+   --feature
+   -h, --help            Show this help message and exit.
+
+Commands:
+   good
+   okay]], parser:get_help())
+   end)
+
+   it("omits categories if all elements are hidden", function()
+      local parser = Parser "foo"
+         :add_help(false)
+      parser:argument "deprecated"
+         :args "?"
+         :hidden(true)
+      parser:flag "--misfeature"
+         :hidden(true)
+
+      assert.equal([[
+Usage: foo]], parser:get_help())
+   end)
 end)

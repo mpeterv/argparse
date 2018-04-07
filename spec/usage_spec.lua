@@ -116,6 +116,42 @@ Usage: foo <first> <second-and-third> <second-and-third>
       )
    end)
 
+   it("omits usage for hidden arguments and options", function()
+      local parser = Parser "foo"
+         :add_help(false)
+      parser:flag "-d" "--deprecated"
+         :hidden(true)
+      parser:flag "-n" "--not-deprecated"
+      parser:argument "normal"
+      parser:argument "deprecated"
+         :args "?"
+         :hidden(true)
+
+      assert.equal(
+         [=[Usage: foo [-n] <normal>]=],
+         parser:get_usage()
+      )
+   end)
+
+   it("omits usage for mutexes if all elements are hidden", function()
+      local parser = Parser "foo"
+         :add_help(false)
+      parser:mutex(
+         parser:flag "--misfeature"
+            :hidden(true),
+         parser:flag "--no-misfeature"
+            :action "store_false"
+            :target "misfeature"
+            :hidden(true)
+      )
+      parser:flag "--feature"
+
+      assert.equal(
+         [=[Usage: foo [--feature]]=],
+         parser:get_usage()
+      )
+   end)
+
    it("usage messages for commands are correct after several invocations", function()
       local parser = Parser "foo"
          :add_help(false)

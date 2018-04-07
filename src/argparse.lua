@@ -262,6 +262,7 @@ local Command = class({
    typechecked("handle_options", "boolean"),
    typechecked("action", "function"),
    typechecked("command_target", "string"),
+   typechecked("hidden", "boolean"),
    add_help
 }, Parser)
 
@@ -283,6 +284,7 @@ local Argument = class({
    typechecked("defmode", "string"),
    typechecked("show_default", "boolean"),
    typechecked("argname", "string", "table"),
+   typechecked("hidden", "boolean"),
    option_action,
    option_init
 })
@@ -304,6 +306,7 @@ local Option = class({
    typechecked("show_default", "boolean"),
    typechecked("overwrite", "boolean"),
    typechecked("argname", "string", "table"),
+   typechecked("hidden", "boolean"),
    option_action,
    option_init
 }, Argument)
@@ -625,7 +628,7 @@ function Parser:get_usage()
       local buf = {}
 
       for _, element in ipairs(mutex) do
-         if not added_elements[element] then
+         if not element._hidden and not added_elements[element] then
             if getmetatable(element) == Option or element == main_argument then
                table.insert(buf, element:_get_usage())
                added_elements[element] = true
@@ -641,7 +644,7 @@ function Parser:get_usage()
    end
 
    local function add_element(element)
-      if not added_elements[element] then
+      if not element._hidden and not added_elements[element] then
          add(element:_get_usage())
          added_elements[element] = true
       end
@@ -750,13 +753,15 @@ function Parser:get_help()
    local labels = {"Arguments:", "Options:", "Commands:"}
 
    for i, elements in ipairs{self._arguments, self._options, self._commands} do
-      if #elements > 0 then
-         local buf = {labels[i]}
+      local buf = {labels[i]}
 
-         for _, element in ipairs(elements) do
+      for _, element in ipairs(elements) do
+         if not element._hidden then
             table.insert(buf, make_two_columns(element:_get_label(), element:_get_description()))
          end
+      end
 
+      if #buf > 1 then
          table.insert(blocks, table.concat(buf, "\n"))
       end
    end
