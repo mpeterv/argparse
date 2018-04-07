@@ -136,6 +136,16 @@ describe("tests related to options", function()
          assert.same({input = {"bar", "-f", "--foo" , "bar"}}, args)
       end)
 
+      it("allows using -- as an option", function()
+         local parser = Parser()
+         parser:flag "--unrelated"
+         parser:option "--"
+            :args "*"
+            :target "tail"
+         local args = parser:parse{"--", "foo", "--unrelated", "bar"}
+         assert.same({tail = {"foo", "--unrelated", "bar"}}, args)
+      end)
+
       describe("Special chars set", function()
          it("handles windows-style options", function()
             local parser = Parser()

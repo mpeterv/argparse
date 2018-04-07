@@ -1169,7 +1169,13 @@ function ParseState:parse(args)
 
                if arg:sub(2, 2) == first then
                   if #arg == 2 then
-                     self:close()
+                     if self.options[arg] then
+                        local option = self:get_option(arg)
+                        self:invoke(option, arg)
+                     else
+                        self:close()
+                     end
+
                      self.handle_options = false
                   else
                      local equals = arg:find "="
