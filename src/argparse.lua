@@ -232,6 +232,7 @@ local Parser = class({
    _options = {},
    _commands = {},
    _mutexes = {},
+   _groups = {},
    _require_command = true,
    _handle_options = true
 }, {
@@ -585,6 +586,21 @@ function Parser:mutex(...)
    return self
 end
 
+function Parser:group(name, ...)
+   assert(type(name) == "string", ("bad argument #1 to 'group' (string expected, got %s)"):format(type(name)))
+
+   local group = {name = name, ...}
+
+   for i, element in ipairs(group) do
+      local mt = getmetatable(element)
+      assert(mt == Option or mt == Argument or mt == Command,
+         ("bad argument #%d to 'group' (Option or Argument or Command expected)"):format(i + 1))
+   end
+
+   table.insert(self._groups, group)
+   return self
+end
+
 local max_usage_width = 70
 local usage_welcome = "Usage: "
 
@@ -739,6 +755,31 @@ local function make_two_columns(s1, s2)
    end
 end
 
+local function get_group_types(group)
+   local types = {}
+
+   for _, element in ipairs(group) do
+      types[getmetatable(element)] = true
+   end
+
+   return types
+end
+
+local function add_group_help(blocks, added_elements, label, elements)
+   local buf = {label}
+
+   for _, element in ipairs(elements) do
+      if not element._hidden and not added_elements[element] then
+         added_elements[element] = true
+         table.insert(buf, make_two_columns(element:_get_label(), element:_get_description()))
+      end
+   end
+
+   if #buf > 1 then
+      table.insert(blocks, table.concat(buf, "\n"))
+   end
+end
+
 function Parser:get_help()
    if self._help then
       return self._help
@@ -750,20 +791,49 @@ function Parser:get_help()
       table.insert(blocks, self._description)
    end
 
-   local labels = {"Arguments:", "Options:", "Commands:"}
+   -- 1. Put groups containing arguments first, then other arguments.
+   -- 2. Put remaining groups containing options, then other options.
+   -- 3. Put remaining groups containing commands, then other commands.
+   -- Assume that an element can't be in several groups.
+   local groups_by_type = {
+      [Argument] = {},
+      [Option] = {},
+      [Command] = {}
+   }
 
-   for i, elements in ipairs{self._arguments, self._options, self._commands} do
-      local buf = {labels[i]}
+   for _, group in ipairs(self._groups) do
+      local group_types = get_group_types(group)
 
-      for _, element in ipairs(elements) do
-         if not element._hidden then
-            table.insert(buf, make_two_columns(element:_get_label(), element:_get_description()))
+      for _, mt in ipairs({Argument, Option, Command}) do
+         if group_types[mt] then
+            table.insert(groups_by_type[mt], group)
+            break
          end
       end
+   end
 
-      if #buf > 1 then
-         table.insert(blocks, table.concat(buf, "\n"))
+   local default_groups = {
+      {name = "Arguments", type = Argument, elements = self._arguments},
+      {name = "Options", type = Option, elements = self._options},
+      {name = "Commands", type = Command, elements = self._commands}
+   }
+
+   local added_elements = {}
+
+   for _, default_group in ipairs(default_groups) do
+      local type_groups = groups_by_type[default_group.type]
+
+      for _, group in ipairs(type_groups) do
+         add_group_help(blocks, added_elements, group.name .. ":", group)
       end
+
+      local default_label = default_group.name .. ":"
+
+      if #type_groups > 0 then
+         default_label = "Other " .. default_label:gsub("^.", string.lower)
+      end
+
+      add_group_help(blocks, added_elements, default_label, default_group.elements)
    end
 
    if self._epilog then

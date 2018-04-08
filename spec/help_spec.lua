@@ -224,4 +224,98 @@ Commands:
       assert.equal([[
 Usage: foo]], parser:get_help())
    end)
+
+   it("supports grouping options", function()
+      local parser = Parser "foo"
+         :add_help(false)
+      parser:argument "thing"
+
+      parser:group("Options for setting position",
+         parser:option "--coords"
+            :args(2)
+            :argname {"<x>", "<y>"}
+            :description "Set coordinates.",
+         parser:option "--polar"
+            :args(2)
+            :argname {"<rad>", "<ang>"}
+            :description "Set polar coordinates."
+      )
+
+      parser:group("Options for setting style",
+         parser:flag "--dotted"
+            :description "More dots.",
+         parser:option "--width"
+            :argname "<px>"
+            :description "Set width."
+      )
+
+      assert.equal([[
+Usage: foo [--coords <x> <y>] [--polar <rad> <ang>] [--dotted]
+       [--width <px>] <thing>
+
+Arguments:
+   thing
+
+Options for setting position:
+   --coords <x> <y>      Set coordinates.
+   --polar <rad> <ang>   Set polar coordinates.
+
+Options for setting style:
+   --dotted              More dots.
+   --width <px>          Set width.]], parser:get_help())
+   end)
+
+   it("adds default group with 'other' prefix if not all elements of a type are grouped", function()
+      local parser = Parser "foo"
+
+      parser:group("Main arguments",
+         parser:argument "foo",
+         parser:argument "bar",
+         parser:flag "--use-default-args"
+      )
+
+      parser:argument "optional"
+         :args "?"
+
+      parser:group("Main options",
+         parser:flag "--something",
+         parser:option "--test"
+      )
+
+      parser:flag "--version"
+
+      parser:group("Some commands",
+         parser:command "foo",
+         parser:command "bar"
+      )
+
+      parser:command "another-command"
+
+      assert.equal([[
+Usage: foo [--use-default-args] [--something] [--test <test>]
+       [--version] [-h] <foo> <bar> [<optional>] <command> ...
+
+Main arguments:
+   foo
+   bar
+   --use-default-args
+
+Other arguments:
+   optional
+
+Main options:
+   --something
+   --test <test>
+
+Other options:
+   --version
+   -h, --help            Show this help message and exit.
+
+Some commands:
+   foo
+   bar
+
+Other commands:
+   another-command]], parser:get_help())
+   end)
 end)
