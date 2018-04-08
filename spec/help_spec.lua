@@ -496,4 +496,102 @@ Options:
                That needs documenting.
   -h, --help   Show this help message and exit.]], parser:get_help())
    end)
+
+   describe("autowrap", function()
+      it("automatically wraps descriptions to match given max width", function()
+         local parser = Parser "foo"
+            :help_max_width(80)
+
+         parser:option "-f --foo"
+            :description("Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor " ..
+               "incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation " ..
+               "ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit " ..
+               "in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat " ..
+               "non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.")
+         parser:option "-b --bar"
+            :description "See above."
+
+         assert.equal([[
+Usage: foo [-f <foo>] [-b <bar>] [-h]
+
+Options:
+      -f <foo>,          Lorem ipsum dolor sit amet, consectetur adipiscing
+   --foo <foo>           elit, sed do eiusmod tempor incididunt ut labore et
+                         dolore magna aliqua. Ut enim ad minim veniam, quis
+                         nostrud exercitation ullamco laboris nisi ut aliquip ex
+                         ea commodo consequat. Duis aute irure dolor in
+                         reprehenderit in voluptate velit esse cillum dolore eu
+                         fugiat nulla pariatur. Excepteur sint occaecat
+                         cupidatat non proident, sunt in culpa qui officia
+                         deserunt mollit anim id est laborum.
+      -b <bar>,          See above.
+   --bar <bar>
+   -h, --help            Show this help message and exit.]], parser:get_help())
+      end)
+
+      it("preserves existing line breaks", function()
+         local parser = Parser "foo"
+            :help_max_width(80)
+
+         parser:option "-f --foo"
+            :description("This is a long line, it should be broken down into several lines. " .. [[
+It just keeps going and going.
+This should always be a new line.
+Another one.
+]])
+         parser:option "-b --bar"
+
+         assert.equal([[
+Usage: foo [-f <foo>] [-b <bar>] [-h]
+
+Options:
+      -f <foo>,          This is a long line, it should be broken down into
+   --foo <foo>           several lines. It just keeps going and going.
+                         This should always be a new line.
+                         Another one.
+      -b <bar>,
+   --bar <bar>
+   -h, --help            Show this help message and exit.]], parser:get_help())
+      end)
+
+      it("preserves indentation", function()
+         local parser = Parser "foo"
+            :help_max_width(80)
+
+         parser:option "-f --foo"
+            :description("This is a long line, it should be broken down into several lines.\n" ..
+               "   This paragraph is indented with three spaces, so when it gets broken down into several lines, " ..
+               "they will be, too.\n\n" ..
+               "  That was an empty line there, preserve it.")
+
+         assert.equal([[
+Usage: foo [-f <foo>] [-h]
+
+Options:
+      -f <foo>,          This is a long line, it should be broken down into
+   --foo <foo>           several lines.
+                            This paragraph is indented with three spaces, so
+                            when it gets broken down into several lines, they
+                            will be, too.
+
+                           That was an empty line there, preserve it.
+   -h, --help            Show this help message and exit.]], parser:get_help())
+      end)
+
+      it("preserves multiple spaces between words", function()
+         local parser = Parser "foo"
+            :help_max_width(80)
+
+         parser:option "-f --foo"
+            :description("This  is  a  long  line  with  two  spaces  between  words,  it  should  be  broken  down.")
+
+         assert.equal([[
+Usage: foo [-f <foo>] [-h]
+
+Options:
+      -f <foo>,          This  is  a  long  line  with  two  spaces  between
+   --foo <foo>           words,  it  should  be  broken  down.
+   -h, --help            Show this help message and exit.]], parser:get_help())
+      end)
+   end)
 end)

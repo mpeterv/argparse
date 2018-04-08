@@ -251,6 +251,7 @@ local Parser = class({
    typechecked("usage_max_width", "number"),
    typechecked("help_usage_margin", "number"),
    typechecked("help_description_margin", "number"),
+   typechecked("help_max_width", "number"),
    add_help
 })
 
@@ -273,6 +274,7 @@ local Command = class({
    typechecked("usage_max_width", "number"),
    typechecked("help_usage_margin", "number"),
    typechecked("help_description_margin", "number"),
+   typechecked("help_max_width", "number"),
    typechecked("hidden", "boolean"),
    add_help
 }, Parser)
@@ -800,6 +802,75 @@ local function split_lines(s)
    return lines
 end
 
+local function autowrap_line(line, max_length)
+   -- Algorithm for splitting lines is simple and greedy.
+   local result_lines = {}
+
+   -- Preserve original indentation of the line, put this at the beginning of each result line.
+   local indentation = line:match("^( *)")
+
+   -- Parts of the last line being assembled.
+   local line_parts = {}
+
+   -- Length of the current line.
+   local line_length = 0
+
+   -- Index of the next character to consider.
+   local index = 1
+
+   while true do
+      local word_start, word_finish, word = line:find("([^ ]+)", index)
+
+      if not word_start then
+         -- Ignore trailing spaces, if any.
+         break
+      end
+
+      local preceding_spaces = line:sub(index, word_start - 1)
+      index = word_finish + 1
+
+      if (#line_parts == 0) or (line_length + #preceding_spaces + #word <= max_length) then
+         -- Either this is the very first word or it fits as an addition to the current line, add it.
+         table.insert(line_parts, preceding_spaces) -- For the very first word this adds the indentation.
+         table.insert(line_parts, word)
+         line_length = line_length + #preceding_spaces + #word
+      else
+         -- Does not fit, finish current line and put the word into a new one.
+         table.insert(result_lines, table.concat(line_parts))
+         line_parts = {indentation, word}
+         line_length = #indentation + #word
+      end
+   end
+
+   if #line_parts > 0 then
+      table.insert(result_lines, table.concat(line_parts))
+   end
+
+   if #result_lines == 0 then
+      -- Preserve empty lines.
+      result_lines[1] = ""
+   end
+
+   return result_lines
+end
+
+-- Automatically wraps lines within given array,
+-- attempting to limit line length to `max_length`.
+-- Existing line splits are preserved.
+local function autowrap(lines, max_length)
+   local result_lines = {}
+
+   for _, line in ipairs(lines) do
+      local autowrapped_lines = autowrap_line(line, max_length)
+
+      for _, autowrapped_line in ipairs(autowrapped_lines) do
+         table.insert(result_lines, autowrapped_line)
+      end
+   end
+
+   return result_lines
+end
+
 function Parser:_get_element_help(element)
    local label_lines = element:_get_label_lines()
    local description_lines = split_lines(element:_get_description())
@@ -815,6 +886,12 @@ function Parser:_get_element_help(element)
    local description_margin_len = self:_inherit_property("help_description_margin", 25)
    local description_margin = (" "):rep(description_margin_len)
 
+   local help_max_width = self:_inherit_property("help_max_width")
+
+   if help_max_width then
+      local description_max_width = math.max(help_max_width - description_margin_len, 10)
+      description_lines = autowrap(description_lines, description_max_width)
+   end
 
    if #label_lines[1] >= (description_margin_len - usage_margin_len) then
       for _, label_line in ipairs(label_lines) do

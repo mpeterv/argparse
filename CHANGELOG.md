@@ -20,6 +20,8 @@
   usage string autogeneration.
 * Added `help_usage_margin` and `help_description_margin` properties
   for configuring help string autogeneration.
+* Added `help_max_width` property. If set, descriptions in help string
+  are automatically wrapped to fit into given number of columns.
 
 ### Improvements
 
