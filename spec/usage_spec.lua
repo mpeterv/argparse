@@ -307,4 +307,38 @@ Usage: foo ([--opt1 <opt1>] | [--opt3 <opt3>] | [--opt5 <opt5>])
        ([<arg4>] | [--opt4 <opt4>])]=], parser:get_usage()
       )
    end)
+
+   it("allows configuring usage margin using usage_margin property", function()
+      local parser = Parser "foo"
+         :usage_margin(2)
+
+      parser:argument "long_argument_name"
+      parser:argument "very_long_words"
+
+      parser:option "--set-important-property"
+      parser:option "--include"
+         :args "*"
+
+      assert.equals([=[
+Usage: foo [--set-important-property <set_important_property>] [-h]
+  <long_argument_name> <very_long_words> [--include [<include>] ...]]=], parser:get_usage())
+   end)
+
+   it("allows configuring max usage width using usage_max_width property", function()
+      local parser = Parser "foo"
+         :usage_max_width(50)
+
+      parser:argument "long_argument_name"
+      parser:argument "very_long_words"
+
+      parser:option "--set-important-property"
+      parser:option "--include"
+         :args "*"
+
+      assert.equals([=[
+Usage: foo
+       [--set-important-property <set_important_property>]
+       [-h] <long_argument_name> <very_long_words>
+       [--include [<include>] ...]]=], parser:get_usage())
+   end)
 end)

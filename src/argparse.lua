@@ -247,6 +247,10 @@ local Parser = class({
    typechecked("action", "function"),
    typechecked("command_target", "string"),
    typechecked("help_vertical_space", "number"),
+   typechecked("usage_margin", "number"),
+   typechecked("usage_max_width", "number"),
+   typechecked("help_usage_margin", "number"),
+   typechecked("help_description_margin", "number"),
    add_help
 })
 
@@ -265,6 +269,10 @@ local Command = class({
    typechecked("action", "function"),
    typechecked("command_target", "string"),
    typechecked("help_vertical_space", "number"),
+   typechecked("usage_margin", "number"),
+   typechecked("usage_max_width", "number"),
+   typechecked("help_usage_margin", "number"),
+   typechecked("help_description_margin", "number"),
    typechecked("hidden", "boolean"),
    add_help
 }, Parser)
@@ -638,7 +646,6 @@ function Parser:group(name, ...)
    return self
 end
 
-local max_usage_width = 70
 local usage_welcome = "Usage: "
 
 function Parser:get_usage()
@@ -646,13 +653,15 @@ function Parser:get_usage()
       return self._usage
    end
 
+   local usage_margin = self:_inherit_property("usage_margin", #usage_welcome)
+   local max_usage_width = self:_inherit_property("usage_max_width", 70)
    local lines = {usage_welcome .. self:_get_fullname()}
 
    local function add(s)
       if #lines[#lines]+1+#s <= max_usage_width then
          lines[#lines] = lines[#lines] .. " " .. s
       else
-         lines[#lines+1] = (" "):rep(#usage_welcome) .. s
+         lines[#lines+1] = (" "):rep(usage_margin) .. s
       end
    end
 
@@ -773,11 +782,6 @@ function Parser:get_usage()
    return table.concat(lines, "\n")
 end
 
-local margin_len = 3
-local margin2_len = 25
-local margin = (" "):rep(margin_len)
-local margin2 = (" "):rep(margin2_len)
-
 local function split_lines(s)
    if s == "" then
       return {}
@@ -796,7 +800,7 @@ local function split_lines(s)
    return lines
 end
 
-local function get_element_help(element)
+function Parser:_get_element_help(element)
    local label_lines = element:_get_label_lines()
    local description_lines = split_lines(element:_get_description())
 
@@ -806,13 +810,19 @@ local function get_element_help(element)
    -- If too long, start description after all the label lines.
    -- Otherwise, combine label and description lines.
 
-   if #label_lines[1] >= (margin2_len - margin_len) then
+   local usage_margin_len = self:_inherit_property("help_usage_margin", 3)
+   local usage_margin = (" "):rep(usage_margin_len)
+   local description_margin_len = self:_inherit_property("help_description_margin", 25)
+   local description_margin = (" "):rep(description_margin_len)
+
+
+   if #label_lines[1] >= (description_margin_len - usage_margin_len) then
       for _, label_line in ipairs(label_lines) do
-         table.insert(result_lines, margin .. label_line)
+         table.insert(result_lines, usage_margin .. label_line)
       end
 
       for _, description_line in ipairs(description_lines) do
-         table.insert(result_lines, margin2 .. description_line)
+         table.insert(result_lines, description_margin .. description_line)
       end
    else
       for i = 1, math.max(#label_lines, #description_lines) do
@@ -822,11 +832,11 @@ local function get_element_help(element)
          local line = ""
 
          if label_line then
-            line = margin .. label_line
+            line = usage_margin .. label_line
          end
 
          if description_line and description_line ~= "" then
-            line = line .. (" "):rep(margin2_len - #line) .. description_line
+            line = line .. (" "):rep(description_margin_len - #line) .. description_line
          end
 
          table.insert(result_lines, line)
@@ -852,7 +862,7 @@ function Parser:_add_group_help(blocks, added_elements, label, elements)
    for _, element in ipairs(elements) do
       if not element._hidden and not added_elements[element] then
          added_elements[element] = true
-         table.insert(buf, get_element_help(element))
+         table.insert(buf, self:_get_element_help(element))
       end
    end
 

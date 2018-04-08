@@ -463,4 +463,37 @@ Options:
 
    -h, --help            Show this help message and exit.]], cmd2:get_help())
    end)
+
+   it("allows configuring margins using help_usage_margin and help_description_margin", function()
+      local parser = Parser "foo"
+         :help_usage_margin(2)
+         :help_description_margin(15)
+
+      parser:argument "arg1"
+         :description "Argument number one."
+      parser:argument "arg2"
+         :description "Argument number two."
+
+      parser:flag "-p"
+         :description "This is a thing."
+      parser:option "-f --foo"
+         :description [[
+And this things uses many lines.
+Because it has lots of complex behaviour.
+That needs documenting.]]
+
+      assert.equal([[
+Usage: foo [-p] [-f <foo>] [-h] <arg1> <arg2>
+
+Arguments:
+  arg1         Argument number one.
+  arg2         Argument number two.
+
+Options:
+  -p           This is a thing.
+     -f <foo>, And this things uses many lines.
+  --foo <foo>  Because it has lots of complex behaviour.
+               That needs documenting.
+  -h, --help   Show this help message and exit.]], parser:get_help())
+   end)
 end)
