@@ -155,6 +155,24 @@ Options:
    -h, --help            Show this help message and exit.]], parser:get_help())
    end)
 
+   it("handles very long argument lists", function()
+      local parser = Parser "foo"
+
+      parser:option "-t --at-least-three"
+         :args("3+")
+         :argname {"<foo>", "<bar>", "<baz>"}
+         :description "Sometimes argument lists are really long."
+
+      assert.equal([[
+Usage: foo [-h] [-t <foo> <bar> <baz> ...]
+
+Options:
+                 -t <foo> <bar> <baz> ...,
+   --at-least-three <foo> <bar> <baz> ...
+                         Sometimes argument lists are really long.
+   -h, --help            Show this help message and exit.]], parser:get_help())
+   end)
+
    it("shows default values", function()
       local parser = Parser "foo"
       parser:option "-o"
