@@ -106,6 +106,55 @@ Options:
    -h, --help            Show this help message and exit.]], parser:get_help())
    end)
 
+   it("puts different aliases on different lines if there are arguments", function()
+      local parser = Parser "foo"
+
+      parser:option "-o --output"
+
+      assert.equal([[
+Usage: foo [-o <output>] [-h]
+
+Options:
+         -o <output>,
+   --output <output>
+   -h, --help            Show this help message and exit.]], parser:get_help())
+   end)
+
+   it("handles description with more lines than usage", function()
+      local parser = Parser "foo"
+
+      parser:option "-o --output"
+         :description [[
+Sets output file.
+If missing, 'a.out' is used by default.
+If '-' is passed, output to stdount.
+]]
+
+      assert.equal([[
+Usage: foo [-o <output>] [-h]
+
+Options:
+         -o <output>,    Sets output file.
+   --output <output>     If missing, 'a.out' is used by default.
+                         If '-' is passed, output to stdount.
+   -h, --help            Show this help message and exit.]], parser:get_help())
+   end)
+
+   it("handles description with less lines than usage", function()
+      local parser = Parser "foo"
+
+      parser:option "-o --output"
+         :description "Sets output file."
+
+      assert.equal([[
+Usage: foo [-o <output>] [-h]
+
+Options:
+         -o <output>,    Sets output file.
+   --output <output>
+   -h, --help            Show this help message and exit.]], parser:get_help())
+   end)
+
    it("shows default values", function()
       local parser = Parser "foo"
       parser:option "-o"

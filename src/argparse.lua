@@ -445,26 +445,43 @@ function Option:_get_default_argname()
    return "<" .. self:_get_default_target() .. ">"
 end
 
--- Returns label to be shown in the help message.
-function Argument:_get_label()
-   return self._name
+-- Returns labels to be shown in the help message.
+function Argument:_get_label_lines()
+   return {self._name}
 end
 
-function Option:_get_label()
-   local variants = {}
+function Option:_get_label_lines()
    local argument_list = self:_get_argument_list()
-   table.insert(argument_list, 1, nil)
 
-   for _, alias in ipairs(self._aliases) do
-      argument_list[1] = alias
-      table.insert(variants, table.concat(argument_list, " "))
+   if #argument_list == 0 then
+      -- Don't put aliases for simple flags like `-h` on different lines.
+      return {table.concat(self._aliases, ", ")}
    end
 
-   return table.concat(variants, ", ")
+   local longest_alias_length = -1
+
+   for _, alias in ipairs(self._aliases) do
+      longest_alias_length = math.max(longest_alias_length, #alias)
+   end
+
+   local argument_list_repr = table.concat(argument_list, " ")
+   local lines = {}
+
+   for i, alias in ipairs(self._aliases) do
+      local line = (" "):rep(longest_alias_length - #alias) .. alias .. " " .. argument_list_repr
+
+      if i ~= #self._aliases then
+         line = line .. ","
+      end
+
+      table.insert(lines, line)
+   end
+
+   return lines
 end
 
-function Command:_get_label()
-   return table.concat(self._aliases, ", ")
+function Command:_get_label_lines()
+   return {table.concat(self._aliases, ", ")}
 end
 
 function Argument:_get_description()
@@ -737,22 +754,66 @@ function Parser:get_usage()
 end
 
 local margin_len = 3
-local margin_len2 = 25
+local margin2_len = 25
 local margin = (" "):rep(margin_len)
-local margin2 = (" "):rep(margin_len2)
+local margin2 = (" "):rep(margin2_len)
 
-local function make_two_columns(s1, s2)
-   if s2 == "" then
-      return margin .. s1
+local function split_lines(s)
+   if s == "" then
+      return {}
    end
 
-   s2 = s2:gsub("\n", "\n" .. margin2)
+   local lines = {}
 
-   if #s1 < (margin_len2-margin_len) then
-      return margin .. s1 .. (" "):rep(margin_len2-margin_len-#s1) .. s2
+   if s:sub(-1) ~= "\n" then
+      s = s .. "\n"
+   end
+
+   for line in s:gmatch("([^\n]*)\n") do
+      table.insert(lines, line)
+   end
+
+   return lines
+end
+
+local function get_element_help(element)
+   local label_lines = element:_get_label_lines()
+   local description_lines = split_lines(element:_get_description())
+
+   local result_lines = {}
+
+   -- All label lines should have the same length (except the last one, it has no comma).
+   -- If too long, start description after all the label lines.
+   -- Otherwise, combine label and description lines.
+
+   if #label_lines[1] >= (margin2_len - margin_len) then
+      for _, label_line in ipairs(label_lines) do
+         table.insert(result_lines, margin .. label_line)
+      end
+
+      for _, description_line in ipairs(description_lines) do
+         table.insert(result_lines, margin2 .. description_line)
+      end
    else
-      return margin .. s1 .. "\n" .. margin2 .. s2
+      for i = 1, math.max(#label_lines, #description_lines) do
+         local label_line = label_lines[i]
+         local description_line = description_lines[i]
+
+         local line = ""
+
+         if label_line then
+            line = margin .. label_line
+         end
+
+         if description_line and description_line ~= "" then
+            line = line .. (" "):rep(margin2_len - #line) .. description_line
+         end
+
+         table.insert(result_lines, line)
+      end
    end
+
+   return table.concat(result_lines, "\n")
 end
 
 local function get_group_types(group)
@@ -771,7 +832,7 @@ local function add_group_help(blocks, added_elements, label, elements)
    for _, element in ipairs(elements) do
       if not element._hidden and not added_elements[element] then
          added_elements[element] = true
-         table.insert(buf, make_two_columns(element:_get_label(), element:_get_description()))
+         table.insert(buf, get_element_help(element))
       end
    end
 

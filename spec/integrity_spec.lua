@@ -106,8 +106,8 @@ Arguments:
    version               Version of the rock.
 
 Options:
-   -f <from>, --from <from>
-                         Fetch the rock from this server.
+       -f <from>,        Fetch the rock from this server.
+   --from <from>
    -h, --help            Show this help message and exit.
 ]], get_output("foo install --help"))
       end)

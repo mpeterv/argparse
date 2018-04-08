@@ -18,6 +18,9 @@
 
 * `--` can now be used as a normal option name, with arguments
   after `--` always passed to it verbatim (#17).
+* When generating help messages for options with arguments and multiple
+  aliases, usage strings for different aliases are put on separate lines and
+  vertically aligned (#15).
 
 ## 0.5.0 (2015-12-09)
 
