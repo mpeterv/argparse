@@ -593,5 +593,30 @@ Options:
    --foo <foo>           words,  it  should  be  broken  down.
    -h, --help            Show this help message and exit.]], parser:get_help())
       end)
+
+      it("autowraps description and epilog", function()
+         local parser = Parser "foo"
+            :help_max_width(80)
+            :description("Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor " ..
+               "incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation " ..
+               "ullamco laboris nisi ut aliquip ex ea commodo consequat.")
+            :epilog("Duis aute irure dolor in reprehenderit " ..
+               "in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat " ..
+               "non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.")
+
+         assert.equal([[
+Usage: foo [-h]
+
+Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor
+incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis
+nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.
+
+Options:
+   -h, --help            Show this help message and exit.
+
+Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu
+fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in
+culpa qui officia deserunt mollit anim id est laborum.]], parser:get_help())
+      end)
    end)
 end)

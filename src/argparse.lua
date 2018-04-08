@@ -955,8 +955,16 @@ function Parser:get_help()
 
    local blocks = {self:get_usage()}
 
+   local help_max_width = self:_inherit_property("help_max_width")
+
    if self._description then
-      table.insert(blocks, self._description)
+      local description = self._description
+
+      if help_max_width then
+         description = table.concat(autowrap(split_lines(description), help_max_width), "\n")
+      end
+
+      table.insert(blocks, description)
    end
 
    -- 1. Put groups containing arguments first, then other arguments.
@@ -1005,7 +1013,13 @@ function Parser:get_help()
    end
 
    if self._epilog then
-      table.insert(blocks, self._epilog)
+      local epilog = self._epilog
+
+      if help_max_width then
+         epilog = table.concat(autowrap(split_lines(epilog), help_max_width), "\n")
+      end
+
+      table.insert(blocks, epilog)
    end
 
    return table.concat(blocks, "\n\n")
