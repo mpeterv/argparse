@@ -44,7 +44,7 @@ master_doc = 'index'
 
 # General information about the project.
 project = u'argparse'
-copyright = u'2013 - 2015, Peter Melnichenko'
+copyright = u'2013 - 2018, Peter Melnichenko'
 
 # The version info for the project you're documenting, acts as replacement for
 # |version| and |release|, also used in various other places throughout the
