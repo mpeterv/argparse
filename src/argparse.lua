@@ -246,6 +246,7 @@ local Parser = class({
    typechecked("handle_options", "boolean"),
    typechecked("action", "function"),
    typechecked("command_target", "string"),
+   typechecked("help_vertical_space", "number"),
    add_help
 })
 
@@ -263,6 +264,7 @@ local Command = class({
    typechecked("handle_options", "boolean"),
    typechecked("action", "function"),
    typechecked("command_target", "string"),
+   typechecked("help_vertical_space", "number"),
    typechecked("hidden", "boolean"),
    add_help
 }, Parser)
@@ -311,6 +313,24 @@ local Option = class({
    option_action,
    option_init
 }, Argument)
+
+function Parser:_inherit_property(name, default)
+   local element = self
+
+   while true do
+      local value = element["_" .. name]
+
+      if value ~= nil then
+         return value
+      end
+
+      if not element._parent then
+         return default
+      end
+
+      element = element._parent
+   end
+end
 
 function Argument:_get_argument_list()
    local buf = {}
@@ -826,7 +846,7 @@ local function get_group_types(group)
    return types
 end
 
-local function add_group_help(blocks, added_elements, label, elements)
+function Parser:_add_group_help(blocks, added_elements, label, elements)
    local buf = {label}
 
    for _, element in ipairs(elements) do
@@ -837,7 +857,7 @@ local function add_group_help(blocks, added_elements, label, elements)
    end
 
    if #buf > 1 then
-      table.insert(blocks, table.concat(buf, "\n"))
+      table.insert(blocks, table.concat(buf, ("\n"):rep(self:_inherit_property("help_vertical_space", 0) + 1)))
    end
 end
 
@@ -885,7 +905,7 @@ function Parser:get_help()
       local type_groups = groups_by_type[default_group.type]
 
       for _, group in ipairs(type_groups) do
-         add_group_help(blocks, added_elements, group.name .. ":", group)
+         self:_add_group_help(blocks, added_elements, group.name .. ":", group)
       end
 
       local default_label = default_group.name .. ":"
@@ -894,7 +914,7 @@ function Parser:get_help()
          default_label = "Other " .. default_label:gsub("^.", string.lower)
       end
 
-      add_group_help(blocks, added_elements, default_label, default_group.elements)
+      self:_add_group_help(blocks, added_elements, default_label, default_group.elements)
    end
 
    if self._epilog then

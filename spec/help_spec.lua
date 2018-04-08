@@ -385,4 +385,82 @@ Some commands:
 Other commands:
    another-command]], parser:get_help())
    end)
+
+   it("allows spacing out element help blocks more with help_vertical_space", function()
+      local parser = Parser "foo"
+         :help_vertical_space(1)
+
+      parser:argument "arg1"
+         :description "Argument number one."
+      parser:argument "arg2"
+         :description "Argument number two."
+
+      parser:flag "-p"
+         :description "This is a thing."
+      parser:option "-f --foo"
+         :description [[
+And this things uses many lines.
+Because it has lots of complex behaviour.
+That needs documenting.]]
+
+      assert.equal([[
+Usage: foo [-p] [-f <foo>] [-h] <arg1> <arg2>
+
+Arguments:
+
+   arg1                  Argument number one.
+
+   arg2                  Argument number two.
+
+Options:
+
+   -p                    This is a thing.
+
+      -f <foo>,          And this things uses many lines.
+   --foo <foo>           Because it has lots of complex behaviour.
+                         That needs documenting.
+
+   -h, --help            Show this help message and exit.]], parser:get_help())
+   end)
+
+   it("inherits help_vertical_space in commands", function()
+      local parser = Parser "foo"
+         :help_vertical_space(1)
+
+      local cmd1 = parser:command "cmd1"
+         :help_vertical_space(2)
+
+      cmd1:flag("-a", "Do a thing.")
+      cmd1:flag("-b", "Do b thing.")
+
+      local cmd2 = parser:command "cmd2"
+
+      cmd2:flag("-c", "Do c thing.")
+      cmd2:flag("-d", "Do d thing.")
+
+      assert.equal([[
+Usage: foo cmd1 [-a] [-b] [-h]
+
+Options:
+
+
+   -a                    Do a thing.
+
+
+   -b                    Do b thing.
+
+
+   -h, --help            Show this help message and exit.]], cmd1:get_help())
+
+      assert.equal([[
+Usage: foo cmd2 [-c] [-d] [-h]
+
+Options:
+
+   -c                    Do c thing.
+
+   -d                    Do d thing.
+
+   -h, --help            Show this help message and exit.]], cmd2:get_help())
+   end)
 end)
