@@ -807,7 +807,13 @@ local function autowrap_line(line, max_length)
    local result_lines = {}
 
    -- Preserve original indentation of the line, put this at the beginning of each result line.
-   local indentation = line:match("^( *)")
+   -- If the first word looks like a list marker ('*', '+', or '-'), add spaces so that starts
+   -- of the second and the following lines vertically align with the start of the second word.
+   local indentation = line:match("^ *")
+
+   if line:find("^ *[%*%+%-]") then
+      indentation = indentation .. " " .. line:match("^ *[%*%+%-]( *)")
+   end
 
    -- Parts of the last line being assembled.
    local line_parts = {}

@@ -578,6 +578,34 @@ Options:
    -h, --help            Show this help message and exit.]], parser:get_help())
       end)
 
+      it("preserves indentation of list items", function()
+         local parser = Parser "foo"
+            :help_max_width(80)
+
+         parser:option "-f --foo"
+            :description("Let's start a list:\n\n" ..
+               "* Here is a list item.\n" ..
+               "* Here is another one, this one is very long so it needs several lines. More words. Word. Word.\n" ..
+               "  + Here is a nested list item. Word. Word. Word. Word. Word. Bird. Word. Bird. Bird. Bird.\n" ..
+               "*   Back to normal list, this one uses several spaces after the list item mark. Bird. Bird. Bird.")
+
+
+      assert.equal([[
+Usage: foo [-f <foo>] [-h]
+
+Options:
+      -f <foo>,          Let's start a list:
+   --foo <foo>
+                         * Here is a list item.
+                         * Here is another one, this one is very long so it
+                           needs several lines. More words. Word. Word.
+                           + Here is a nested list item. Word. Word. Word. Word.
+                             Word. Bird. Word. Bird. Bird. Bird.
+                         *   Back to normal list, this one uses several spaces
+                             after the list item mark. Bird. Bird. Bird.
+   -h, --help            Show this help message and exit.]], parser:get_help())
+      end)
+
       it("preserves multiple spaces between words", function()
          local parser = Parser "foo"
             :help_max_width(80)
