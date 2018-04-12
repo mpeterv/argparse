@@ -1,11 +1,6 @@
 Miscellaneous
 =============
 
-Generating and overwriting help and usage messages
---------------------------------------------------
-
-The usage and help messages of parsers and commands can be generated on demand using ``:get_usage()`` and ``:get_help()`` methods, and overridden using ``help`` and ``usage`` properties.
-
 Overwriting default help option
 -------------------------------
 
@@ -17,60 +12,16 @@ If the property ``add_help`` of a parser is set to ``false``, no help option wil
    local parser = argparse()
       :add_help "/?"
 
-::
+.. code-block:: none
 
    $ lua script.lua /?
 
-::
+.. code-block:: none
 
    Usage: script.lua [/?]
 
    Options:
       /?                    Show this help message and exit.
-
-Setting argument placeholder
-----------------------------
-
-For options and arguments, ``argname`` property controls the placeholder for the argument in the usage message.
-
-.. code-block:: lua
-   :linenos:
-
-   parser:option "-f" "--from"
-      :argname "<server>"
-
-::
-
-   $ lua script.lua --help
-
-::
-
-   Usage: script.lua [-f <server>] [-h]
-
-   Options:
-      -f <server>, --from <server>
-      -h, --help            Show this help message and exit.
-
-``argname`` can be an array of placeholders.
-
-.. code-block:: lua
-   :linenos:
-
-   parser:option "--pair"
-      :args(2)
-      :argname {"<key>", "<value>"}
-
-::
-
-   $ lua script.lua --help
-
-::
-
-   Usage: script.lua [--pair <key> <value>] [-h]
-
-   Options:
-      --pair <key> <value>
-      -h, --help            Show this help message and exit.
 
 Disabling option handling
 -------------------------
@@ -86,7 +37,7 @@ When ``handle_options`` property of a parser or a command is set to ``false``, a
    parser:option "-f" "--foo"
       :args "*"
 
-::
+.. code-block:: none
 
    $ lua script.lua bar -f --foo bar
 
@@ -106,7 +57,7 @@ By default, if an option is invoked too many times, latest invocations overwrite
 
    parser:option "-o --output"
 
-::
+.. code-block:: none
 
    $ lua script.lua -oFOO -oBAR
 
@@ -124,11 +75,11 @@ Set ``overwrite`` property to ``false`` to prohibit this behavior.
    parser:option "-o --output"
       :overwrite(false)
 
-::
+.. code-block:: none
 
    $ lua script.lua -oFOO -oBAR
 
-::
+.. code-block:: none
 
    Usage: script.lua [-o <output>] [-h]
 
@@ -168,16 +119,22 @@ Property        Type
 
 Other properties:
 
-=================== ==========================
-Property            Type
-=================== ==========================
-``usage``           String
-``help``            String
-``require_command`` Boolean
-``handle_options``  Boolean
-``add_help``        Boolean or string or table
-``command_target``  String
-=================== ==========================
+=========================== ==========================
+Property                    Type
+=========================== ==========================
+``usage``                   String
+``help``                    String
+``require_command``         Boolean
+``handle_options``          Boolean
+``add_help``                Boolean or string or table
+``command_target``          String
+``usage_max_width``         Number
+``usage_margin``            Number
+``help_max_width``          Number
+``help_usage_margin``       Number
+``help_description_margin`` Number
+``help_vertical_space``     Number
+=========================== ==========================
 
 Command properties
 ^^^^^^^^^^^^^^^^^^
@@ -194,18 +151,25 @@ Property        Type
 
 Other properties:
 
-=================== ==========================
-Property            Type
-=================== ==========================
-``target``          String
-``usage``           String
-``help``            String
-``require_command`` Boolean
-``handle_options``  Boolean
-``action``          Function
-``add_help``        Boolean or string or table
-``command_target``  String
-=================== ==========================
+=========================== ==========================
+Property                    Type
+=========================== ==========================
+``target``                  String
+``usage``                   String
+``help``                    String
+``require_command``         Boolean
+``handle_options``          Boolean
+``action``                  Function
+``add_help``                Boolean or string or table
+``command_target``          String
+``hidden``                  Boolean
+``usage_max_width``         Number
+``usage_margin``            Number
+``help_max_width``          Number
+``help_usage_margin``       Number
+``help_description_margin`` Number
+``help_vertical_space``     Number
+=========================== ==========================
 
 Argument properties
 ^^^^^^^^^^^^^^^^^^^
@@ -233,6 +197,7 @@ Property            Type
 ``argname``         String or table
 ``action``          Function or string
 ``init``            Any
+``hidden``          Boolean
 =================== ===============
 
 Option and flag properties
@@ -263,4 +228,5 @@ Property            Type
 ``argname``         String or table
 ``action``          Function or string
 ``init``            Any
+``hidden``          Boolean
 =================== ==================

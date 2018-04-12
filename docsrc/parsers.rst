@@ -15,26 +15,25 @@ The ``argparse`` module is a function which, when called, creates an instance of
 Parsing command line arguments
 ------------------------------
 
-``:parse([args])`` method of the Parser class returns a table with processed data from the command line or ``args`` array.
+``:parse([argv])`` method of the Parser class returns a table with processed data from the command line or ``argv`` array.
 
 .. code-block:: lua
    :linenos:
 
    local args = parser:parse()
-   print(args)  -- Assuming print is patched to handle tables nicely.
 
-When executed, this script prints ``{}`` because the parser is empty and no command line arguments were supplied.
+After this is executed with ``lua script.lua``, ``args`` is an empty table because the parser is empty and no command line arguments were supplied.
 
 Error handling
 ^^^^^^^^^^^^^^
 
 If the provided command line arguments are not recognized by the parser, it will print an error message and call ``os.exit(1)``.
 
-::
+.. code-block:: none
 
    $ lua script.lua foo
 
-::
+.. code-block:: none
 
    Usage: script.lua [-h]
 
@@ -49,7 +48,7 @@ An error can raised manually using ``:error()`` method.
 
    parser:error("manual argument validation failed")
 
-::
+.. code-block:: none
 
    Usage: script.lua [-h]
 
@@ -62,11 +61,11 @@ As the automatically generated usage message states, there is a help option ``-h
 
 When a help option is used, parser will print a help message and call ``os.exit(0)``.
 
-::
+.. code-block:: none
 
    $ lua script.lua -h
 
-::
+.. code-block:: none
 
    Usage: script.lua [-h]
 
@@ -78,11 +77,11 @@ Typo autocorrection
 
 When an option is not recognized by the parser, but there is an option with a similar name, a suggestion is automatically added to the error message.
 
-::
+.. code-block:: none
 
    $ lua script.lua --hepl
 
-::
+.. code-block:: none
 
    Usage: script.lua [-h]
 

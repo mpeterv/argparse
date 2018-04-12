@@ -10,7 +10,7 @@ Options can be added using ``:option(name, description, default, convert, args, 
    parser:option "-f" "--from"
    parser:option "-f --from"
 
-::
+.. code-block:: none
 
    $ lua script.lua --from there
    $ lua script.lua --from=there
@@ -45,7 +45,7 @@ Flags are almost identical to options, except that they don't take an argument b
 
    parser:flag("-q --quiet")
 
-::
+.. code-block:: none
 
    $ lua script.lua -q
 
@@ -73,7 +73,7 @@ Just as arguments, options can be configured to take several command line argume
    parser:option "--optional"
       :args "?"
 
-::
+.. code-block:: none
 
    $ lua script.lua --pair foo bar
 
@@ -83,7 +83,7 @@ Just as arguments, options can be configured to take several command line argume
       pair = {"foo", "bar"}
    }
 
-::
+.. code-block:: none
 
    $ lua script.lua --pair foo bar --optional
 
@@ -94,7 +94,7 @@ Just as arguments, options can be configured to take several command line argume
       optional = {}
    }
 
-::
+.. code-block:: none
 
    $ lua script.lua --optional=baz
 
@@ -118,7 +118,7 @@ For options, it is possible to control how many times they can be used. argparse
    parser:option("-e --exclude")
       :count "*"
 
-::
+.. code-block:: none
 
    $ lua script.lua -eFOO -eBAR
 
@@ -139,7 +139,7 @@ As a special case, if an option can be used more than once and it consumes no ar
       :count "0-2"
       :target "verbosity"
 
-::
+.. code-block:: none
 
    $ lua script.lua -vv
 

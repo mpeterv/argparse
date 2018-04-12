@@ -14,7 +14,7 @@ argparse can perform automatic validation and conversion on arguments. If ``conv
    parser:option "-t --times"
       :convert(tonumber)
 
-::
+.. code-block:: none
 
    $ lua script.lua foo.txt -t5
 
@@ -25,30 +25,52 @@ argparse can perform automatic validation and conversion on arguments. If ``conv
       times = 5
    }
 
-::
+.. code-block:: none
 
    $ lua script.lua nonexistent.txt
 
-::
+.. code-block:: none
 
    Usage: script.lua [-t <times>] [-h] <input>
 
    Error: nonexistent.txt: No such file or directory
 
-::
+.. code-block:: none
 
    $ lua script.lua foo.txt --times=many
 
-::
+.. code-block:: none
 
    Usage: script.lua [-t <times>] [-h] <input>
 
    Error: malformed argument 'many'
 
+If ``convert`` property of an element is an array of functions, they will be used as converters for corresponding arguments
+in case the element accepts multiple arguments.
+
+.. code-block:: lua
+   :linenos:
+
+   parser:option "--line-style"
+      :args(2)
+      :convert {string.lower, tonumber}
+
+.. code-block:: none
+
+   $ lua script.lua --line-style DASHED 1.5
+
+.. code-block:: lua
+
+   {
+      line_style = {"dashed", 1.5}
+   }
+
+
 Table converters
 ^^^^^^^^^^^^^^^^
 
-If convert property of an element is a table, arguments passed to it will be used as keys. If a key is missing, an error is raised.
+If convert property of an element is a table and doesn't have functions in array part,
+arguments passed to it will be used as keys. If a key is missing, an error is raised.
 
 .. code-block:: lua
    :linenos:
@@ -59,7 +81,7 @@ If convert property of an element is a table, arguments passed to it will be use
          bar = "Something bar-related"
       }
 
-::
+.. code-block:: none
 
    $ lua script.lua bar
 
@@ -69,11 +91,11 @@ If convert property of an element is a table, arguments passed to it will be use
       choice = "Something bar-related"
    }
 
-::
+.. code-block:: none
 
    $ lua script.lua baz
 
-::
+.. code-block:: none
 
    Usage: script.lua [-h] <choice>
 
@@ -104,11 +126,11 @@ Initial value to be stored at target index in the result table can be set using 
       end
    end):init({"foo", "bar"})
 
-   parser:flag("--no-exceptions"):action(function()
+   parser:flag("--no-exceptions"):action(function(args)
       args.exceptions = {}
    end)
 
-::
+.. code-block:: none
 
    $ lua script.lua --exceptions x y --exceptions z t
 
@@ -125,7 +147,7 @@ Initial value to be stored at target index in the result table can be set using 
       }
    }
 
-::
+.. code-block:: none
 
    $ lua script.lua --exceptions x y --no-exceptions
 
@@ -145,11 +167,11 @@ Actions can also be used when a flag needs to print some message and exit withou
       os.exit(0)
    end)
 
-::
+.. code-block:: none
 
    $ lua script.lua -v
 
-::
+.. code-block:: none
 
    script v1.0.0
 
@@ -179,7 +201,7 @@ Examples using ``store_false`` and ``concat`` actions:
    parser:flag("--rain", "Enable rain", false)
    parser:option("--exceptions"):args("*"):action("concat"):init({"foo", "bar"})
 
-::
+.. code-block:: none
 
    $ lua script.lua
 
@@ -189,7 +211,7 @@ Examples using ``store_false`` and ``concat`` actions:
       rain = false
    }
 
-::
+.. code-block:: none
 
    $ lua script.lua --candy
 
@@ -200,7 +222,7 @@ Examples using ``store_false`` and ``concat`` actions:
       rain = false
    }
 
-::
+.. code-block:: none
 
    $ lua script.lua --no-candy --rain
 
@@ -211,7 +233,7 @@ Examples using ``store_false`` and ``concat`` actions:
       rain = true
    }
 
-::
+.. code-block:: none
 
    $ lua script.lua --exceptions x y --exceptions z t
 
@@ -246,11 +268,11 @@ Actions for parsers and commands are simply callbacks invoked after parsing, wit
       print("Callbacks are fun!")
    end)
 
-::
+.. code-block:: none
 
    $ lua script.lua install
 
-::
+.. code-block:: none
 
    Running install
    Callbacks are fun!

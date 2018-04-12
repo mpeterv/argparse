@@ -12,7 +12,7 @@ Commands can be added using ``:command(name, description, epilog)`` method. Just
 
 If a command it used, ``true`` is stored in the corresponding field of the result table.
 
-::
+.. code-block:: none
 
    $ lua script.lua install
 
@@ -24,11 +24,11 @@ If a command it used, ``true`` is stored in the corresponding field of the resul
 
 A typo will result in an appropriate error message.
 
-::
+.. code-block:: none
 
    $ lua script.lua instal
 
-::
+.. code-block:: none
 
    Usage: script.lua [-h] <command> ...
 
@@ -47,7 +47,7 @@ Use ``command_target`` property of the parser to store the name of used command 
    parser:command("install")
    parser:command("remove")
 
-::
+.. code-block:: none
 
    $ lua script.lua install
 
@@ -70,7 +70,7 @@ The Command class is a subclass of the Parser class, so all the Parser's methods
    install:argument "rock"
    install:option "-f --from"
 
-::
+.. code-block:: none
 
    $ lua script.lua install foo --from=bar
 
@@ -85,21 +85,21 @@ The Command class is a subclass of the Parser class, so all the Parser's methods
 
 Commands have their own usage and help messages.
 
-::
+.. code-block:: none
 
    $ lua script.lua install
 
-::
+.. code-block:: none
 
    Usage: script.lua install [-f <from>] [-h] <rock>
 
    Error: too few arguments
 
-::
+.. code-block:: none
 
    $ lua script.lua install --help
 
-::
+.. code-block:: none
 
    Usage: script.lua install [-f <from>] [-h] <rock>
 
@@ -122,11 +122,11 @@ By default, if a parser has commands, using one of them is obligatory.
    local parser = argparse()
    parser:command "install"
 
-::
+.. code-block:: none
 
    $ lua script.lua
 
-::
+.. code-block:: none
 
    Usage: script.lua [-h] <command> ...
 

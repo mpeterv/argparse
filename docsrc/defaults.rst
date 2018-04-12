@@ -12,7 +12,7 @@ For elements such as arguments and options, if ``default`` property is set to a 
       :description "Output file."
       :default "a.out"
 
-::
+.. code-block:: none
 
    $ lua script.lua
 
@@ -24,11 +24,11 @@ For elements such as arguments and options, if ``default`` property is set to a 
 
 The existence of a default value is reflected in help message, unless ``show_default`` property is set to ``false``.
 
-::
+.. code-block:: none
 
    $ lua script.lua --help
 
-::
+.. code-block:: none
 
    Usage: script.lua [-o <output>] [-h]
 
@@ -39,11 +39,11 @@ The existence of a default value is reflected in help message, unless ``show_def
 
 Note that invocation without required arguments is still an error.
 
-::
+.. code-block:: none
 
    $ lua script.lua -o
 
-::
+.. code-block:: none
 
    Usage: script.lua [-o <output>] [-h]
 
@@ -54,7 +54,8 @@ Default mode
 
 ``defmode`` property regulates how argparse should use the default value of an element.
 
-If ``defmode`` contains ``u`` (for unused), the default value will be automatically passed to the element if it was not invoked at all. This is the default behavior.
+By default, or if ``defmode`` contains ``u`` (for unused), the default value will be automatically passed to the element if it was not invoked at all.
+It will be passed minimal required of times, so that if the element is allowed to consume no arguments (e.g. using ``:args "?"``), the default value is ignored.
 
 If ``defmode`` contains ``a`` (for argument), the default value will be automatically passed to the element if not enough arguments were passed, or not enough invocations were made.
 
@@ -69,11 +70,11 @@ Consider the difference:
       :default "password"
       :defmode "arg"
 
-::
+.. code-block:: none
 
    $ lua script.lua -h
 
-::
+.. code-block:: none
 
    Usage: script.lua [-o <o>] [-p [<p>]] [-h]
 
@@ -82,7 +83,7 @@ Consider the difference:
       -p [<p>]              default: password
       -h, --help            Show this help message and exit.
 
-::
+.. code-block:: none
 
    $ lua script.lua
 
@@ -92,7 +93,7 @@ Consider the difference:
       o = "a.out"
    }
 
-::
+.. code-block:: none
 
    $ lua script.lua -p
 
@@ -104,11 +105,11 @@ Consider the difference:
       p = "password"
    }
 
-::
+.. code-block:: none
 
    $ lua script.lua -o
 
-::
+.. code-block:: none
 
    Usage: script.lua [-o <o>] [-p [<p>]] [-h]
 

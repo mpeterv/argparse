@@ -3,12 +3,14 @@ Adding and configuring arguments
 
 Positional arguments can be added using ``:argument(name, description, default, convert, args)`` method. It returns an Argument instance, which can be configured in the same way as Parsers. The ``name`` property is required.
 
+This and the following examples show contents of the result table returned by `parser:parse()` when the script is executed with given command-line arguments.
+
 .. code-block:: lua
    :linenos:
 
    parser:argument "input"
 
-::
+.. code-block:: none
 
    $ lua script.lua foo
 
@@ -46,7 +48,7 @@ If more than one argument can be consumed, a table is used to store the data.
    parser:argument("optional", "An optional argument.")
       :args "?"
 
-::
+.. code-block:: none
 
    $ lua script.lua foo bar
 
@@ -56,7 +58,7 @@ If more than one argument can be consumed, a table is used to store the data.
       pair = {"foo", "bar"}
    }
 
-::
+.. code-block:: none
 
    $ lua script.lua foo bar baz
 
