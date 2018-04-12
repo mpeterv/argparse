@@ -19,8 +19,9 @@ parser:option("-o --output", "Output file.", "a.out")
 parser:option("-I --include", "Include locations."):count("*")
 
 local args = parser:parse()
-print(args)  -- Assuming print is patched to handle tables nicely.
 ```
+
+`args` contents depending on command line arguments:
 
 ```bash
 $ lua script.lua foo
@@ -45,6 +46,8 @@ $ lua script.lua foo -I/usr/local/include -Isrc -o bar
    include = {"/usr/local/include", "src"}
 }
 ```
+
+Error messages depending on command line arguments:
 
 ```bash
 $ lua script.lua foo bar
