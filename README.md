@@ -7,7 +7,17 @@ Argparse is a feature-rich command line parser for Lua inspired by argparse for 
 
 Argparse supports positional arguments, options, flags, optional arguments, subcommands and more. Argparse automatically generates usage, help and error messages.
 
-Simple example: 
+## Contents
+
+* [Example](#example)
+* [Installation](#installation)
+* [Tutorial](#tutorial)
+* [Testing](#testing)
+* [License](#license)
+
+## Example
+
+Simple example:
 
 ```lua
 -- script.lua
@@ -89,13 +99,6 @@ Usage: script [-o <output>] [-I <include>] [-h] <input>
 Error: unknown option '--outptu'
 Did you mean '--output'?
 ```
-
-## Contents
-
-* [Installation](#installation)
-* [Tutorial](#tutorial)
-* [Testing](#testing)
-* [License](#license)
 
 ## Installation
 
