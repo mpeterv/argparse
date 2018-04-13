@@ -1,6 +1,11 @@
 Miscellaneous
 =============
 
+Argparse version
+----------------
+
+``argparse`` module is a table with ``__call`` metamethod. ``argparse.version`` is a string in ``MAJOR.MINOR.PATCH`` format specifying argparse version.
+
 Overwriting default help option
 -------------------------------
 

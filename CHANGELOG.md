@@ -22,6 +22,7 @@
   for configuring help string autogeneration.
 * Added `help_max_width` property. If set, descriptions in help string
   are automatically wrapped to fit into given number of columns.
+* Argparse version is now available as `argparse.version`.
 
 ### Improvements
 
